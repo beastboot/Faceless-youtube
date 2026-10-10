@@ -29,10 +29,12 @@ COMMANDS = [("stats", "Subscribers, views, videos"), ("latest", "Newest videos w
             ("runs", "Recent automation runs"), ("dashboard", "Open the dashboard"), ("help", "What I can do")]
 
 
-def cf(method, path, **kw):
+def cf(method, path, ok_fail=False, **kw):
     r = requests.request(method, f"{API}/accounts/{os.environ['CF_ACCOUNT_ID']}{path}",
                          headers={"Authorization": f"Bearer {os.environ.get('CF_WORKERS_TOKEN') or os.environ['CF_API_TOKEN']}"}, timeout=60, **kw)
     j = r.json()
+    if not j.get("success") and ok_fail:
+        return None
     if not j.get("success"):
         sys.exit(f"Cloudflare {method} {path} failed: {j.get('errors')}\n"
                  "If this is an access error: create a token from the 'Edit Cloudflare Workers' template and "
@@ -54,8 +56,16 @@ def main():
         "metadata": (None, json.dumps(meta), "application/json"),
         "worker.js": ("worker.js", code, "application/javascript+module")})
     print("Worker uploaded")
+    sub = (cf("GET", "/workers/subdomain", ok_fail=True) or {}).get("subdomain")
+    if not sub:   # first Worker on this account: claim its free *.workers.dev address
+        for name in ("oddannals", f"oddannals-{secrets.token_hex(3)}"):
+            made = cf("PUT", "/workers/subdomain", ok_fail=True, json={"subdomain": name})
+            if made:
+                sub = made["subdomain"]
+                break
+        else:
+            sys.exit("Could not create a workers.dev address; open Workers & Pages once in the Cloudflare dashboard.")
     cf("POST", f"/workers/scripts/{NAME}/subdomain", json={"enabled": True, "previews_enabled": False})
-    sub = cf("GET", "/workers/subdomain")["subdomain"]
     url = f"https://{NAME}.{sub}.workers.dev"
     tg = f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}"
     r = requests.post(f"{tg}/setWebhook", json={"url": url, "secret_token": hook_secret,
