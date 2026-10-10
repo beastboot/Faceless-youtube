@@ -2,6 +2,7 @@
 edit, thumbnail -> upload. English and Hindi versions share the same illustrations."""
 import json
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
@@ -32,11 +33,15 @@ def illustrate(cfg, script, art, fmt, res):
     chars = script.get("characters") or {}
     char_note = ("Characters: " + "; ".join(f"{k}: {v}" for k, v in chars.items())) if chars else ""
 
+    deadline = time.time() + 60 * (cfg["images"].get("max_minutes") or {}).get(fmt, 30)
+
     def one(i_shot):
         i, sh = i_shot
         path = art / f"shot-{i:03d}.jpg"
         if path.exists():
             return i, {"kind": "image", "path": path, "fill": True}
+        if time.time() > deadline:  # image time budget spent: stock/reuse fills the rest
+            return i, None
         prompt = sh["image_prompt"] or sh["line"]
         # Only add the character sheet when a named character appears in this shot.
         if char_note and any(name.lower() in prompt.lower() for name in chars):

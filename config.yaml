@@ -59,6 +59,8 @@ images:
   cloudflare_models: ["@cf/black-forest-labs/flux-1-schnell"]
   cloudflare_steps: 4
   max_images: {long: 55, short: 14}   # more shots than this -> neighbouring shots share an image
+  max_minutes: {long: 35, short: 10}  # time budget for AI images per video (backups are slow);
+                                      # shots left over use stock clips / reuse earlier images
   styles:
     # Long videos: epic semi-realistic scenes (like "Unsolved India").
     long: >-

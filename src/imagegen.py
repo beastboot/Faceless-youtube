@@ -17,6 +17,9 @@ class ImageGenError(RuntimeError):
     pass
 
 
+_cf_exhausted = False  # set once Cloudflare reports the free daily allocation is used up
+
+
 def _cf_body(model, prompt, cfg, seed, landscape):
     if "flux-1-schnell" in model:  # square only; accepts just prompt + steps
         return {"prompt": prompt[:2000], "steps": cfg["images"].get("cloudflare_steps", 4)}
@@ -25,9 +28,12 @@ def _cf_body(model, prompt, cfg, seed, landscape):
 
 
 def _cloudflare(prompt, cfg, seed, landscape):
+    global _cf_exhausted
     acct, token = os.environ.get("CF_ACCOUNT_ID"), os.environ.get("CF_API_TOKEN")
     if not (acct and token):
         raise ImageGenError("Cloudflare credentials not set")
+    if _cf_exhausted:
+        raise ImageGenError("Cloudflare daily free allocation used up (resets 00:00 UTC)")
     errors = []
     for model in cfg["images"]["cloudflare_models"]:
         r = http().post(CF_URL.format(acct=acct, model=model),
@@ -42,6 +48,10 @@ def _cloudflare(prompt, cfg, seed, landscape):
         if r.ok and b64:
             return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
         errors.append(f"{model} HTTP {r.status_code}: {r.text[:160]}")
+        if "daily free allocation" in r.text:
+            _cf_exhausted = True
+            log.warning("Cloudflare free daily image budget used up; using backups for the rest of this run")
+            break
     raise ImageGenError("; ".join(errors))
 
 
@@ -51,14 +61,14 @@ def _pollinations(prompt, cfg, seed, landscape):
     token = os.environ.get("POLLINATIONS_TOKEN")
     headers = {"Authorization": f"Bearer {token}"} if token else {}
     # Anonymous use is heavily rate-limited (HTTP 402); keep waiting patiently.
-    for attempt in range(cfg["images"].get("pollinations_retries", 12)):
+    for attempt in range(cfg["images"].get("pollinations_retries", 5)):
         r = http().get(POLLINATIONS_URL + urllib.parse.quote(prompt[:1500]), params=params,
                        headers=headers, timeout=150)
         if r.ok and r.headers.get("content-type", "").startswith("image"):
             im = Image.open(io.BytesIO(r.content)).convert("RGB")
             # Crop the watermark strip in the bottom-right corner.
             return im.crop((0, 0, im.width, int(im.height * 0.93)))
-        time.sleep(min(10 + attempt * 5, 40))
+        time.sleep(min(8 + attempt * 4, 20))
     raise ImageGenError("Pollinations kept refusing (rate limit)")
 
 
