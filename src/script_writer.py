@@ -1,6 +1,7 @@
 """Hooks -> scored; script -> scenes; packaging -> titles linted. All grounded in research notes."""
 import json
 import random
+import re
 
 from . import llm
 from .common import ROOT, log
@@ -207,6 +208,12 @@ Return JSON:
     return data
 
 
+def _cap_latin(text):
+    """'jaivana cannon का सच' -> 'Jaivana Cannon का सच' (Roman words inside Hindi titles look sloppy lowercase)."""
+    return re.sub(r"\b([a-z])([a-z]{2,})\b", lambda m: m.group(1).upper() + m.group(2)
+                  if m.group(0) not in ("shorts", "and", "the", "of", "in") else m.group(0), text)
+
+
 def translate_hindi(cfg, script, fmt, search_phrases=()):
     """Same shots, same images: translate every line plus packaging into natural spoken Hindi."""
     lines = [[sh["line"] for sh in sc["shots"]] for sc in script["scenes"]]
@@ -240,7 +247,9 @@ most relevant ones word-for-word in the titles, the first description sentence a
 Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hinglish:
 - 5 titles (under 70 characters, curiosity + a number, name or date). Write them in Hindi (Devanagari);
   only proper nouns or search keywords may stay in English letters (e.g. "Roopkund", "Titanic").
-  Never write Hindi words in Roman letters in titles.
+  Never write Hindi words in Roman letters in titles. Proofread every title word by word: each word must
+  mean exactly what you intend (e.g. इतिहास = history, जाति = caste). Never mention caste, religion or
+  community in a title unless the story is specifically about it.
 - 3 thumbnail_texts: 3-6 punchy Hindi words; wrap the 1-3 most emotional/curious words in *asterisks*
   (they are shown in red), e.g. "दुनिया के 7 *सबसे रहस्यमयी* चीज़ें". Must not just repeat the title.
 - description_intro (2 sentences), description_body (1 paragraph), engagement_question
@@ -276,7 +285,7 @@ Return JSON:
         out[k] = data.get(k) or script.get(k)
     titles = [t.strip() for t in (data.get("titles") or []) if t and t.strip()]
     thumbs = [t.strip() for t in (data.get("thumbnail_texts") or []) if t and t.strip()]
-    out["title"] = (titles[0] if titles else script["title"])[:95]
+    out["title"] = _cap_latin((titles[0] if titles else script["title"])[:95])
     if fmt == "short" and "#shorts" not in out["title"].lower():
         out["title"] = out["title"][:88] + " #shorts"
     out["thumbnail_text"] = thumbs[0] if thumbs else script["thumbnail_text"]
