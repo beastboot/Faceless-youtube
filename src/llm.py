@@ -1,0 +1,94 @@
+"""Free-tier LLM client: Google Gemini first, Groq as fallback. Always returns parsed JSON."""
+import json
+import os
+import re
+import time
+
+from .common import http, log
+
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+
+class LLMError(RuntimeError):
+    pass
+
+
+def _parse_json(text):
+    text = text.strip()
+    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Fall back to the outermost {...} or [...] block.
+        m = re.search(r"(\{.*\}|\[.*\])", text, re.S)
+        if m:
+            return json.loads(m.group(1))
+        raise
+
+
+def _gemini(model, system, prompt, temperature):
+    key = os.environ["GEMINI_API_KEY"]
+    body = {
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": temperature,
+                             "responseMimeType": "application/json",
+                             "maxOutputTokens": 16384},
+    }
+    r = http().post(GEMINI_URL.format(model=model), params={"key": key}, json=body, timeout=180)
+    if r.status_code >= 400:
+        raise LLMError(f"gemini {model} HTTP {r.status_code}: {r.text[:300]}")
+    data = r.json()
+    try:
+        return "".join(p.get("text", "") for p in data["candidates"][0]["content"]["parts"])
+    except (KeyError, IndexError):
+        raise LLMError(f"gemini {model} returned no content: {str(data)[:300]}")
+
+
+def _groq(model, system, prompt, temperature):
+    key = os.environ["GROQ_API_KEY"]
+    body = {
+        "model": model,
+        "messages": [{"role": "system", "content": system},
+                     {"role": "user", "content": prompt}],
+        "temperature": temperature,
+        "response_format": {"type": "json_object"},
+        "max_tokens": 8000,
+    }
+    r = http().post(GROQ_URL, headers={"Authorization": f"Bearer {key}"}, json=body, timeout=180)
+    if r.status_code >= 400:
+        raise LLMError(f"groq {model} HTTP {r.status_code}: {r.text[:300]}")
+    return r.json()["choices"][0]["message"]["content"]
+
+
+def ask_json(cfg, system, prompt, temperature=None):
+    """Try every configured provider/model until one returns valid JSON."""
+    lc = cfg["llm"]
+    temperature = lc.get("temperature", 0.9) if temperature is None else temperature
+    providers = {"gemini": (_gemini, "GEMINI_API_KEY", lc.get("gemini_models", [])),
+                 "groq": (_groq, "GROQ_API_KEY", lc.get("groq_models", []))}
+    attempts = []
+    for name in lc["providers"]:
+        fn, env, models = providers[name]
+        if not os.environ.get(env):
+            attempts.append(f"{name}: {env} not set")
+            continue
+        for model in models:
+            for retry in range(3):
+                try:
+                    return _parse_json(fn(model, system, prompt, temperature))
+                except LLMError as e:
+                    msg = str(e)
+                    attempts.append(msg)
+                    if any(f"HTTP {c}" in msg for c in (429, 500, 503)):
+                        wait = 20 * (retry + 1)
+                        log.warning("%s rate-limited/unavailable, retrying in %ss", model, wait)
+                        time.sleep(wait)
+                        continue
+                    log.warning("LLM error: %s", msg)
+                    break  # model gone / bad request -> try next model
+                except (json.JSONDecodeError, ValueError) as e:
+                    attempts.append(f"{model}: invalid JSON ({e})")
+                    log.warning("%s returned invalid JSON, retrying", model)
+    raise LLMError("All LLM providers failed:\n  " + "\n  ".join(attempts[-6:]))

@@ -1,0 +1,82 @@
+# Faceless YouTube automation — channel configuration.
+# Secrets (API keys, OAuth tokens) live in environment variables / .env, never here.
+
+channel:
+  name: "Odd Annals"                  # youtube.com/@OddAnnals
+  niche: "history, little-known facts and unsolved mysteries"
+  audience: "curious adults 18-45 who binge documentaries and 'rabbit hole' videos"
+  language: "en"
+  category_id: "27"                   # 27 = Education (22 People & Blogs, 24 Entertainment)
+  voice_guide: "channel/voice.md"     # style guide every script prompt reads
+
+# How many of each to produce per run (GitHub Actions runs once a day).
+# YouTube API quota: ~1,600 units per upload, 10,000/day default => keep total <= 5.
+schedule:
+  longs_per_run: 1
+  shorts_per_run: 2
+  # Publish times (UTC, HH:MM). Videos upload as private and YouTube flips them public at this time.
+  # Empty list or a time already passed today => published immediately.
+  long_publish_utc: ["15:00"]          # ~11am US Eastern / 8:30pm India
+  short_publish_utc: ["13:00", "19:00"]
+
+long:
+  target_words: 1500                  # ~10 minutes at 150 wpm (8+ min allows mid-roll ads)
+  min_scenes: 18
+  width: 1920
+  height: 1080
+  voice: "en-US-AndrewNeural"
+  rate: "+0%"
+  burn_captions: false                # long-form: upload SRT captions instead (better for SEO)
+  upload_captions: true
+
+short:
+  target_words: 130                   # ~50 seconds
+  min_scenes: 5
+  width: 1080
+  height: 1920
+  voice: "en-US-AndrewNeural"
+  rate: "+8%"
+  burn_captions: true                 # Shorts need big on-screen captions
+  upload_captions: false
+
+video:
+  fps: 30
+  scene_tail_seconds: 0.25            # small breath between scenes
+  music_volume: 0.08                  # drop royalty-free .mp3s into assets/music/ (optional)
+  crf: 23
+  preset: "veryfast"
+
+llm:
+  # Tried in order; the first provider with an API key that succeeds wins.
+  providers: ["gemini", "groq"]
+  gemini_models: ["gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-flash-lite-latest"]
+  groq_models: ["openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
+  temperature: 0.9
+
+research:
+  # Competitor channels in the niche. The pipeline measures which of their recent videos beat
+  # that channel's own median views (the swipe.py method) and shows the outliers to the topic picker.
+  # Handles that don't resolve are skipped with a warning — edit freely.
+  competitor_handles:
+    - "@OverSimplified"
+    - "@SimpleHistory"
+    - "@TheInfographicsShow"
+    - "@LEMMiNO"
+    - "@Nexpo"
+    - "@historymarche"
+  outlier_min_multiple: 2.0
+  videos_per_channel: 30
+
+quality:
+  hook_candidates: 5                  # LLM writes N hooks, hookscore.py keeps the best
+  title_candidates: 10                # LLM writes N titles, title.py keeps the best
+  max_script_attempts: 2
+
+youtube:
+  privacy: "public"                   # public | unlisted | private
+  made_for_kids: false
+  # Set true if a video contains realistic AI-generated people/events viewers could mistake for real.
+  # Stock footage + narration does not need it.
+  contains_synthetic_media: false
+  long_playlist_id: ""                # optional: auto-add long videos to this playlist
+  short_playlist_id: ""
