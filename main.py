@@ -8,6 +8,7 @@
     python main.py --reach                             # reach report + keep-public + comments only
 """
 import argparse
+import json
 import sys
 import traceback
 from pathlib import Path
@@ -22,7 +23,8 @@ def send_report(report, failures, upload):
     """Telegram summary: every video with link + publish time, failures, and the 3 thumbnail
     options of each long video for YouTube Studio's Test & Compare."""
     import json
-    lines = [f"📺 Odd Annals run: {len([r for r in report if r[2] or not upload])} video(s)"]
+    lines = [f"📊 Run finished: {len([r for r in report if r[2] or not upload])} video(s) made, "
+             f"{len(failures)} failure(s)"]
     for fmt, lang, vid, work in report:
         try:
             meta = json.loads((work / "metadata.json").read_text())
@@ -91,6 +93,10 @@ def main():
     extra = {l: c for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" in c}
     done = {"long": 0, "short": 0}
     report, failures = [], []
+    notify.send(f"🎬 Making videos: {targets.get('long', 0)} long + {targets.get('short', 0)} Shorts"
+                + (" (test, no upload)" if not upload else "")
+                + "\nTopics:\n" + "\n".join(f"• {f}: {t.get('topic')}" for f in ("long", "short")
+                                               for t in queues.get(f, [])[: targets.get(f, 0)]))
     slots = {}  # (lang, fmt) -> publish slots used
     quota_hit = False
     for fmt in ("long", "short"):
@@ -107,6 +113,15 @@ def main():
             try:
                 results = pipeline.produce(cfg, topic, fmt, langs, upload=upload, publish_at=publish_at)
                 report.extend((fmt, lang, vid, work) for lang, vid, work in results)
+                for lang, vid, work in results:   # ✅ per video, the moment it's done
+                    try:
+                        title = json.loads((work / "metadata.json").read_text()).get("title", work.name)
+                    except Exception:
+                        title = work.name
+                    when = publish_at.get(lang) if vid else None
+                    notify.send(f"✅ {fmt}/{lang} done: {title}\n"
+                                + (f"https://youtu.be/{vid}" if vid else "(test render, not uploaded)")
+                                + (f"\n⏰ goes public {when} UTC" if when else ("\n🌐 public now" if vid else "")))
                 for lang, vid, work in results:
                     slots[(lang, fmt)] = slots.get((lang, fmt), 0) + 1
                     log.info("DONE %s/%s %s", fmt, lang, f"https://youtu.be/{vid}" if vid else work)
@@ -114,6 +129,7 @@ def main():
             except Exception as e:
                 log.error("FAILED %s %r: %s — trying next candidate", fmt, topic.get("topic"), e)
                 failures.append(f"{fmt}: {topic.get('topic')} — {str(e)[:120]}")
+                notify.send(f"❌ {fmt} failed: {topic.get('topic')}\n{str(e)[:300]}\n(trying the next topic)")
                 log.debug(traceback.format_exc())
                 if any(k in str(e) for k in ("Not enough research", "No Wikipedia article", "Quality gate")):
                     # Remember it so the topic picker never proposes it again.

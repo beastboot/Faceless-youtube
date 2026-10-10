@@ -32,6 +32,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300           # Pollinations fallback is slow if the Cloudflare budget runs out
     steps:
+      - name: Telegram — run started
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -n "$TG_TOKEN" ] || exit 0
+          curl -s -o /dev/null "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            --data-urlencode chat_id="${TG_CHAT}" \
+            --data-urlencode text="🟡 Odd Annals run started (${{ github.event_name }})
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
       - uses: actions/checkout@v4
 
       - name: Install ffmpeg + headless-Chrome libraries (Remotion)
@@ -113,3 +124,27 @@ jobs:
           name: videos-${{ github.run_id }}
           path: output/*/*/final.mp4
           retention-days: 3
+
+      - name: Telegram — run crashed
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -n "$TG_TOKEN" ] || exit 0
+          curl -s -o /dev/null "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            --data-urlencode chat_id="${TG_CHAT}" \
+            --data-urlencode text="🔴 Odd Annals run FAILED — check the log:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Telegram — run passed
+        if: success()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -n "$TG_TOKEN" ] || exit 0
+          curl -s -o /dev/null "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            --data-urlencode chat_id="${TG_CHAT}" \
+            --data-urlencode text="🟢 Odd Annals run PASSED
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
