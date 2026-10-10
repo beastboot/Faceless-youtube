@@ -3,6 +3,7 @@
 
 channel:
   name: "Odd Annals"                  # youtube.com/@OddAnnals
+  handle: "@oddannals"                # used for the subscribe link in descriptions
   niche: "history, little-known facts and unsolved mysteries"
   audience: "curious adults 18-45 who binge documentaries and 'rabbit hole' videos"
   language: "hi"                      # main language (see languages: below)
@@ -117,6 +118,7 @@ languages:
   ta:
     enabled: true
     channel_name: "Odd Annals Tamil"
+    handle: "@oddannalstamil"
     youtube_env: "_TA"                # uses YT_CLIENT_ID_TA / YT_CLIENT_SECRET_TA / YT_REFRESH_TOKEN_TA
     longs_per_run: 1
     shorts_per_run: 2

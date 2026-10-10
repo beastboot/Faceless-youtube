@@ -14,23 +14,29 @@ from .common import ROOT, ffprobe_duration, fmt_ts, log, run, slugify
 from .media import MediaPicker
 
 TEXT = {
-    "en": {"chapters": "Chapters:", "sources": "Sources:",
+    "en": {"learn": "In this video:", "more": "📺 More stories:", "ask": "💬 {q}",
+           "chapters": "Chapters:", "sources": "Sources:",
            "ai": "Illustrations: AI-generated. Narration: AI voice.",
            "subscribe": "Subscribe to {name} for a new story every day.",
            "full": "▶ Watch the full documentary: {url}", "intro": "Intro"},
-    "ta": {"chapters": "அத்தியாயங்கள்:", "sources": "ஆதாரங்கள்:", "english": "🇬🇧 In English:",
+    "ta": {"learn": "இந்த வீடியோவில்:", "more": "📺 மேலும் கதைகள்:", "ask": "💬 {q}",
+           "chapters": "அத்தியாயங்கள்:", "sources": "ஆதாரங்கள்:", "english": "🇬🇧 In English:",
            "ai": "படங்கள்: AI உருவாக்கியவை. குரல்: AI.", "subscribe": "இதுபோன்ற கதைகளுக்கு {name} சேனலை சப்ஸ்கிரைப் செய்யுங்கள்.",
            "full": "▶ முழு ஆவணப்படம்: {url}", "intro": "தொடக்கம்"},
-    "te": {"chapters": "అధ్యాయాలు:", "sources": "ఆధారాలు:", "english": "🇬🇧 In English:",
+    "te": {"learn": "ఈ వీడియోలో:", "more": "📺 మరిన్ని కథలు:", "ask": "💬 {q}",
+           "chapters": "అధ్యాయాలు:", "sources": "ఆధారాలు:", "english": "🇬🇧 In English:",
            "ai": "చిత్రాలు: AI రూపొందించినవి. గొంతు: AI.", "subscribe": "ఇలాంటి కథల కోసం {name} ను సబ్‌స్క్రైబ్ చేయండి.",
            "full": "▶ పూర్తి డాక్యుమెంటరీ: {url}", "intro": "ప్రారంభం"},
-    "bn": {"chapters": "অধ্যায়:", "sources": "সূত্র:", "english": "🇬🇧 In English:",
+    "bn": {"learn": "এই ভিডিওতে:", "more": "📺 আরও গল্প:", "ask": "💬 {q}",
+           "chapters": "অধ্যায়:", "sources": "সূত্র:", "english": "🇬🇧 In English:",
            "ai": "ছবি: AI দিয়ে তৈরি। কণ্ঠ: AI।", "subscribe": "এমন গল্পের জন্য {name} সাবস্ক্রাইব করুন।",
            "full": "▶ পুরো ডকুমেন্টারি: {url}", "intro": "শুরু"},
-    "mr": {"chapters": "प्रकरणे:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
+    "mr": {"learn": "या व्हिडिओमध्ये:", "more": "📺 आणखी कथा:", "ask": "💬 {q}",
+           "chapters": "प्रकरणे:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
            "ai": "चित्रे: AI ने तयार केली. आवाज: AI.", "subscribe": "अशा कथांसाठी {name} ला सबस्क्राइब करा.",
            "full": "▶ संपूर्ण माहितीपट: {url}", "intro": "सुरुवात"},
-    "hi": {"chapters": "अध्याय:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
+    "hi": {"learn": "इस वीडियो में:", "more": "📺 और कहानियाँ देखें:", "ask": "💬 {q}",
+           "chapters": "अध्याय:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
            "ai": "चित्र: AI द्वारा बनाए गए। आवाज़: AI वॉइस।",
            "subscribe": "ऐसी ही रोचक कहानियों के लिए {name} को सब्सक्राइब करें।",
            "full": "▶ पूरी डॉक्यूमेंट्री देखें: {url}", "intro": "शुरुआत"},
@@ -282,14 +288,44 @@ def latest_long_url(lang):
     return None
 
 
-def build_description(cfg, script, res, chapters, fmt, lang):
+def related_videos(lang, fmt, series=None, n=3):
+    """Recent long videos of this language (same series first): links that keep viewers watching."""
+    rows = [r for r in state.load() if r.get("format") == "long" and r.get("video_id") and r.get("lang") == lang
+            and r.get("title")]
+    rows.sort(key=lambda r: (bool(series) and r.get("series") == (series or {}).get("id")), reverse=True)
+    seen, out = set(), []
+    for r in rows if series else reversed(rows):
+        if r["video_id"] not in seen:
+            seen.add(r["video_id"])
+            out.append(f"▶ {r['title'].split(' | EP')[0][:70]}: https://youtu.be/{r['video_id']}")
+        if len(out) >= n:
+            break
+    return out
+
+
+def subscribe_link(cfg, lang):
+    handle = (cfg["languages"].get(lang) or {}).get("handle") or cfg["channel"].get("handle")
+    return f"https://www.youtube.com/{handle}?sub_confirmation=1" if handle else ""
+
+
+def build_description(cfg, script, res, chapters, fmt, lang, links=(), series=None):
+    """Layout: the first ~150 characters are what search results and the "...more" fold show, so the
+    keyword-led hook comes first and everything else follows in order of what helps watch time."""
     t = TEXT[lang]
     parts = [(script.get("description_intro") or "").strip()]
     if fmt == "short" and (url := latest_long_url(lang)):
         parts.append(t["full"].format(url=url))  # route Shorts viewers to watch hours
+    parts += [x for x in links if x]
+    if script.get("key_points") and script.get("special") != "quiz":
+        parts.append(t["learn"] + "\n" + "\n".join(script["key_points"]))
     if chapters:
         parts.append(f"{t['chapters']}\n{chapters}")
     parts.append((script.get("description_body") or "").strip())
+    if script.get("engagement_question"):
+        parts.append(t["ask"].format(q=script["engagement_question"].strip()))
+    more = related_videos(lang, fmt, series)
+    if more:
+        parts.append(t["more"] + "\n" + "\n".join(more))
     if lang != "en" and script.get("en"):
         en = script["en"]
         parts.append(f"{t['english']}\n{en['description_intro']} {en['description_body']}".strip())
@@ -306,15 +342,33 @@ def build_description(cfg, script, res, chapters, fmt, lang):
     parts.append(t["ai"])
     if script.get("credits"):
         parts.append("Image credits:\n" + "\n".join(list(dict.fromkeys(script["credits"]))[:20]))
-    if fmt == "long":
-        parts.append(t["subscribe"].format(name=(cfg["languages"].get(lang) or {}).get("channel_name")
-                                           or cfg["channel"]["name"]))
+    sub = t["subscribe"].format(name=(cfg["languages"].get(lang) or {}).get("channel_name") or cfg["channel"]["name"])
+    if (link := subscribe_link(cfg, lang)):
+        sub += f"\n🔔 {link}"
+    parts.append(sub)
     tags = [h if h.startswith("#") else "#" + h.replace(" ", "")
             for h in (script.get("hashtags") or [])][:3]
     if fmt == "short" and "#shorts" not in [x.lower() for x in tags]:
         tags.append("#shorts")
     parts.append(" ".join(tags))
     return "\n\n".join(p for p in parts if p)
+
+
+def build_tags(script, lang):
+    """Main keyword first, then the most-searched real phrases, then the writer's tags (deduplicated).
+    YouTube keeps ~500 characters; youtube.py trims the tail, so the order is the priority."""
+    if script.get("special") == "quiz":
+        return ["quiz", "guess the place", "पहचानो", "रहस्य", "quiz in hindi", "history quiz"]
+    phrases = script.get("search_phrases") or []
+    if lang not in ("hi", "en"):   # other languages: only the English-letter searches carry over
+        phrases = [p for p in phrases if p.isascii()]
+    seen, out = set(), []
+    for t in [script.get("primary_keyword") or ""] + phrases[:10] + list(script.get("tags") or []):
+        t = str(t).strip().lstrip("#")
+        if t and len(t) <= 60 and t.lower() not in seen and "<" not in t and ">" not in t:
+            seen.add(t.lower())
+            out.append(t)
+    return out
 
 
 # ---- one language version -----------------------------------------------------------------
@@ -446,11 +500,11 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
     if fmt == "long" and series and episode:
         suffix = f" | EP {episode}"
         title = title[:100 - len(suffix)] + suffix
-    description = build_description(cfg, script, res, chapters, fmt, lang)
+    links = []   # placed right after the opening hook, never above it
     for key, hi_txt, en_txt in (("part1_video", "▶ भाग 1 यहाँ देखें", "▶ Watch Part 1"),
                                 ("quiz_video", "▶ कल का क्विज़", "▶ Yesterday's quiz")):
         if script.get(key):
-            description = f"{hi_txt if lang == 'hi' else en_txt}: https://youtu.be/{script[key]}\n\n" + description
+            links.append(f"{hi_txt if lang == 'hi' else en_txt}: https://youtu.be/{script[key]}")
     if series:
         pl = json.loads((ROOT / "data" / "playlists.json").read_text()).get(f"series-{series['id']}-{lang}") \
             if (ROOT / "data" / "playlists.json").exists() else None
@@ -458,11 +512,10 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         if pl:   # keeps viewers watching (session continuation is a satisfaction signal)
             head += f"\n▶ पूरी सीरीज़: https://www.youtube.com/playlist?list={pl}" if lang == "hi" else \
                 f"\n▶ Full series: https://www.youtube.com/playlist?list={pl}"
-        description = head + "\n\n" + description if fmt == "long" else description + f"\n\n📚 {series['name']}"
+        links.append(head if fmt == "long" else f"📚 {series['name']}")
+    description = build_description(cfg, script, res, chapters, fmt, lang, links, series)
     timeline = [[round(st, 2), it.get("line_text", "")] for it, st in zip(items, starts)]
-    tags = script.get("tags") or []
-    if script.get("special") == "quiz":
-        tags = ["quiz", "guess the place", "पहचानो", "रहस्य", "quiz in hindi", "history quiz"]
+    tags = build_tags(script, lang)
     meta = {"title": title, "lang": lang, "caption_track": caption_track, "timeline": timeline,
             "duration": round(total, 2),
             "localizations": localizations,
@@ -498,7 +551,13 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                 if (sh.get("graphic") or {}).get("type") in ("map", "name", "date"):
                     sh["graphic"] = None
     script_en = review.review(cfg, script_en, res, fmt)  # raises -> main tries the next topic
-    phrases = [] if topic.get("special") == "quiz" else keywords.for_topic(topic["topic"], res["wiki_title"])
+    phrases = [] if topic.get("special") == "quiz" else keywords.for_topic(
+        topic["topic"], res["wiki_title"], res.get("hi_title"))
+    # the one phrase every title, description opening and first tag is built around
+    script_en["primary_keyword"] = keywords.primary(phrases, [res["wiki_title"].split("(")[0].strip(),
+                                                              res.get("hi_title")]) if phrases else ""
+    script_en["search_phrases"] = phrases
+    script_en["research_names"] = [n for n in (res["wiki_title"].split("(")[0].strip(), res.get("hi_title")) if n]
     illustrate(cfg, script_en, base / "art", fmt, res)
     geocode_maps(script_en)
 
@@ -514,7 +573,7 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
             elif lang == "hi":
                 script = script_writer.translate_hindi(cfg, script_en, fmt, phrases)
             else:
-                script = script_writer.translate_regional(cfg, script_en, fmt, lang)
+                script = script_writer.translate_regional(cfg, script_en, fmt, lang, phrases=phrases)
             work = base / lang
             work.mkdir(exist_ok=True)
             meta, total = render_language(cfg, script, res, fmt, lang, work, template, series, episode)
@@ -591,7 +650,8 @@ From this {'Hindi' if lang == 'hi' else 'English'} documentary script, pick {cc[
 work as standalone Shorts: each a run of consecutive lines (by index) that is gripping on its own,
 about 80-120 words in total (40-55 seconds), ending on a strong line. Avoid the intro and outro.
 For each, write in the same language: a new opening hook line (max 14 words, creates instant
-curiosity), the same hook in Hinglish (Roman letters), a title under 70 characters, and 3-5
+curiosity), the same hook in Hinglish (Roman letters), a title of 40-60 characters that contains the
+main search keyword "{script.get('primary_keyword') or ''}" (or the subject's name) near the start, and 3-5
 thumbnail words with the key words wrapped in *asterisks*.
 LINES: {json.dumps(listing, ensure_ascii=False)}
 Return {{"clips": [{{"start": i, "end": j, "hook": "...", "hook_hinglish": "...", "title": "...",
@@ -607,7 +667,8 @@ Return {{"clips": [{{"start": i, "end": j, "hook": "...", "hook_hinglish": "..."
                 continue
             body = [dict(sh) for sh in shots[a:b + 1]]
             first_vis = body[0].get("visual")
-            clip = {**{key: script.get(key) for key in ("hashtags", "tags", "engagement_question", "credits")},
+            clip = {**{key: script.get(key) for key in ("hashtags", "tags", "engagement_question", "credits",
+                                                         "primary_keyword", "search_phrases", "research_names")},
                     "title": (c.get("title") or script["title"])[:90] + " #shorts",
                     "thumbnail_text": c.get("thumbnail_text") or script.get("thumbnail_text"),
                     "thumb_visual": first_vis,

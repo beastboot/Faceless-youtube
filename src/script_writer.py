@@ -280,6 +280,58 @@ def _merge_graphic(orig, translated):
     return out
 
 
+PACKAGING_RULES = """PACKAGING RULES (titles, description, tags decide whether anyone finds and clicks the video):
+- Titles: put the MAIN KEYWORD (or the subject's name) in the first 35 characters; then a curiosity gap
+  that the video really answers (a question, a contradiction, a "nobody knows why"). Specific beats
+  vague: a year, a number or a name. Never lie or promise what the video doesn't show.
+- description_intro: exactly 2 sentences. The first sentence starts with the MAIN KEYWORD and makes a
+  curious promise (it is what search results show, ~120 characters). The second adds 1-2 other search
+  phrases naturally. No keyword lists, no "#" here.
+- key_points: 3-4 short lines "what you will learn" (each starts with a fitting emoji, e.g. 🏰 📜 🔍 ❓),
+  each naturally containing a different search phrase; never reveal the final answer.
+- description_body: 1 short paragraph of story context (no spoilers of the ending).
+- engagement_question: one question viewers can answer in a few words (opinions get more comments).
+- tags: 15-20 tags. FIRST the MAIN KEYWORD, then the other most-searched phrases exactly as written in
+  the list (Hindi AND Hinglish/English spellings), then the subject's name, place, era and the broader
+  niche ("रहस्य", "history in hindi"). No single-word filler, no unrelated famous names.
+- hashtags: 3, the first one is the subject (e.g. "#Kuldhara"), then one niche tag ("#रहस्य"), then one
+  broad tag ("#इतिहास" / "#history"). They show above the title, so make them real words."""
+
+TITLE_HOOKS = re.compile(r"रहस्य|सच|क्यों|कैसे|कौन|क्या|अनसुलझ|हैरान|कोई नहीं|आज भी|खौफ|डरावन|शापित|गायब|"
+                         r"mystery|secret|why|how|truth|nobody|still|cursed|vanish|unsolved|"
+                         r"மர்ம|ரகசிய|ஏன்|எப்படி|உண்மை", re.I)
+
+
+def best_title(titles, keyword="", names=(), fmt="long"):
+    """Score the title candidates for search + click-through and return them best first.
+
+    Rewards: the main search keyword (or the subject's name) early in the title, a length that is not
+    cut off in search (<=60 characters visible), a number/year, a curiosity word, a question. Penalises
+    shouting, several emojis, and titles so long the subject is cut off on phones."""
+    kw = (keyword or "").lower()
+    keys = [k.lower() for k in (kw, *names) if k]
+    scored = []
+    for t in titles:
+        tl, n = t.lower(), len(t)
+        sc = 0
+        pos = min((tl.find(k.split()[0]) for k in keys if k.split() and k.split()[0] in tl), default=-1)
+        if kw and kw in tl:
+            sc += 30
+        if pos >= 0:
+            sc += 25 if pos <= 35 else 10
+        sc += 15 if 30 <= n <= 60 else 8 if n <= 70 else -10
+        sc += 10 if re.search(r"\d", t) else 0
+        sc += 10 if TITLE_HOOKS.search(t) else 0
+        sc += 5 if "?" in t else 0
+        sc -= 10 * max(0, len(re.findall(r"[\U0001F300-\U0001FAFF]", t)) - 1)
+        sc -= 10 * max(0, len([w for w in t.split() if len(w) > 3 and w.isupper() and w.isascii()]) - 2)
+        scored.append((sc, -n, t))
+    scored.sort(reverse=True)
+    if scored:
+        log.info("Title pick (%d pts): %s", scored[0][0], scored[0][2])
+    return [t for _, _, t in scored]
+
+
 SCRIPT_RANGES = {"ta": r"[\u0B80-\u0BFF]", "te": r"[\u0C00-\u0C7F]", "bn": r"[\u0980-\u09FF]",
                  "mr": r"[\u0900-\u097F]"}
 
@@ -287,7 +339,7 @@ REGIONAL = {"ta": ("Tamil", "Tamil script"), "te": ("Telugu", "Telugu script"),
             "bn": ("Bengali", "Bengali script"), "mr": ("Marathi", "Devanagari script")}
 
 
-def translate_regional(cfg, script, fmt, lang, host_name=""):
+def translate_regional(cfg, script, fmt, lang, host_name="", phrases=()):
     """Same shots, same pictures: the script + packaging in Tamil / Telugu / Bengali / Marathi.
     Captions are shown in the language's own script."""
     name, writing = REGIONAL[lang]
@@ -308,14 +360,20 @@ ON-SCREEN GRAPHICS (translate text, sub, label, name, role, by, prefix, suffix, 
 years, "type" and map "place"; add a {name} "label" for maps): {json.dumps(graphics, ensure_ascii=False)}
 CHAPTER TITLES (translate non-empty ones): {json.dumps(chapters, ensure_ascii=False)}
 
-Also {name} YouTube packaging for {name} speakers: 5 titles (under 70 characters, curiosity + a number,
+SEARCH PHRASES people type on YouTube about this topic, most searched first (Hindi/English; use the
+subject names as {name} speakers would search them, in {writing} and in English letters):
+{json.dumps(list(phrases)[:20], ensure_ascii=False)}
+MAIN KEYWORD: the subject's name as {name} speakers search it.
+{PACKAGING_RULES}
+
+Also {name} YouTube packaging for {name} speakers: 8 titles (45-60 characters, curiosity + a number,
 name or date, in {writing}; proper nouns may stay in English; at most one emoji; proofread every word;
 never mention caste/religion/community unless the story is about it), 3 thumbnail_texts (3-6 words,
-1-3 key words wrapped in *asterisks*), description_intro (2 sentences), description_body (1 paragraph),
-engagement_question, 15 tags ({name} + English), 3 hashtags.
+1-3 key words wrapped in *asterisks*), description_intro, key_points, description_body,
+engagement_question, tags ({name} + English), hashtags as in the PACKAGING RULES.
 
 Return JSON: {{"scenes": [["line", ...], ...], "graphics": {{"0.1": {{...}}}}, "chapters": ["..."],
- "titles": ["..."], "thumbnail_texts": ["..."], "description_intro": "...", "description_body": "...",
+ "titles": ["..."], "thumbnail_texts": ["..."], "description_intro": "...", "key_points": ["..."], "description_body": "...",
  "engagement_question": "...", "tags": ["..."], "hashtags": ["#..."]}}"""
     for attempt in range(3):
         data = llm.ask_json(cfg, f"You are an expert {name} documentary translator. Reply with JSON only.",
@@ -347,9 +405,11 @@ Return JSON: {{"scenes": [["line", ...], ...], "graphics": {{"0.1": {{...}}}}, "
         out[k] = data.get(k) or script.get(k)
     titles = [t.strip() for t in (data.get("titles") or []) if t and t.strip()]
     thumbs = [t.strip() for t in (data.get("thumbnail_texts") or []) if t and t.strip()]
+    titles = best_title(titles, "", [n for n in (script.get("research_names") or []) if n], fmt)
     out["title"] = _cap_latin((titles[0] if titles else script["title"])[:95])
     if fmt == "short" and "#shorts" not in out["title"].lower():
         out["title"] = out["title"][:88] + " #shorts"
+    out["key_points"] = [str(x).strip() for x in (data.get("key_points") or []) if str(x).strip()][:4]
     out["thumbnail_text"] = thumbs[0] if thumbs else script["thumbnail_text"]
     out["lang"] = lang
     out["en_chapters"] = chapters
@@ -395,12 +455,13 @@ ALSO write "hinglish": the SAME Hindi lines written in Roman/Latin letters the w
 Hindi on WhatsApp (e.g. "1959 mein nau hikers achanak gayab ho gaye"). Same structure, one per line.
 Keep English loanwords in normal English spelling. No diacritics.
 
-SEARCH PHRASES Indian viewers actually type on YouTube about this topic (from autocomplete). Use the
-most relevant ones word-for-word in the titles, the first description sentence and the tags:
-{json.dumps(list(search_phrases)[:30], ensure_ascii=False)}
+SEARCH PHRASES Indian viewers actually type on YouTube about this topic (from autocomplete), MOST
+SEARCHED FIRST: {json.dumps(list(search_phrases)[:30], ensure_ascii=False)}
+MAIN KEYWORD (the most-searched one): "{script.get('primary_keyword') or ''}"
+{PACKAGING_RULES}
 
 Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hinglish:
-- 5 titles (under 70 characters, curiosity + a number, name or date). Write them in Hindi (Devanagari);
+- 8 titles (ideally 45-60 characters, curiosity + a number, name or date). Write them in Hindi (Devanagari);
   only proper nouns or search keywords may stay in English letters (e.g. "Roopkund", "Titanic").
   Never write Hindi words in Roman letters in titles. Proven formulas in this niche: "<place> का रहस्य",
   "चौंका देने वाला रहस्य!", "सच जानकर हैरान रह जाओगे", "यह सच आप नहीं जानते", numbered lists
@@ -409,15 +470,14 @@ Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hin
   community in a title unless the story is specifically about it.
 - 3 thumbnail_texts: 3-6 punchy Hindi words; wrap the 1-3 most emotional/curious words in *asterisks*
   (they are shown in red), e.g. "दुनिया के 7 *सबसे रहस्यमयी* चीज़ें". Must not just repeat the title.
-- description_intro (2 sentences), description_body (1 paragraph), engagement_question
-- tags: 15 tags mixing Hindi, Hinglish (Hindi in Latin letters) and English keywords
-- hashtags: 3 hashtags
+- description_intro, key_points, description_body, engagement_question, tags, hashtags: see PACKAGING
+  RULES above (Hindi, with Hinglish/English search words where people search that way)
 
 Return JSON:
 {{"scenes": [["hindi line", ...], ...], "hinglish": [["roman hindi line", ...], ...],
  "graphics": {{"0.1": {{...translated graphic...}}}},
  "chapters": ["..."], "titles": ["..."],
- "thumbnail_texts": ["..."], "description_intro": "...", "description_body": "...",
+ "thumbnail_texts": ["..."], "description_intro": "...", "key_points": ["..."], "description_body": "...",
  "engagement_question": "...", "tags": ["..."], "hashtags": ["#..."]}}"""
     for attempt in range(3):
         data = llm.ask_json(cfg, "You are an expert Hindi documentary translator. Reply with JSON only.",
@@ -444,9 +504,13 @@ Return JSON:
         out[k] = data.get(k) or script.get(k)
     titles = [t.strip() for t in (data.get("titles") or []) if t and t.strip()]
     thumbs = [t.strip() for t in (data.get("thumbnail_texts") or []) if t and t.strip()]
+    names = [n for n in ((script.get("research_names") or []) + [script.get("primary_keyword") or ""]) if n]
+    titles = best_title(titles, script.get("primary_keyword") or "", names, fmt)
     out["title"] = _cap_latin((titles[0] if titles else script["title"])[:95])
+    out["title_candidates"] = titles[:5]
     if fmt == "short" and "#shorts" not in out["title"].lower():
         out["title"] = out["title"][:88] + " #shorts"
+    out["key_points"] = [str(x).strip() for x in (data.get("key_points") or []) if str(x).strip()][:4]
     out["thumbnail_text"] = thumbs[0] if thumbs else script["thumbnail_text"]
     out["lang"] = "hi"
     # Keep the English packaging: shown to English-language viewers via YouTube localizations,

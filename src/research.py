@@ -114,7 +114,7 @@ def research(topic):
         log.info("Research: + Hindi Wikipedia '%s' (%d chars)", hi_title, len(hi_text))
     imgs = images(s, title, topic["topic"])
     log.info("Research: %s — %d chars, %d free images", title, len(text), len(imgs))
-    return {"wiki_title": title,
+    return {"wiki_title": title, "hi_title": hi_title,
             "hi_wiki_url": ("https://hi.wikipedia.org/wiki/" + hi_title.replace(" ", "_")) if hi_title else None,
             "wiki_url": "https://en.wikipedia.org/wiki/" + title.replace(" ", "_"),
             "text": text, "images": imgs}
