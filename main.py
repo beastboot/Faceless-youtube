@@ -19,6 +19,34 @@ from src import notify, pipeline, reach, state, trends, youtube
 from src.common import load_config, log, setup_logging
 
 
+def announce_live(cfg, window_minutes=65):
+    """Telegram 'now live' for scheduled videos whose publish time passed in the last hour.
+    Stateless: run hourly, each video is announced once (its publish time falls in one window)."""
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    due = []
+    for r in state.load():
+        at = r.get("publish_at")
+        if not (at and r.get("video_id")):
+            continue
+        t = datetime.fromisoformat(at.replace("Z", "+00:00"))
+        if now - timedelta(minutes=window_minutes) < t <= now:
+            due.append(r)
+    if not due or not youtube.available():
+        return
+    items = youtube.client().videos().list(part="status,statistics",
+                                           id=",".join(r["video_id"] for r in due)).execute().get("items", [])
+    info = {v["id"]: v for v in items}
+    for r in due:
+        v = info.get(r["video_id"])
+        if v and v["status"]["privacyStatus"] == "public":
+            notify.send(f"🌐 Live now: {r['title']}\nhttps://youtu.be/{r['video_id']}\n"
+                        f"👀 {v['statistics'].get('viewCount', '0')} views so far")
+        elif v:
+            notify.send(f"⚠️ Should be live but is {v['status']['privacyStatus']}: {r['title']}\n"
+                        f"https://youtu.be/{r['video_id']}")
+
+
 def send_report(report, failures, upload):
     """Telegram summary: every video with link + publish time, failures, and the 3 thumbnail
     options of each long video for YouTube Studio's Test & Compare."""
@@ -50,6 +78,7 @@ def main():
     ap.add_argument("--topic", help="skip trend picking and make this topic")
     ap.add_argument("--format", choices=["long", "short"], default="short")
     ap.add_argument("--reach", action="store_true", help="only run the reach report/actions")
+    ap.add_argument("--watch", action="store_true", help="announce videos that went public in the last hour")
     ap.add_argument("--upload-dir", help="upload an already-rendered output/<run> folder")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
@@ -63,6 +92,10 @@ def main():
         log.error("YT_CLIENT_ID / YT_CLIENT_SECRET / YT_REFRESH_TOKEN missing. "
                   "Run scripts/get_youtube_token.py or use --no-upload.")
         return 2
+
+    if args.watch:
+        announce_live(cfg)
+        return 0
 
     if args.reach or (upload and not args.upload_dir):
         try:

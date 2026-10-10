@@ -317,8 +317,35 @@ def run(cfg):
         state.HISTORY.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
     STATS.write_text(json.dumps({r["video_id"]: row for r, row in table if row}, indent=1))
     write_report(table, actions, _traffic_sources(since) if have_analytics else [], have_analytics)
+    telegram_summary(table, actions, have_analytics)
     for a in actions:
         log.info("Reach: %s", a)
+
+
+def telegram_summary(table, actions, have_analytics):
+    """Short analytics report for the phone."""
+    from . import notify
+    rows = sorted([(r, x) for r, x in table if x], key=lambda t: -t[1]["views"])
+    views = sum(x["views"] for _, x in rows)
+    mins = sum((x["watch_min"] or 0) for _, x in rows)
+    subs = sum((x["subs"] or 0) for _, x in rows)
+    try:
+        ch = youtube.client().channels().list(part="statistics", mine=True).execute()["items"][0]["statistics"]
+    except Exception:
+        ch = {}
+    lines = ["📈 Odd Annals analytics",
+             f"Subscribers: {ch.get('subscriberCount', '?')} / 1,000",
+             f"Watch hours: {mins / 60:,.1f} / 4,000" + ("" if have_analytics else " (analytics pending)"),
+             f"Views (all videos): {views:,}" + (f" · subs gained: {subs}" if subs else ""),
+             f"Public videos: {sum(1 for _, x in rows if x['privacy'] == 'public')}"]
+    if rows:
+        lines.append("\nTop videos:")
+        for r, x in rows[:5]:
+            pct = f", {x['avg_pct']:.0f}% watched" if x.get("avg_pct") is not None else ""
+            lines.append(f"• {x['views']:,} views{pct} — {r['title'][:55]}\n  https://youtu.be/{r['video_id']}")
+    if actions:
+        lines.append("\nActions today:\n" + "\n".join(f"• {a[:120]}" for a in actions[:8]))
+    notify.send("\n".join(lines))
 
 
 def write_report(table, actions, sources, have_analytics):
