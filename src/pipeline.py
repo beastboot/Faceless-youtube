@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from . import imagegen, keywords, review
 from . import research as research_mod
-from . import script_writer, state, thumbnail, tts, video, youtube
+from . import llm, script_writer, social, state, thumbnail, tts, video, youtube
 from .common import ROOT, ffprobe_duration, fmt_ts, log, slugify
 from .media import MediaPicker
 
@@ -184,7 +184,12 @@ def voice_for(cfg, fmt, lang):
     return cfg[fmt]["voice"], cfg[fmt]["rate"]
 
 
-def render_language(cfg, script, res, fmt, lang, work, template="yellow"):
+def series_for(cfg, topic):
+    all_series = cfg.get("series") or []
+    return next((x for x in all_series if x["id"] == topic.get("series")), all_series[0] if all_series else None)
+
+
+def render_language(cfg, script, res, fmt, lang, work, template="yellow", series=None, episode=None):
     vc = cfg["video"]
     voice, rate = voice_for(cfg, fmt, lang)
     hinglish = cfg["languages"].get(lang, {}).get("captions") == "hinglish"
@@ -201,6 +206,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow"):
         else:
             caps = tts.caption_chunks(words, max_words)
         return {"audio": mp3, "audio_dur": ffprobe_duration(mp3), "lang": lang, "scene": si,
+                "line_text": sh["line"],
                 "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"),
                 "caption_lang": "en" if hinglish else lang, "captions": caps,
                 "visual": sh["visual"], "tail": vc["scene_tail_seconds"] if last else vc["shot_tail_seconds"]}
@@ -216,7 +222,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow"):
     video.write_srt(items, starts, work / "captions.srt")
     caption_track = "hi-Latn" if hinglish else lang  # YouTube's "Hindi (Latin)" subtitle language
     thumbnail.make(script["thumb_visual"], script["thumbnail_text"], work / "thumbnail.jpg", work, lang, template,
-                   label=cfg["thumbnails"].get("label") or cfg["channel"]["name"].upper())
+                   label=(series or {}).get("label") or cfg["thumbnails"].get("label") or cfg["channel"]["name"].upper())
 
     scene_starts = {}
     for it, st in zip(items, starts):
@@ -230,9 +236,19 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow"):
                                      total, "en") if fmt == "long" else ""
         localizations["en"] = {"title": script["en"]["title"][:100],
                                "description": build_description(cfg, en_script, res, en_chapters, fmt, "en")[:4900]}
-    meta = {"title": script["title"], "lang": lang, "caption_track": caption_track,
+    title = script["title"]
+    if fmt == "long" and series and episode:
+        suffix = f" | EP {episode}"
+        title = title[:100 - len(suffix)] + suffix
+    description = build_description(cfg, script, res, chapters, fmt, lang)
+    if series:
+        head = (f"📚 {series['name']} — एपिसोड {episode}" if lang == "hi" else f"📚 Series: {series['name']} — Episode {episode}")
+        description = head + "\n\n" + description if fmt == "long" else description + f"\n\n📚 {series['name']}"
+    timeline = [[round(st, 2), it.get("line_text", "")] for it, st in zip(items, starts)]
+    meta = {"title": title, "lang": lang, "caption_track": caption_track, "timeline": timeline,
+            "duration": round(total, 2),
             "localizations": localizations,
-            "description": build_description(cfg, script, res, chapters, fmt, lang),
+            "description": description,
             "tags": script.get("tags") or [],
             "engagement_question": script.get("engagement_question") or ""}
     (work / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
@@ -259,6 +275,9 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     illustrate(cfg, script_en, base / "art", fmt, res)
 
     template = thumbnail.choose_template(cfg)  # same A/B arm for every language of this topic
+    series = series_for(cfg, topic)
+    episode = 1 + sum(1 for r in state.load() if r.get("series") == (series or {}).get("id")
+                      and r.get("format") == fmt and r.get("video_id"))
     results = []
     for lang in langs:
         try:
@@ -266,14 +285,15 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                       else script_writer.translate_hindi(cfg, script_en, fmt, phrases))
             work = base / lang
             work.mkdir(exist_ok=True)
-            meta, total = render_language(cfg, script, res, fmt, lang, work, template)
+            meta, total = render_language(cfg, script, res, fmt, lang, work, template, series, episode)
             when = publish_at.get(lang)
-            video_id = publish(cfg, work, fmt, meta, when) if upload else None
+            video_id = publish(cfg, work, fmt, meta, when, series) if upload else None
             if upload:  # test renders (--no-upload) don't use up the topic
                 state.append({"format": fmt, "lang": lang, "topic": topic["topic"],
                               "wiki_title": res["wiki_title"], "title": meta["title"],
                               "video_id": video_id, "duration": round(total, 1), "publish_at": when,
                               "dir": f"{base.name}/{lang}", "thumb_template": template,
+                              "series": (series or {}).get("id"), "episode": episode,
                               "pending_comment": meta["engagement_question"] if video_id else ""})
             cleanup(work)
             results.append((lang, video_id, work))
@@ -283,18 +303,92 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                 raise
     if not results:
         raise RuntimeError("No language version could be produced")
+    # Extra Shorts cut from this long video, in the main language (they funnel viewers to it).
+    if fmt == "long" and (cfg.get("clips") or {}).get("per_long"):
+        main = next(((l, v, w) for l, v, w in results if l == langs[0]), None)
+        if main:
+            try:
+                clip_script = json.loads((main[2] / "script.json").read_text())
+                results += make_clips(cfg, clip_script, res, base, main[0], main[1], upload, template, series)
+            except Exception as e:
+                log.error("Clips from long video failed: %s", e)
     return results
 
 
+def make_clips(cfg, script, res, base, lang, long_video_id, upload, template, series):
+    """Pick strong standalone moments from a long video, give each a new hook + CTA, render as Shorts."""
+    cc = cfg["clips"]
+    shots = [sh for sc in script["scenes"] for sh in sc["shots"]]
+    listing = [{"i": i, "line": sh["line"]} for i, sh in enumerate(shots)]
+    data = llm.ask_json(cfg, "You are a YouTube Shorts editor. JSON only.", f"""
+From this {'Hindi' if lang == 'hi' else 'English'} documentary script, pick {cc['per_long']} different moments that
+work as standalone Shorts: each a run of consecutive lines (by index) that is gripping on its own,
+about 80-120 words in total (40-55 seconds), ending on a strong line. Avoid the intro and outro.
+For each, write in the same language: a new opening hook line (max 14 words, creates instant
+curiosity), the same hook in Hinglish (Roman letters), a title under 70 characters, and 3-5
+thumbnail words with the key words wrapped in *asterisks*.
+LINES: {json.dumps(listing, ensure_ascii=False)}
+Return {{"clips": [{{"start": i, "end": j, "hook": "...", "hook_hinglish": "...", "title": "...",
+"thumbnail_text": "..."}}]}}""", temperature=0.6)
+    cta = {"hi": ("पूरी कहानी हमारे चैनल पर देखिए, लिंक नीचे है।", "Poori kahani hamare channel par dekhiye, link neeche hai."),
+           "en": ("Watch the full story on our channel, link below.", "Watch the full story on our channel, link below.")}[lang]
+    out = []
+    slots = cc.get("publish_utc") or []
+    for k, c in enumerate((data.get("clips") or [])[:cc["per_long"]]):
+        try:
+            a, b = int(c["start"]), int(c["end"])
+            if not (0 <= a <= b < len(shots)) or b - a > 14:
+                continue
+            body = [dict(sh) for sh in shots[a:b + 1]]
+            first_vis = body[0].get("visual")
+            clip = {**{key: script.get(key) for key in ("hashtags", "tags", "engagement_question", "credits")},
+                    "title": (c.get("title") or script["title"])[:90] + " #shorts",
+                    "thumbnail_text": c.get("thumbnail_text") or script.get("thumbnail_text"),
+                    "thumb_visual": first_vis,
+                    "description_intro": c.get("hook") or "", "description_body": script.get("description_intro") or "",
+                    "scenes": [{"chapter": "", "shots":
+                                [{"line": c["hook"], "caption": c.get("hook_hinglish") or c["hook"], "visual": first_vis}]
+                                + body
+                                + [{"line": cta[0], "caption": cta[1], "visual": shots[-1].get("visual") or body[-1].get("visual")}]}]}
+            clip["scenes"][0]["narration"] = " ".join(sh["line"] for sh in clip["scenes"][0]["shots"])
+            work = base / f"{lang}-clip{k + 1}"
+            work.mkdir(exist_ok=True)
+            meta, total = render_language(cfg, clip, res, "short", lang, work, template, series, None)
+            if long_video_id:
+                meta["description"] = (f"▶ पूरी कहानी: https://youtu.be/{long_video_id}\n\n" if lang == "hi"
+                                       else f"▶ Full story: https://youtu.be/{long_video_id}\n\n") + meta["description"]
+                (work / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
+            when = youtube.next_publish_time(slots, k) if upload else None
+            vid = publish(cfg, work, "short", meta, when) if upload else None
+            if upload:
+                state.append({"format": "short", "lang": lang, "topic": f"{script['title']} (clip {k + 1})",
+                              "title": meta["title"], "video_id": vid, "duration": round(total, 1),
+                              "publish_at": when, "clip_of": long_video_id, "dir": f"{base.name}/{work.name}",
+                              "series": (series or {}).get("id"),
+                              "pending_comment": meta.get("engagement_question") or ""})
+            cleanup(work)
+            log.info("Clip %d: %s (%.0fs)", k + 1, meta["title"], total)
+            out.append((lang, vid, work))
+        except Exception as e:
+            log.error("Clip %d failed: %s", k + 1, e)
+    return out
+
+
 # ---- publishing ---------------------------------------------------------------------------
-def publish(cfg, work, fmt, meta, publish_at=None):
+def publish(cfg, work, fmt, meta, publish_at=None, series=None):
     lang = meta.get("lang", "en")
     video_id = youtube.upload(cfg, work / "final.mp4", meta, publish_at)
+    tl = ROOT / "data" / "timelines"
+    tl.mkdir(parents=True, exist_ok=True)
+    (tl / f"{video_id}.json").write_text(json.dumps({"duration": meta.get("duration"),
+                                                     "timeline": meta.get("timeline")}, ensure_ascii=False))
     if fmt == "long":
         youtube.set_thumbnail(video_id, work / "thumbnail.jpg")
     if cfg[fmt].get("upload_captions"):
         youtube.upload_captions(video_id, work / "captions.srt", meta.get("caption_track", lang))
-    youtube.add_to_playlist(video_id, youtube.playlist_for(cfg, fmt, lang))
+    youtube.add_to_playlist(video_id, youtube.playlist_for(cfg, fmt, lang, series if fmt == "long" else None))
+    if fmt == "short":
+        social.cross_post(cfg, work / "final.mp4", meta, video_id)
     return video_id
 
 

@@ -128,18 +128,19 @@ PLAYLISTS = {  # (format, lang) -> title; created automatically on first use
 }
 
 
-def playlist_for(cfg, fmt, lang):
-    """Playlist id for this format/language, creating it (50 quota units, once) if needed."""
+def playlist_for(cfg, fmt, lang, series=None):
+    """Playlist id for this format/language (or series), creating it (50 quota units, once) if needed."""
     from .common import ROOT
     path = ROOT / "data" / "playlists.json"
     known = json.loads(path.read_text()) if path.exists() else {}
-    key = f"{fmt}-{lang}"
+    key = f"series-{series['id']}-{lang}" if series else f"{fmt}-{lang}"
     if known.get(key):
         return known[key]
     if cfg["youtube"].get(f"{fmt}_playlist_id") and lang == cfg["channel"]["language"]:
         return cfg["youtube"][f"{fmt}_playlist_id"]
     try:
-        title = PLAYLISTS.get((fmt, lang), f"{cfg['channel']['name']} — {fmt} ({lang})")
+        title = (f"{series['name']} | {cfg['channel']['name']}" if series
+                 else PLAYLISTS.get((fmt, lang), f"{cfg['channel']['name']} — {fmt} ({lang})"))
         pl = client().playlists().insert(part="snippet,status", body={
             "snippet": {"title": title, "defaultLanguage": lang},
             "status": {"privacyStatus": "public"}}).execute()

@@ -3,9 +3,9 @@ import html
 import json
 import random
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
-from . import keywords, llm, state, youtube
+from . import keywords, llm, occasions, state, youtube
 from .common import http, log
 
 SKIP_PREFIXES = ("Special:", "Main_Page", "Wikipedia:", "File:", "Portal:", "Help:", "Category:",
@@ -162,8 +162,17 @@ OUR CHANNEL PERFORMANCE (most viewed first):
 ALREADY COVERED (do not repeat):
 {json.dumps(state.used_topics()[-150:], ensure_ascii=False)}
 
+UPCOMING OCCASIONS IN INDIA (search interest peaks around these; a related video published 2-5 days
+early catches the wave). Also consider major Hindu/Sikh/Muslim/Jain festivals and historical
+anniversaries you know fall in the next 12 days from {date.today():%d %B %Y}:
+{json.dumps(occasions.upcoming(), ensure_ascii=False)}
+If one fits the niche, make at least one topic about the history or mystery behind it.
+
+SERIES (assign every topic to exactly one, by id):
+{json.dumps([{{"id": x["id"], "about": x["about"]}} for x in cfg.get("series", [])], ensure_ascii=False)}
+
 Return:
-{{"topics": [{{"format": "long" | "short", "topic": "short topic name",
+{{"topics": [{{"format": "long" | "short", "topic": "short topic name", "series": "series id",
   "wikipedia_title": "Exact Wikipedia article title", "angle": "the specific hook/angle for this video",
   "why": "one line: why this will get views"}}]}}"""
     data = llm.ask_json(cfg, system, prompt)

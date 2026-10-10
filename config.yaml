@@ -25,7 +25,7 @@ long:
   voice: "en-US-AndrewNeural"
   rate: "+0%"
   burn_captions: true                 # on-screen captions (Hinglish for Hindi videos)
-  upload_captions: true               # also upload them as a subtitle track
+  upload_captions: false              # captions are on screen; skipping the track saves 400 quota units
 
 short:
   target_words: 95                    # English words; the Hindi version runs ~40% longer => ~55 s
@@ -117,6 +117,38 @@ research:
   outlier_min_multiple: 2.0
   videos_per_channel: 30
 
+# Channel identity: a recurring host + named, numbered series (why story channels get loyal viewers).
+host:
+  name: "इतिहास दादा"
+  name_en: "Itihaas Dada"
+  look: >-
+    a warm, wise Indian grandfather storyteller in his seventies, white beard and moustache,
+    round brass spectacles, saffron shawl over a white kurta, holding a glowing brass lantern
+  # He opens each video right after the hook and closes it with the call to action.
+series:
+  - id: "bharat"
+    name: "भारत के अनसुलझे रहस्य"
+    label: "भारत के रहस्य"
+    about: "Indian history, forts, temples, kings, freedom struggle, unsolved Indian cases and places"
+  - id: "duniya"
+    name: "दुनिया के रहस्य"
+    label: "दुनिया के रहस्य"
+    about: "world mysteries, lost civilisations, strange events outside India"
+  - id: "kahani"
+    name: "इतिहास की सच्ची कहानियाँ"
+    label: "सच्ची कहानी"
+    about: "dramatic true stories of real people: survivors, spies, explorers, rulers"
+
+# Extra Shorts cut from each long video (same pictures, new hook), linking to the full video.
+clips:
+  per_long: 2
+  publish_utc: ["09:30", "16:30"]     # 3:00 PM and 10:00 PM IST
+
+# Also post every Short as an Instagram Reel / Facebook Reel when Meta credentials exist.
+social:
+  instagram: true
+  facebook: true
+
 keywords:
   # YouTube autocomplete is queried with these to see what Indian viewers search for right now.
   niche_seeds: ["रहस्य", "रहस्यमयी", "अनसुलझे रहस्य", "इतिहास की कहानी", "भारत का इतिहास",
@@ -138,7 +170,7 @@ reach:
   auto_publish_private: false         # true = make our private, unscheduled uploads public. Off so a
                                       # video YOU set to private is never re-published automatically.
   post_comments: true                 # channel posts the script's question as the first comment
-  max_replies_per_day: 10             # English replies to new viewer comments (0 = off)
+  max_replies_per_day: 6              # English replies to new viewer comments (0 = off)
   repackage_after_hours: 72           # judge a video after 3 days...
   repackage_below_median: 0.5         # ...and retitle it once if under half its peers' median views
 

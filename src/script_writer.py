@@ -32,10 +32,19 @@ def _voice(cfg):
     return p.read_text() if p.exists() else ""
 
 
+def _insights():
+    p = ROOT / "data" / "insights.json"
+    try:
+        tips = json.loads(p.read_text()) if p.exists() else []
+    except ValueError:
+        tips = []
+    return ("\n\nLESSONS FROM OUR OWN ANALYTICS (apply them):\n- " + "\n- ".join(tips)) if tips else ""
+
+
 def _system(cfg):
     return ("You write scripts for a faceless documentary YouTube channel narrated by an AI voice. "
             "You are meticulous about facts: you only state what the research notes support. "
-            "Reply with JSON only.\n\nCHANNEL VOICE GUIDE:\n" + _voice(cfg))
+            "Reply with JSON only.\n\nCHANNEL VOICE GUIDE:\n" + _voice(cfg) + _insights())
 
 
 def best_hook(cfg, topic, research, fmt):
@@ -101,6 +110,18 @@ def write(cfg, topic, research, fmt):
                   '"stock_query": 2-4 plain English words to find a real stock video clip. Never for '
                   "shots showing specific people or events." if share else
                   "Do not add stock_query fields.")
+    host = cfg.get("host") or {}
+    host_rule = ""
+    if host:
+        hn = host["name_en"]
+        host_rule = (f"""
+THE HOST: the narrator is {hn}, the channel's recurring storyteller ({host['look'].strip()}).
+Add him to "characters" with exactly that description.
+""" + (f"""- Line 2 (right after the hook) is {hn} greeting viewers in one short warm sentence and naming
+  today's story, e.g. "I'm {hn}, and tonight's story begins in 1815..." (shot cast: ["{hn}"]).
+- The final shot shows {hn} closing the story with the call to action (cast: ["{hn}"]).
+- Nowhere else: the rest of the video shows the story itself.""" if fmt == "long" else
+          f"""- Only the final shot shows {hn} (cast: ["{hn}"]); no intro, the hook comes first."""))
     prompt = f"""Write the full narration for a {fmt} YouTube video, split into shots for an
 animated documentary. Every shot gets its own AI-generated illustration.
 
@@ -137,7 +158,7 @@ Scene and shot rules:
   Depict violence and death only indirectly (aftermath, shadows, empty rooms).
 - Write numbers and years as they should be spoken. No stage directions, emojis or markdown in lines.
 {long_bits}
-
+{host_rule}
 Packaging (YouTube SEO):
 - {n_titles} title candidates: under 60 characters, front-load the subject, include a number, name
   or date, curiosity without clickbait lies. Max two ALL-CAPS words.
@@ -195,6 +216,9 @@ def translate_hindi(cfg, script, fmt, search_phrases=()):
 documentary narrator, not bookish/shuddh Hindi: common English loanwords are fine where Hindi
 speakers actually use them. Keep names, places and numbers accurate. Write numbers and years
 as they should be spoken in Hindi.
+
+The narrator/host "{(cfg.get("host") or {}).get("name_en", "")}" is always written as
+"{(cfg.get("host") or {}).get("name", "")}" in Hindi and in Hinglish as "{(cfg.get("host") or {}).get("name_en", "")}".
 
 STRICT: keep exactly the same structure: {len(lines)} scenes, and the same number of lines in
 each scene, in the same order. One Hindi line per English line.

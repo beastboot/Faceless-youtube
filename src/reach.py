@@ -139,6 +139,36 @@ Return {{"replies": [{{"id": "...", "reply": "..." or "skip"}}]}}"""
     REPLIED.write_text(json.dumps(sorted(done)))
 
 
+def retention(video_id, since):
+    """Retention curve -> hook hold at 30s and the biggest drop-offs mapped to the script line spoken."""
+    tl_path = ROOT / "data" / "timelines" / f"{video_id}.json"
+    if not tl_path.exists():
+        return None
+    tl = json.loads(tl_path.read_text())
+    dur, timeline = tl.get("duration") or 0, tl.get("timeline") or []
+    api = build("youtubeAnalytics", "v2", credentials=youtube.credentials(), cache_discovery=False)
+    r = api.reports().query(ids="channel==MINE", startDate=since,
+                            endDate=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                            metrics="audienceWatchRatio", dimensions="elapsedVideoTimeRatio",
+                            filters=f"video=={video_id}").execute()
+    pts = [(float(a), float(b)) for a, b in r.get("rows", [])]
+    if len(pts) < 10 or not dur:
+        return None
+
+    def line_at(sec):
+        cur = ""
+        for st, text in timeline:
+            if st <= sec:
+                cur = text
+        return cur
+
+    hook = next((w for x, w in pts if x * dur >= 30), pts[-1][1])
+    drops = sorted(((pts[i - 1][1] - pts[i][1], pts[i][0]) for i in range(2, len(pts))), reverse=True)[:3]
+    return {"held_at_30s": round(hook, 2),
+            "biggest_drops": [{"at": f"{int(x * dur) // 60}:{int(x * dur) % 60:02d}", "drop": round(d, 3),
+                               "line": line_at(x * dur)[:140]} for d, x in drops if d > 0.02]}
+
+
 def weekly_strategy(cfg, table, actions):
     """Once a week: what worked, what didn't, and concrete changes. Insights feed the topic picker."""
     if STRATEGY.exists() and (datetime.now().timestamp() - STRATEGY.stat().st_mtime) < 6.5 * 86400:
@@ -147,7 +177,8 @@ def weekly_strategy(cfg, table, actions):
              "topic": r.get("topic"), "thumbnail": r.get("thumb_template"),
              "age_hours": round(x["age_h"]), "views": x["views"],
              "avg_percent_watched": x["avg_pct"], "watch_minutes": x["watch_min"], "subs": x["subs"],
-             "likes": x["likes"], "comments": x["comments"]} for r, x in table if x]
+             "likes": x["likes"], "comments": x["comments"],
+             "retention": x.get("retention")} for r, x in table if x]
     if len(rows) < 5:
         return
     prompt = f"""You are the growth strategist for a faceless Hindi YouTube channel (animated history
@@ -156,7 +187,9 @@ with its performance:
 {json.dumps(rows, ensure_ascii=False)}
 
 Write a short weekly review: which topics, title styles and formats worked (cite numbers), which
-didn't, and 3-5 concrete changes for next week. Then give 3-6 one-line "insights" for the AI topic
+didn't, and 3-5 concrete changes for next week. Where "retention" exists, use it: held_at_30s is the
+share still watching at 0:30 (hook strength); biggest_drops show the exact line where viewers left —
+say what about those lines made people leave and how scripts should change. Then give 3-6 one-line "insights" for the AI topic
 picker (e.g. "Indian fort mysteries get 3x the views of European history").
 Return {{"review_markdown": "...", "insights": ["..."]}}"""
     data = llm.ask_json(cfg, "You are a data-driven YouTube strategist. JSON only.", prompt, temperature=0.4)
@@ -255,6 +288,13 @@ def run(cfg):
             except Exception as e:
                 log.warning("Repackage failed for %s: %s", r["video_id"], e)
 
+    if have_analytics:
+        for r, x in table:
+            if x and x["age_h"] >= 72 and x["views"] >= 30:
+                try:
+                    x["retention"] = retention(r["video_id"], since)
+                except Exception as e:
+                    log.debug("Retention for %s failed: %s", r["video_id"], e)
     for step in (lambda: reply_to_comments(cfg, actions), lambda: weekly_strategy(cfg, table, actions)):
         try:
             step()
