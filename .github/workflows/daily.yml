@@ -2,7 +2,7 @@ name: Daily videos
 
 on:
   schedule:
-    - cron: "30 4 * * *"        # 04:30 UTC (10:00 IST) daily; publish times are set in config.yaml
+    - cron: "17 3 * * *"        # 03:17 UTC (08:47 IST): odd minute = less GitHub queueing; publish times in config.yaml
   workflow_dispatch:
     inputs:
       longs:
