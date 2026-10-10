@@ -75,6 +75,27 @@ Return {{"hooks": [{{"formula": "...", "hook": "..."}}]}}"""
     return scored[0][1]
 
 
+# Special formats queued in data/followups.json (see reach.py / pipeline.queue_followups)
+SPECIALS = {
+    "part1": """This is PART 1 of a two-part story. Tell the first half fully and satisfyingly, then stop on
+  the story's biggest turning point as a cliffhanger. The last line says Part 2 arrives in two days and asks
+  viewers to subscribe so they don't miss it. Titles must include "Part 1".""",
+    "part2": """This is PART 2 of "{part1_title}". Open with a 15-20 second recap of Part 1, then continue from
+  the cliffhanger to the end of the story with a strong payoff. Mention Part 1 is linked in the description.
+  Titles must include "Part 2".""",
+    "question": """This Short answers a viewer's question. The FIRST line is: "{asker} asked: {question}"
+  (first name only). Then answer it clearly from the research notes with one surprising detail, and end by
+  inviting viewers to ask their own questions in the comments.""",
+    "quiz": """This is a "Guess the place" quiz Short. Do NOT name the place or reveal the answer anywhere
+  (not in titles, tags or descriptions either). Line 1: "Can you guess this place?" Then exactly three clues,
+  each harder to miss than the last (history, a strange fact, a visual detail). Last line: "Comment your answer!
+  The answer comes tomorrow." Image prompts must not show readable names or signs.""",
+    "quiz_answer": """This Short reveals the answer to yesterday's quiz. Line 1: "Yesterday's quiz answer is…"
+  then reveal the place with its most amazing fact, then 2-3 more facts, and end by inviting viewers to check
+  whether they guessed right.""",
+}
+
+
 def _clean_scenes(data):
     """Keep shots that have a spoken line; derive each scene's narration from its shots."""
     scenes = []
@@ -132,6 +153,10 @@ Add him to "characters" with exactly that description.
 - The final shot shows {hn} closing the story with the call to action (cast: ["{hn}"]).
 - Nowhere else: the rest of the video shows the story itself.""" if fmt == "long" else
           f"""- Only the final shot shows {hn} (cast: ["{hn}"]); no intro, the hook comes first."""))
+    special = SPECIALS.get(topic.get("special") or "", "")
+    if special:
+        special = "\nSPECIAL FORMAT (follow exactly):\n" + special.format(**{k: topic.get(k, "") for k in
+                                                                            ("asker", "question", "part1_title")})
     prompt = f"""Write the full narration for a {fmt} YouTube video, split into shots for an
 animated documentary. Every shot gets its own AI-generated illustration.
 
@@ -177,7 +202,7 @@ Scene and shot rules:
   Depict violence and death only indirectly (aftermath, shadows, empty rooms).
 - Write numbers and years as they should be spoken. No stage directions, emojis or markdown in lines.
 {long_bits}
-{host_rule}
+{host_rule}{special}
 Packaging (YouTube SEO):
 - {n_titles} title candidates: under 60 characters, front-load the subject, include a number, name
   or date, curiosity without clickbait lies. Max two ALL-CAPS words.

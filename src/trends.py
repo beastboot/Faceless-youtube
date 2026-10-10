@@ -196,15 +196,27 @@ Return:
     # Our own winners' follow-ups and viewer requests jump the queue (consumed once used).
     qpath = state.HISTORY.parent / "followups.json"
     queue = json.loads(qpath.read_text()) if qpath.exists() else []
+    now = datetime.now(timezone.utc).isoformat()
     if queue:
         for fmt, lst, n in (("long", longs, n_long), ("short", shorts, n_short)):
-            picked = [x for x in queue if x.get("format") == fmt][:1] if n else []  # at most 1 per format per run
+            ready = [x for x in queue if x.get("format") == fmt and (x.get("not_before") or "") <= now]
+            picked = ready[:1] if n else []  # at most 1 per format per run
             for x in picked:
-                lst.insert(0, {"format": fmt, "topic": x["topic"], "angle": x.get("angle", ""),
-                               "series": x.get("series"), "wikipedia_title": x["topic"].split(" — ")[0]})
+                lst.insert(0, {**{k: v for k, v in x.items() if k not in ("kind", "not_before")},
+                               "format": fmt, "angle": x.get("angle", ""),
+                               "wikipedia_title": x.get("wikipedia_title") or x["topic"].split(" — ")[0]})
                 queue.remove(x)
                 log.info("Queued %s topic first: %s (%s)", fmt, x["topic"], x.get("kind"))
         qpath.write_text(json.dumps(queue, indent=1, ensure_ascii=False))
+    # Weekly formats: a quiz Short on the quiz day, a two-part long story on the two-part day.
+    fx = cfg.get("formats") or {}
+    day = datetime.now(timezone.utc).strftime("%a").lower()
+    if shorts and day == fx.get("quiz_day") and not any(t.get("special") for t in shorts):
+        target = next((t for t in shorts if t.get("series") in ("mandir", "bharat", "pauranik", "duniya")), shorts[-1])
+        target["special"] = "quiz"
+    if longs and day == fx.get("two_part_day") and not longs[0].get("special"):
+        longs[0]["special"] = "part1"
+        longs[0]["topic"] = longs[0]["topic"] + " — Part 1"
     for t in longs + shorts:
         log.info("Picked %-5s: %s — %s", t["format"], t["topic"], t.get("angle", ""))
     return longs, shorts

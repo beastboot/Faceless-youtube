@@ -41,3 +41,15 @@ def send_photos(paths, caption=""):
     finally:
         for f in files.values():
             f.close()
+
+
+def send_document(path, caption=""):
+    token, chat = _cfg()
+    if not (token and chat and path and os.path.exists(path)):
+        return
+    try:
+        with open(path, "rb") as f:
+            http().post(API.format(token=token, method="sendDocument"), timeout=120,
+                        data={"chat_id": chat, "caption": caption[:1000]}, files={"document": f})
+    except Exception as e:
+        log.warning("Telegram document failed: %s", e)

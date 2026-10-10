@@ -130,11 +130,21 @@ def collect_requests(cfg, texts, actions):
     data = llm.ask_json(cfg, "You extract viewer requests from YouTube comments. JSON only.", f"""
 Comments on a Hindi history & mysteries channel:
 {json.dumps(texts[:60], ensure_ascii=False)}
-List the specific video topics viewers ASK for (e.g. "make a video on Bhangarh fort"), merged and counted.
-Ignore praise, spam and vague requests. Return {{"requests": [{{"topic": "English topic name", "count": n}}]}}""",
+1) List the specific video topics viewers ASK for (e.g. "make a video on Bhangarh fort"), merged and counted.
+2) Pick at most 2 genuine curious QUESTIONS about history/mysteries (e.g. "why was the Kailasa temple carved
+   top-down?") with the asker's first name only (from "author") and an English topic for research.
+Ignore praise, spam, abuse and vague text.
+Return {{"requests": [{{"topic": "English topic name", "count": n}}],
+ "questions": [{{"asker": "first name", "question": "question in the viewer's language", "topic": "English topic"}}]}}""",
                         temperature=0.2)
     q = _load_queue()
     have = {x["topic"].lower() for x in q}
+    for qu in (data.get("questions") or [])[:2]:
+        if qu.get("question") and qu.get("topic") and qu["topic"].lower() not in have:
+            q.append({"kind": "question", "special": "question", "format": "short", "series": None,
+                      "topic": qu["topic"], "asker": (qu.get("asker") or "a viewer").split()[0][:20],
+                      "question": qu["question"][:200], "angle": "Answer a viewer's question"})
+            actions.append(f"❓ Ask Itihaas Dada queued: {qu['question'][:80]}")
     for req in (data.get("requests") or [])[:5]:
         t = (req.get("topic") or "").strip()
         if t and t.lower() not in have:
@@ -156,7 +166,8 @@ def reply_to_comments(cfg, actions):
                                        maxResults=50, order="time", textFormat="plainText").execute()
     todo = []
     try:
-        collect_requests(cfg, [t["snippet"]["topLevelComment"]["snippet"]["textDisplay"][:300]
+        collect_requests(cfg, [{"author": t["snippet"]["topLevelComment"]["snippet"].get("authorDisplayName", ""),
+                                "text": t["snippet"]["topLevelComment"]["snippet"]["textDisplay"][:300]}
                                for t in threads.get("items", [])
                                if (t["snippet"]["topLevelComment"]["snippet"].get("authorChannelId") or {}).get("value") != me],
                          actions)
@@ -355,8 +366,15 @@ def run(cfg):
                     x["retention"] = retention(r["video_id"], since)
                 except Exception as e:
                     log.debug("Retention for %s failed: %s", r["video_id"], e)
-    for step in (lambda: double_down(table, actions), lambda: reply_to_comments(cfg, actions),
-                 lambda: weekly_strategy(cfg, table, actions)):
+    from . import extras
+    today = datetime.now(timezone.utc)
+    steps = [lambda: double_down(table, actions), lambda: reply_to_comments(cfg, actions),
+             lambda: weekly_strategy(cfg, table, actions)]
+    if today.strftime("%a") == "Mon":
+        steps.append(lambda: extras.community_post(cfg))
+    if today.day == 1:
+        steps.append(lambda: extras.monthly_ebook(cfg))
+    for step in steps:
         try:
             step()
         except Exception as e:

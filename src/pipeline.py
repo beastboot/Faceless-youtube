@@ -229,7 +229,8 @@ def build_description(cfg, script, res, chapters, fmt, lang):
     if lang != "en" and script.get("en"):
         en = script["en"]
         parts.append(f"{t['english']}\n{en['description_intro']} {en['description_body']}".strip())
-    parts.append(f"{t['sources']}\n{res['wiki_url']}" + (f"\n{res['hi_wiki_url']}" if res.get("hi_wiki_url") else ""))
+    if script.get("special") != "quiz":   # a source link would reveal the quiz answer
+        parts.append(f"{t['sources']}\n{res['wiki_url']}" + (f"\n{res['hi_wiki_url']}" if res.get("hi_wiki_url") else ""))
     tag = (cfg.get("affiliate") or {}).get("amazon_tag")
     if tag:  # books on the topic; Amazon requires the disclosure line
         from urllib.parse import quote_plus
@@ -373,6 +374,10 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         suffix = f" | EP {episode}"
         title = title[:100 - len(suffix)] + suffix
     description = build_description(cfg, script, res, chapters, fmt, lang)
+    for key, hi_txt, en_txt in (("part1_video", "▶ भाग 1 यहाँ देखें", "▶ Watch Part 1"),
+                                ("quiz_video", "▶ कल का क्विज़", "▶ Yesterday's quiz")):
+        if script.get(key):
+            description = f"{hi_txt if lang == 'hi' else en_txt}: https://youtu.be/{script[key]}\n\n" + description
     if series:
         pl = json.loads((ROOT / "data" / "playlists.json").read_text()).get(f"series-{series['id']}-{lang}") \
             if (ROOT / "data" / "playlists.json").exists() else None
@@ -382,11 +387,14 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
                 f"\n▶ Full series: https://www.youtube.com/playlist?list={pl}"
         description = head + "\n\n" + description if fmt == "long" else description + f"\n\n📚 {series['name']}"
     timeline = [[round(st, 2), it.get("line_text", "")] for it, st in zip(items, starts)]
+    tags = script.get("tags") or []
+    if script.get("special") == "quiz":
+        tags = ["quiz", "guess the place", "पहचानो", "रहस्य", "quiz in hindi", "history quiz"]
     meta = {"title": title, "lang": lang, "caption_track": caption_track, "timeline": timeline,
             "duration": round(total, 2),
             "localizations": localizations,
             "description": description,
-            "tags": script.get("tags") or [],
+            "tags": tags,
             "engagement_question": script.get("engagement_question") or ""}
     (work / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
     (work / "script.json").write_text(json.dumps(script, indent=1, ensure_ascii=False, default=str))
@@ -407,8 +415,17 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     if len(res["text"]) < (3000 if fmt == "long" else 600):
         raise RuntimeError(f"Not enough research material for {res['wiki_title']}")
     script_en = script_writer.write(cfg, topic, res, fmt)
+    for key in ("part1_video", "quiz_video"):   # carried into descriptions of follow-ups
+        if topic.get(key):
+            script_en[key] = topic[key]
+    script_en["special"] = topic.get("special")
+    if topic.get("special") == "quiz":   # never leak the answer: no map/name graphics
+        for sc in script_en["scenes"]:
+            for sh in sc["shots"]:
+                if (sh.get("graphic") or {}).get("type") in ("map", "name", "date"):
+                    sh["graphic"] = None
     script_en = review.review(cfg, script_en, res, fmt)  # raises -> main tries the next topic
-    phrases = keywords.for_topic(topic["topic"], res["wiki_title"])
+    phrases = [] if topic.get("special") == "quiz" else keywords.for_topic(topic["topic"], res["wiki_title"])
     illustrate(cfg, script_en, base / "art", fmt, res)
     geocode_maps(script_en)
 
@@ -433,6 +450,18 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                               "dir": f"{base.name}/{lang}", "thumb_template": template,
                               "series": (series or {}).get("id"), "episode": episode,
                               "pending_comment": meta["engagement_question"] if video_id else ""})
+            if video_id and fmt == "long":
+                try:
+                    from . import extras
+                    extras.save_script(video_id, script, meta)
+                except Exception as e:
+                    log.warning("Saving script failed: %s", e)
+            if video_id and fmt == "long" and (cfg.get("podcast") or {}).get("enabled"):
+                try:   # same story as a website article + podcast episode
+                    from . import site
+                    site.add_episode(cfg, script, meta, work, video_id)
+                except Exception as e:
+                    log.warning("Site/podcast step failed: %s", e)
             cleanup(work)
             results.append((lang, video_id, work))
         except Exception as e:
@@ -441,6 +470,8 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                 raise
     if not results:
         raise RuntimeError("No language version could be produced")
+    if upload:
+        queue_followups(topic, fmt, script_en, results)
     # Extra Shorts cut from this long video, in the main language (they funnel viewers to it).
     if fmt == "long" and (cfg.get("clips") or {}).get("per_long"):
         main = next(((l, v, w) for l, v, w in results if l == langs[0]), None)
@@ -451,6 +482,26 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
             except Exception as e:
                 log.error("Clips from long video failed: %s", e)
     return results
+
+
+def queue_followups(topic, fmt, script, results):
+    """Part 1 -> queue Part 2 (2 days later); quiz -> queue tomorrow's answer reveal."""
+    from datetime import datetime, timedelta, timezone
+    path = ROOT / "data" / "followups.json"
+    q = json.loads(path.read_text()) if path.exists() else []
+    vid = next((v for _, v, _ in results if v), None)
+    if topic.get("special") == "part1":
+        q.append({"kind": "part2", "special": "part2", "format": fmt, "series": topic.get("series"),
+                  "topic": topic["topic"].replace("Part 1", "").strip() + " — Part 2",
+                  "wikipedia_title": topic.get("wikipedia_title"), "part1_title": script.get("title"),
+                  "part1_video": vid, "angle": "Continue from Part 1's cliffhanger",
+                  "not_before": (datetime.now(timezone.utc) + timedelta(days=2)).isoformat()})
+    if topic.get("special") == "quiz":
+        q.append({"kind": "quiz_answer", "special": "quiz_answer", "format": "short", "series": topic.get("series"),
+                  "topic": topic["topic"] + " — quiz answer", "wikipedia_title": topic.get("wikipedia_title"),
+                  "quiz_video": vid, "angle": "Reveal yesterday's quiz answer",
+                  "not_before": (datetime.now(timezone.utc) + timedelta(hours=20)).isoformat()})
+    path.write_text(json.dumps(q, indent=1, ensure_ascii=False))
 
 
 def make_clips(cfg, script, res, base, lang, long_video_id, upload, template, series):

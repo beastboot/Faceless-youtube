@@ -170,6 +170,17 @@ clips:
   per_long: 2
   publish_utc: ["09:30", "16:30"]     # 3:00 PM and 10:00 PM IST
 
+# Each long video also becomes a website article and a podcast episode (site/ on GitHub Pages).
+podcast:
+  enabled: true
+  title: "Odd Annals — रहस्य और इतिहास"
+  owner_email: ""                     # Spotify/Apple send the ownership code here; set your channel email
+
+# Weekly formats: a "guess the place" quiz Short (answer revealed next day) and a two-part long story.
+formats:
+  quiz_day: "fri"
+  two_part_day: "wed"
+
 # Backup videos kept private on YouTube and published only if a day's run fails or is late.
 reserve:
   target: 2
