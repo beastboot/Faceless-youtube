@@ -13,6 +13,9 @@ def review(cfg, script, research, fmt):
     prompt = f"""You are a strict fact-checker and YouTube retention editor reviewing a {fmt} script
 before it is published on a documentary channel. Compare every factual claim with the RESEARCH NOTES.
 
+SENSITIVITY: if the script mocks, sexualises or questions the sacred figures or beliefs of any
+religion, or stirs caste/communal controversy, set verdict "reject" (reason: "sensitive").
+
 Score 1-10 for each: hook (does line 1 create real curiosity?), accuracy (claims supported by the
 notes?), retention (pacing, open loops, no filler), originality (a real story with a point of view,
 not a generic list or a Wikipedia summary).

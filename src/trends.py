@@ -133,6 +133,10 @@ verifiable fact or moment that can be told fast).
 
 Rules:
 - Every topic must fit the niche. Ignore celebrities, sports, politics-of-today and gossip.
+- SENSITIVITY (hard rule): never pick topics that mock, sexualise, or question the sacred figures,
+  scriptures or beliefs of ANY religion (blasphemy cases, "Jesus/Prophet/god had a lover" etc.), and
+  no caste or Hindu-Muslim/communal controversies. Respectful history of temples, festivals, saints
+  and religious architecture is fine.
 - Prefer topics that are trending today (the candidates below) when they fit; otherwise choose a strong
   evergreen story the candidates point to.
 - Each topic must map to one existing English Wikipedia article title that holds the facts.
