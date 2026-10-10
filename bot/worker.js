@@ -260,7 +260,8 @@ async function askGemini(env, question, ch) {
 mystery animations, automated daily uploads; a Tamil sister channel). Answer the owner's question using ONLY the data
 below; say plainly when the data doesn't contain the answer (analytics lag 1-3 days). Be short and concrete, with
 numbers, and end with one practical suggestion if useful. Reply in the language/style the owner used (Hindi, Hinglish
-or English). Telegram HTML only: <b>, <i>, <a href>; no markdown, no tables.
+or English). Private videos were made private on purpose by the owner (e.g. sensitive topics): never suggest
+publishing them. Scheduled videos (publishAt) go public by themselves. Telegram HTML only: <b>, <i>, <a href>; no markdown, no tables.
 Today: ${new Date().toISOString().slice(0, 10)}. Channel in focus: ${ch.name}.
 DATA: ${JSON.stringify(ctx).slice(0, 30000)}
 QUESTION: ${question}`;

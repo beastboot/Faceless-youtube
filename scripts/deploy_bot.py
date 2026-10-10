@@ -18,7 +18,7 @@ import requests
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
-NAME = "odd-annals-bot"
+NAME = "oddannals-telegram"
 API = "https://api.cloudflare.com/client/v4"
 SECRETS = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "GEMINI_API_KEY",
            "YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN",
