@@ -13,7 +13,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src import pipeline, trends, youtube
+from src import pipeline, state, trends, youtube
 from src.common import load_config, log, setup_logging
 
 
@@ -69,6 +69,10 @@ def main():
             except Exception as e:
                 log.error("FAILED %s %r: %s — trying next candidate", fmt, topic.get("topic"), e)
                 log.debug(traceback.format_exc())
+                if "Not enough research" in str(e) or "No Wikipedia article" in str(e):
+                    # Remember it so the topic picker never proposes it again.
+                    state.append({"format": f"{fmt}-skipped", "topic": topic.get("topic"),
+                                  "reason": str(e)[:200]})
                 if "quotaExceeded" in str(e):
                     log.error("YouTube quota exhausted for today; stopping.")
                     quota_hit = True
