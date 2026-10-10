@@ -280,6 +280,9 @@ def _merge_graphic(orig, translated):
     return out
 
 
+SCRIPT_RANGES = {"ta": r"[\u0B80-\u0BFF]", "te": r"[\u0C00-\u0C7F]", "bn": r"[\u0980-\u09FF]",
+                 "mr": r"[\u0900-\u097F]"}
+
 REGIONAL = {"ta": ("Tamil", "Tamil script"), "te": ("Telugu", "Telugu script"),
             "bn": ("Bengali", "Bengali script"), "mr": ("Marathi", "Devanagari script")}
 
@@ -319,7 +322,14 @@ Return JSON: {{"scenes": [["line", ...], ...], "graphics": {{"0.1": {{...}}}}, "
                             prompt, temperature=0.4)
         tr = data.get("scenes") or []
         if len(tr) == len(lines) and all(len(a) == len(b) for a, b in zip(tr, lines)):
-            break
+            flat = [str(t) for sc in tr for t in sc]
+            in_script = sum(1 for t in flat if re.search(SCRIPT_RANGES[lang], t))
+            if in_script >= 0.8 * max(1, len(flat)):
+                break
+            # e.g. a fallback model answering in Hindi: the Tamil voice would read nothing
+            log.warning("%s translation is not in %s (%d/%d lines, attempt %d), retrying",
+                        name, writing, in_script, len(flat), attempt + 1)
+            continue
         log.warning("%s translation shape mismatch (attempt %d), retrying", name, attempt + 1)
     else:
         raise RuntimeError(f"{name} translation did not keep the shot structure")
