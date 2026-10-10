@@ -250,7 +250,10 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         def speak_g(i_item):
             i, (si, sh, last) = i_item
             mp3 = work / f"voice-{i:03d}.mp3"
-            words = tts.speak_gemini(sh["line"], mp3, lc["tts"])
+            tcfg = dict(lc["tts"])
+            if fmt == "short":   # Shorts: faster, punchier delivery
+                tcfg["style"] = tcfg["style"] + " This is a YouTube Short: speak FAST and energetic, no pauses."
+            words = tts.speak_gemini(sh["line"], mp3, tcfg)
             max_words = 3 if fmt == "short" else 7
             caps = (tts.retext_captions(words, sh["caption"], max_words) if hinglish and sh.get("caption")
                     else tts.caption_chunks(words, max_words))
@@ -273,7 +276,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
     limit = cfg["languages"].get(lang, {}).get("short_max_seconds") if fmt == "short" else None
     spoken = sum(it["audio_dur"] + it["tail"] for it in items)
     if limit and spoken > limit:
-        factor = min(1.18, spoken / (limit - 1.5))
+        factor = min(1.3, spoken / (limit - 1.5))
         log.info("[%s] Short is %.0fs; speeding narration up x%.2f to fit %ss", lang, spoken, factor, limit)
         for it in items:
             fast = it["audio"].with_name(it["audio"].stem + "-fast.mp3")

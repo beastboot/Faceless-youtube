@@ -146,7 +146,8 @@ Rules:
 - Learn from the competitor outliers (videos that beat their own channel's median views by the multiple
   shown): borrow the angle and framing patterns, never copy the title.
 - Learn from our own channel performance: do more of what got views AND high average % watched.
-- The audience is mainly Hindi-speaking Indians. About HALF of the topics should be Indian: forts,
+- The audience is mainly Hindi-speaking Indians. At least THREE QUARTERS of the topics must be Indian
+  (series mandir, pauranik or bharat), as our competitor data shows: forts,
   temples, kings and empires, freedom struggle, unsolved Indian cases and places (Bhangarh, Roopkund,
   Kuldhara, Netaji, Indus script...). The rest: world mysteries that Indians search for.
 - Use the youtube_searches_hindi candidates as evidence of what Indians search for right now.
@@ -181,8 +182,17 @@ Return:
   "why": "one line: why this will get views"}}]}}"""
     data = llm.ask_json(cfg, system, prompt)
     topics = data.get("topics", data if isinstance(data, list) else [])
-    longs = [t for t in topics if t.get("format") == "long"][:want_long]
-    shorts = [t for t in topics if t.get("format") == "short"][:want_short]
+    # Enforce the data, not just ask for it: Indian series first, and at most ~1 in 4 slots for
+    # world topics (the niche's outliers are overwhelmingly Indian temple/mythology/history stories).
+    indian = {x["id"] for x in cfg.get("series", []) if x["id"] in ("mandir", "pauranik", "bharat")}
+
+    def ranked(items, n):
+        """Indian-series topics first; world topics only after them (so at most ~1 in 4 slots)."""
+        ind = [t for t in items if t.get("series") in indian]
+        return ind + [t for t in items if t.get("series") not in indian]
+
+    longs = ranked([t for t in topics if t.get("format") == "long"], n_long)[:want_long]
+    shorts = ranked([t for t in topics if t.get("format") == "short"], n_short)[:want_short]
     for t in longs + shorts:
         log.info("Picked %-5s: %s — %s", t["format"], t["topic"], t.get("angle", ""))
     return longs, shorts

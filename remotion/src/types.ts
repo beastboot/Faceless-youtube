@@ -35,5 +35,6 @@ export type Props = {
   captionsOn: boolean;
   fonts: {display: string; hindi: string};
   logo: string | null;
+  grain?: string | null;
   endCard: {title: string; button: string} | null;
 };

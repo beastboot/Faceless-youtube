@@ -28,7 +28,7 @@ long:
   upload_captions: false              # captions are on screen; skipping the track saves 400 quota units
 
 short:
-  target_words: 95                    # English words; the Hindi version runs ~40% longer => ~55 s
+  target_words: 75                    # English words; Hindi + Gemini narration runs longer => ~55-60 s
   min_scenes: 5
   width: 1080
   height: 1920
@@ -100,7 +100,7 @@ languages:
     captions: "hinglish"              # hinglish (Roman letters) | hindi (Devanagari)
     long_rate: "+12%"                 # Madhur is slow at +0%; this is a natural documentary pace
     short_rate: "+20%"
-    short_max_seconds: 60             # Shorts longer than this are sped up slightly (max 18%)
+    short_max_seconds: 60             # Shorts longer than this are sped up (max 30%)
     long_publish_utc: ["14:30"]       # 8:00 PM IST
     short_publish_utc: ["06:30", "12:30"]   # 12:00 PM and 6:00 PM IST
   en:

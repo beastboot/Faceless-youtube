@@ -75,6 +75,12 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
         for sh in shots:
             if sh["start"] + sh["dur"] > end_at:
                 sh["graphic"] = None
+    grain = pub / "fonts" / "grain.png"  # fine film grain texture, generated once
+    if not grain.exists():
+        import numpy as np
+        from PIL import Image
+        g = np.random.default_rng(1).normal(128, 40, (1296, 2304)).clip(0, 255).astype(np.uint8)
+        Image.fromarray(g).save(grain)
     lang = scenes[0].get("lang", "en") if scenes else "en"
     logo = ROOT / "branding" / "logo.png"
     props = {
@@ -83,6 +89,7 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
         "transitionSeconds": vc.get("transition_seconds", 0.35), "captionsOn": bool(fc.get("burn_captions")),
         "fonts": {"display": "Anton", "hindi": "Mukta"},
         "logo": stage_file(logo) if logo.exists() else None,
+        "grain": "fonts/grain.png",
         "endCard": END_CARD.get(lang, END_CARD["en"]) if fmt == "long" else None,
     }
     props_path = work / "motion-props.json"

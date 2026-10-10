@@ -226,7 +226,7 @@ def _merge_graphic(orig, translated):
     if not isinstance(translated, dict) or translated.get("type") != orig.get("type"):
         return orig
     out = dict(orig)
-    for k in ("text", "sub", "label", "name", "role", "by"):
+    for k in ("text", "sub", "label", "name", "role", "by", "prefix", "suffix"):
         if translated.get(k):
             out[k] = translated[k]
     if orig.get("type") == "timeline" and isinstance(translated.get("points"), list) \
@@ -262,7 +262,7 @@ ENGLISH LINES (scene by scene):
 {json.dumps(lines, ensure_ascii=False)}
 
 ON-SCREEN GRAPHICS (keyed by "scene.shot"; translate every human-readable text field — text, sub,
-label, name, role, by, points[].label, place labels — into Hindi; keep numbers, years and "type"
+label, name, role, by, prefix, suffix, points[].label, place labels — into Hindi; keep numbers, years and "type"
 unchanged; for "map" keep "place" in English and add a Hindi "label"):
 {json.dumps({f"{i}.{j}": sh["graphic"] for i, sc in enumerate(script["scenes"]) for j, sh in enumerate(sc["shots"]) if sh.get("graphic")}, ensure_ascii=False)}
 

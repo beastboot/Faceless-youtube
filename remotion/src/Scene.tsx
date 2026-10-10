@@ -98,3 +98,18 @@ export const entrance = (kind: string, frame: number, xf: number): React.CSSProp
     default: return {opacity: p};
   }
 };
+
+/** Warm light leak drifting across the frame now and then, plus fine film grain. */
+export const FilmLook: React.FC<{seed: string; grain: string | null}> = ({seed, grain}) => {
+  const frame = useCurrentFrame();
+  const {width, height} = useVideoConfig();
+  const leak = Math.max(0, Math.sin(frame / 70 + random(seed) * 6));
+  return (
+    <AbsoluteFill style={{pointerEvents: 'none'}}>
+      <AbsoluteFill style={{opacity: 0.18 * leak, mixBlendMode: 'screen',
+        background: `radial-gradient(circle at ${20 + 60 * ((frame / 300) % 1)}% 20%, rgba(255,170,80,0.9), rgba(255,170,80,0) 45%)`}} />
+      {grain ? <Img src={staticFile(grain)} style={{position: 'absolute', width: width * 1.2, height: height * 1.2, opacity: 0.07,
+        mixBlendMode: 'overlay', left: -((frame * 37) % (width * 0.2)), top: -((frame * 53) % (height * 0.2))}} /> : null}
+    </AbsoluteFill>
+  );
+};

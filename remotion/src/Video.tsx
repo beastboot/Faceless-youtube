@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Img, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Captions} from './Captions';
 import {GraphicLayer} from './graphics/Graphics';
-import {ClipVideo, KenBurns, Particles, Vignette, entrance} from './Scene';
+import {ClipVideo, FilmLook, KenBurns, Particles, Vignette, entrance} from './Scene';
 import type {Props, Shot} from './types';
 import {RED, YELLOW, clamp, fontFor, pop} from './util';
 
@@ -19,7 +19,9 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
   const narrationFrames = Math.round(shot.dur * fps);
   return (
     <AbsoluteFill style={index === 0 ? {} : entrance(shot.transition, frame, xf)}>
-      {shot.video ? <ClipVideo src={shot.video} /> : shot.image ? <KenBurns src={shot.image} move={shot.move} len={len} /> : <AbsoluteFill style={{background: '#101418'}} />}
+      {shot.video ? <ClipVideo src={shot.video} />
+        : shot.image ? <KenBurns src={shot.image} move={shot.move} len={len} />
+        : <AbsoluteFill style={{background: '#101418'}} />}
       <Particles kind={shot.ambient} seed={`shot-${index}`} />
       <Vignette />
       {shot.graphic ? (
@@ -71,6 +73,7 @@ export const Main: React.FC<Props> = (props) => {
           </Sequence>
         );
       })}
+      <FilmLook seed="film" grain={props.grain ?? null} />
       {props.logo ? (
         <AbsoluteFill style={{alignItems: 'flex-end', padding: props.short ? '4% 5%' : '2.2% 2.4%', pointerEvents: 'none'}}>
           <Img src={staticFile(props.logo)} style={{width: props.short ? 120 : 92, height: props.short ? 120 : 92, opacity: 0.85, borderRadius: '50%'}} />
