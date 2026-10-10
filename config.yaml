@@ -44,6 +44,8 @@ video:
   music_volume: 0.08                  # royalty-free .mp3s in assets/music/ (see README: copyright)
   bed_volume: 1.0                     # synthesised ambient bed used when assets/music/ is empty
   sfx_volume: 0.5                     # whoosh on every picture change (0 = off)
+  renderer: "remotion"                # remotion = motion graphics (maps, dates, counters, karaoke captions)
+                                      # ffmpeg = the simpler built-in renderer (uses "animation" below)
   animation: "storybook"              # storybook = camera move + light particles + glow on painted scenes
                                       # sketch = pen draws each picture live | kenburns = plain pan/zoom
   sketch_draw_share: 0.55             # share of each shot spent drawing before colours wash in
@@ -86,7 +88,15 @@ images:
 languages:
   hi:
     enabled: true                     # main language: makes every video in schedule above
-    voice: "hi-IN-MadhurNeural"
+    voice: "hi-IN-MadhurNeural"       # Edge voice (backup)
+    tts:
+      engine: "gemini"                # expressive narration; whole video falls back to Edge if unavailable
+      voice: "Charon"
+      models: ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-3.8-flash-tts"]
+      style: >-
+        Read the following Hindi line as a gripping, warm Indian documentary storyteller: natural
+        conversational Hindi, clear diction, a brisk pace, rising tension on mysteries, dramatic
+        pauses only where the sentence needs one. Read only the line, nothing else.
     captions: "hinglish"              # hinglish (Roman letters) | hindi (Devanagari)
     long_rate: "+12%"                 # Madhur is slow at +0%; this is a natural documentary pace
     short_rate: "+20%"

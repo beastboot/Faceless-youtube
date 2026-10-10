@@ -83,6 +83,7 @@ def _clean_scenes(data):
                   "image_prompt": (sh.get("image_prompt") or "").strip(),
                   "cast": [c for c in (sh.get("cast") or []) if isinstance(c, str)],
                   "move": (sh.get("move") or "").strip(), "ambient": (sh.get("ambient") or "").strip(),
+                  "graphic": sh.get("graphic") if isinstance(sh.get("graphic"), dict) else None,
                   "stock_query": (sh.get("stock_query") or "").strip()}
                  for sh in (sc.get("shots") or []) if (sh.get("line") or "").strip()]
         if shots:
@@ -145,6 +146,15 @@ Scene and shot rules:
   for emotional beats) and "ambient" (a moving light/weather layer matching the mood: fireflies |
   sparkles | dust | leaves | rain | snow | embers | none — magical/night: fireflies or sparkles,
   sunlight indoors: dust, autumn/forest: leaves, storms/sorrow: rain, battles/fire: embers).
+- MOTION GRAPHICS: about one shot in three gets an on-screen "graphic" that makes a fact visual.
+  Use the type that fits the line; never two in a row; facts only from the notes:
+    {{"type": "date", "text": "1815", "sub": "Kuldhara, Rajasthan"}}          (a year/date being introduced)
+    {{"type": "counter", "value": 84, "label": "villages emptied", "suffix": ""}} (a striking number)
+    {{"type": "map", "place": "Kuldhara, Jaisalmer, Rajasthan, India"}}        (first time a place matters)
+    {{"type": "name", "name": "Salim Singh", "role": "Dewan of Jaisalmer"}}   (a key person appears)
+    {{"type": "quote", "text": "short quote or legend line", "by": "who/what"}} (a real quote or the legend)
+    {{"type": "timeline", "points": [{{"year": "1291", "label": "Paliwals settle"}}, ...]}}  (2-4 points)
+    {{"type": "fact", "text": "4-7 word punchline"}}                             (the big reveal of a scene)
 - Define each recurring character once in "characters" (region/ethnicity, age, build, hair, clothing,
   distinctive features) and repeat that exact description inside every image_prompt where they appear, so the
   character looks the same in every shot.
@@ -181,7 +191,8 @@ Return JSON:
 {{"characters": {{"Name": "visual description"}},
  "scenes": [{{"chapter": "optional chapter title",
    "shots": [{{"line": "spoken sentence", "image_prompt": "what the illustration shows",
-              "cast": ["Name"], "move": "zoom_in", "ambient": "dust", "stock_query": "optional"}}]}}],
+              "cast": ["Name"], "move": "zoom_in", "ambient": "dust", "graphic": null,
+              "stock_query": "optional"}}]}}],
  "titles": ["..."], "thumbnail_texts": ["..."], "thumbnail_prompt": "...",
  "description_intro": "...", "description_body": "...", "engagement_question": "...",
  "search_queries": ["..."], "tags": ["..."], "hashtags": ["#..."]}}"""
@@ -208,6 +219,23 @@ Return JSON:
     return data
 
 
+def _merge_graphic(orig, translated):
+    """Translated text on the original graphic; structure, numbers and coordinates stay as they were."""
+    if not orig:
+        return None
+    if not isinstance(translated, dict) or translated.get("type") != orig.get("type"):
+        return orig
+    out = dict(orig)
+    for k in ("text", "sub", "label", "name", "role", "by"):
+        if translated.get(k):
+            out[k] = translated[k]
+    if orig.get("type") == "timeline" and isinstance(translated.get("points"), list) \
+            and len(translated["points"]) == len(orig.get("points") or []):
+        out["points"] = [{"year": a.get("year"), "label": b.get("label") or a.get("label")}
+                         for a, b in zip(orig["points"], translated["points"])]
+    return out
+
+
 def _cap_latin(text):
     """'jaivana cannon का सच' -> 'Jaivana Cannon का सच' (Roman words inside Hindi titles look sloppy lowercase)."""
     return re.sub(r"\b([a-z])([a-z]{2,})\b", lambda m: m.group(1).upper() + m.group(2)
@@ -232,6 +260,11 @@ each scene, in the same order. One Hindi line per English line.
 
 ENGLISH LINES (scene by scene):
 {json.dumps(lines, ensure_ascii=False)}
+
+ON-SCREEN GRAPHICS (keyed by "scene.shot"; translate every human-readable text field — text, sub,
+label, name, role, by, points[].label, place labels — into Hindi; keep numbers, years and "type"
+unchanged; for "map" keep "place" in English and add a Hindi "label"):
+{json.dumps({f"{i}.{j}": sh["graphic"] for i, sc in enumerate(script["scenes"]) for j, sh in enumerate(sc["shots"]) if sh.get("graphic")}, ensure_ascii=False)}
 
 CHAPTER TITLES (translate non-empty ones, keep empty ones empty):
 {json.dumps(chapters, ensure_ascii=False)}
@@ -260,6 +293,7 @@ Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hin
 
 Return JSON:
 {{"scenes": [["hindi line", ...], ...], "hinglish": [["roman hindi line", ...], ...],
+ "graphics": {{"0.1": {{...translated graphic...}}}},
  "chapters": ["..."], "titles": ["..."],
  "thumbnail_texts": ["..."], "description_intro": "...", "description_body": "...",
  "engagement_question": "...", "tags": ["..."], "hashtags": ["#..."]}}"""
@@ -279,8 +313,9 @@ Return JSON:
     out["scenes"] = [
         {"chapter": (chs[i] if i < len(chs) else "") or "",
          "shots": [{"line": str(h).strip(), "caption": str(r).strip(),
-                    "image_prompt": sh["image_prompt"], "visual": sh.get("visual")}
-                   for h, r, sh in zip(hi[i], hl[i], sc["shots"])],
+                    "image_prompt": sh["image_prompt"], "visual": sh.get("visual"),
+                    "graphic": _merge_graphic(sh.get("graphic"), (data.get("graphics") or {}).get(f"{i}.{j}"))}
+                   for j, (h, r, sh) in enumerate(zip(hi[i], hl[i], sc["shots"]))],
          "narration": " ".join(str(x).strip() for x in hi[i])}
         for i, sc in enumerate(script["scenes"])]
     for k in ("description_intro", "description_body", "engagement_question", "tags", "hashtags"):

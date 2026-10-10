@@ -122,6 +122,36 @@ def illustrate(cfg, script, art, fmt, res):
                               else shots[0]["visual"])
 
 
+def geocode_maps(script):
+    """Map graphics need coordinates: OpenStreetMap Nominatim (free, 1 request/second). Maps that
+    can't be located are dropped rather than pinned in the wrong place."""
+    import time as _t
+    from .common import http
+    cache = {}
+    for sc in script["scenes"]:
+        for sh in sc["shots"]:
+            g = sh.get("graphic")
+            if not g or g.get("type") != "map":
+                continue
+            if g.get("lat") is not None and g.get("lon") is not None:
+                continue
+            place = g.get("place") or ""
+            if place not in cache:
+                try:
+                    r = http().get("https://nominatim.openstreetmap.org/search",
+                                   params={"q": place, "format": "json", "limit": 1}, timeout=20).json()
+                    cache[place] = (float(r[0]["lat"]), float(r[0]["lon"])) if r else None
+                except Exception as e:
+                    log.debug("geocode %r failed: %s", place, e)
+                    cache[place] = None
+                _t.sleep(1.1)
+            if cache[place]:
+                g["lat"], g["lon"] = cache[place]
+                g.setdefault("label", place.split(",")[0])
+            else:
+                sh["graphic"] = None
+
+
 # ---- description / chapters ---------------------------------------------------------------
 def chapters_block(script, starts, total, lang="en"):
     """YouTube chapter rules: first at 0:00, at least 3, each >= 10s. Otherwise omit."""
@@ -206,14 +236,40 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         else:
             caps = tts.caption_chunks(words, max_words)
         return {"audio": mp3, "audio_dur": ffprobe_duration(mp3), "lang": lang, "scene": si,
-                "line_text": sh["line"],
+                "line_text": sh["line"], "graphic": sh.get("graphic"),
                 "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"),
                 "caption_lang": "en" if hinglish else lang, "captions": caps,
                 "visual": sh["visual"], "tail": vc["scene_tail_seconds"] if last else vc["shot_tail_seconds"]}
 
-    with ThreadPoolExecutor(4) as ex:
-        items = list(ex.map(speak, enumerate(flat)))
-    log.info("[%s] narrated %d shots", lang, len(items))
+    lc = cfg["languages"].get(lang, {})
+    engine = (lc.get("tts") or {}).get("engine", "edge")
+    items = None
+    if engine == "gemini":
+        # Expressive Gemini narration; if it can't voice EVERY line, the whole video falls back to
+        # Edge so a video never switches voices half-way.
+        def speak_g(i_item):
+            i, (si, sh, last) = i_item
+            mp3 = work / f"voice-{i:03d}.mp3"
+            words = tts.speak_gemini(sh["line"], mp3, lc["tts"])
+            max_words = 3 if fmt == "short" else 7
+            caps = (tts.retext_captions(words, sh["caption"], max_words) if hinglish and sh.get("caption")
+                    else tts.caption_chunks(words, max_words))
+            return {"audio": mp3, "audio_dur": ffprobe_duration(mp3), "lang": lang, "scene": si,
+                    "line_text": sh["line"], "graphic": sh.get("graphic"),
+                    "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"),
+                    "caption_lang": "en" if hinglish else lang, "captions": caps,
+                    "visual": sh["visual"], "tail": vc["scene_tail_seconds"] if last else vc["shot_tail_seconds"]}
+        try:
+            with ThreadPoolExecutor(3) as ex:
+                items = list(ex.map(speak_g, enumerate(flat)))
+            log.info("[%s] narrated %d shots with Gemini (%s)", lang, len(items), lc["tts"].get("voice"))
+        except Exception as e:
+            log.warning("[%s] Gemini TTS unavailable (%s); narrating this video with Edge", lang, e)
+            items = None
+    if items is None:
+        with ThreadPoolExecutor(4) as ex:
+            items = list(ex.map(speak, enumerate(flat)))
+        log.info("[%s] narrated %d shots", lang, len(items))
     limit = cfg["languages"].get(lang, {}).get("short_max_seconds") if fmt == "short" else None
     spoken = sum(it["audio_dur"] + it["tail"] for it in items)
     if limit and spoken > limit:
@@ -283,6 +339,7 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     script_en = review.review(cfg, script_en, res, fmt)  # raises -> main tries the next topic
     phrases = keywords.for_topic(topic["topic"], res["wiki_title"])
     illustrate(cfg, script_en, base / "art", fmt, res)
+    geocode_maps(script_en)
 
     template = thumbnail.choose_template(cfg)  # same A/B arm for every language of this topic
     series = series_for(cfg, topic)

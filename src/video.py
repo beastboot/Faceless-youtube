@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
-from . import audio, fonts, sketch, storybook
+from . import audio, fonts, motion, sketch, storybook
 from .common import ROOT, ffprobe_duration, log, run, srt_ts
 
 
@@ -75,6 +75,24 @@ def caption_png(text, out, w, h, short, lang="en"):
 
 
 # ---- per-scene rendering -----------------------------------------------------------------
+def shot_wav(scene, idx, work, cfg):
+    """Shot narration padded to a whole number of frames (+ whoosh on a new picture)."""
+    vc = cfg["video"]
+    fps = vc["fps"]
+    dur = math.ceil((scene["audio_dur"] + scene.get("tail", vc["scene_tail_seconds"])) * fps) / fps
+    wav = work / f"seg-{idx:03d}.wav"
+    if scene.get("whoosh") and vc.get("sfx_volume", 0) > 0:
+        # Transition whoosh under the first moments of every new shot.
+        run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-i", audio.whoosh(), "-filter_complex",
+             f"[0]aresample=44100,aformat=channel_layouts=stereo,apad[n];"
+             f"[1]volume={vc['sfx_volume']}[w];[n][w]amix=inputs=2:duration=first:normalize=0[a]",
+             "-map", "[a]", "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
+    else:
+        run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-af", "apad",
+             "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
+    return wav, dur
+
+
 def render_scene(scene, idx, work, cfg, fmt):
     fc, vc = cfg[fmt], cfg["video"]
     w, h, fps = fc["width"], fc["height"], vc["fps"]
@@ -86,17 +104,7 @@ def render_scene(scene, idx, work, cfg, fmt):
     vframes = frames + extra
     vdur = vframes / fps
     seg = work / f"seg-{idx:03d}.mp4"
-    wav = work / f"seg-{idx:03d}.wav"
-
-    if scene.get("whoosh") and vc.get("sfx_volume", 0) > 0:
-        # Transition whoosh under the first moments of every new shot.
-        run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-i", audio.whoosh(), "-filter_complex",
-             f"[0]aresample=44100,aformat=channel_layouts=stereo,apad[n];"
-             f"[1]volume={vc['sfx_volume']}[w];[n][w]amix=inputs=2:duration=first:normalize=0[a]",
-             "-map", "[a]", "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
-    else:
-        run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-af", "apad",
-             "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
+    wav, dur = shot_wav(scene, idx, work, cfg)
 
     inputs, base = [], ""
     vis = scene["visual"]
@@ -156,11 +164,17 @@ def assemble(scenes, work, out_path, cfg, fmt):
     for lang in {s.get("caption_lang", s.get("lang", "en")) for s in scenes}:
         fonts.font_path(lang)  # fetch once before threads start
     workers = max(1, min(4, (os.cpu_count() or 2) // 2))
-    log.info("Rendering %d scenes with %d workers", len(scenes), workers)
     for i, sc in enumerate(scenes):
         sc["last"] = i == len(scenes) - 1
-    with ThreadPoolExecutor(workers) as ex:
-        results = list(ex.map(lambda a: render_scene(a[1], a[0], work, cfg, fmt), enumerate(scenes)))
+    if cfg["video"].get("renderer") == "remotion":
+        # Motion-graphics renderer: audio per shot here, all visuals in one Remotion render.
+        with ThreadPoolExecutor(workers) as ex:
+            wavs = list(ex.map(lambda a: shot_wav(a[1], a[0], work, cfg), enumerate(scenes)))
+        results = [(None, w_, d) for w_, d in wavs]
+    else:
+        log.info("Rendering %d scenes with %d workers", len(scenes), workers)
+        with ThreadPoolExecutor(workers) as ex:
+            results = list(ex.map(lambda a: render_scene(a[1], a[0], work, cfg, fmt), enumerate(scenes)))
 
     starts, t = [], 0.0
     for _, _, d in results:
@@ -168,7 +182,9 @@ def assemble(scenes, work, out_path, cfg, fmt):
         t += d
     (work / "audio.txt").write_text("".join(f"file '{r[1].name}'\n" for r in results))
     xd = cfg["video"].get("transition_seconds", 0)
-    if xd and len(results) > 1:
+    if cfg["video"].get("renderer") == "remotion":
+        motion.render(scenes, starts, [r[2] for r in results], work, work / "video.mp4", cfg, fmt)
+    elif xd and len(results) > 1:
         join_with_transitions(results, scenes, work / "video.mp4", cfg, fmt, xd)
     else:
         (work / "video.txt").write_text("".join(f"file '{r[0].name}'\n" for r in results))
