@@ -33,14 +33,14 @@ def ensure_node():
     run(["npx", "remotion", "browser", "ensure"], cwd=RDIR)
 
 
-def camera_clips(scenes, durs, work, cfg, fmt):
-    """2.5D camera clip for every picture shot that has a depth map ({shot index: clip path})."""
+def camera_clips(scenes, durs, stage, run_id, cfg, fmt):
+    """2.5D camera move for every picture shot that has a depth map, written as JPEG frames straight
+    into the render's staging folder: {shot index: {"dir", "count"}}."""
     vc, fc = cfg["video"], cfg[fmt]
     if not vc.get("parallax", True):
         return {}
     from . import parallax
     fps, xf = vc["fps"], vc.get("transition_seconds", 0.35)
-    (work / "cam").mkdir(exist_ok=True)
     jobs = []
     for i, (sc, d) in enumerate(zip(scenes, durs)):
         vis = sc.get("visual") or {}
@@ -48,17 +48,16 @@ def camera_clips(scenes, durs, work, cfg, fmt):
             continue
         move = vis.get("move") or ["zoom_in", "pan_left", "zoom_out", "pan_right", "rise"][i % 5]
         frames = int(round((d + xf) * fps)) + 2   # covers the shot plus the next shot's transition
-        key = hashlib.sha1(f"{vis['path']}|{move}|{frames}|{fc['width']}x{fc['height']}".encode()).hexdigest()[:12]
         jobs.append((i, {"image": vis["path"], "depth": vis["depth"], "move": move, "frames": frames,
-                         "width": fc["width"], "height": fc["height"], "fps": fps,
-                         "out": work / "cam" / f"{key}.mp4"}))
+                         "width": fc["width"], "height": fc["height"], "fps": fps, "out": stage / f"cam{i:03d}"}))
     if not jobs:
         return {}
     import time
     t0 = time.time()
-    done = parallax.render_clips(jobs)
+    done = parallax.render_clips(jobs, fn=parallax.render_frames)
     log.info("3D camera: %d/%d shots in %.0fs", len(done), len(jobs), time.time() - t0)
-    return {i: str(p) for i, p in done.items()}
+    counts = {i: kw["frames"] for i, kw in jobs}
+    return {i: {"dir": f"run/{run_id}/{Path(p).name}", "count": counts[i]} for i, p in done.items()}
 
 
 def render(scenes, starts, durs, work, out, cfg, fmt):
@@ -90,17 +89,16 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
             copied[path] = f"run/{run_id}/{name}"
         return copied[path]
 
-    cams = camera_clips(scenes, durs, work, cfg, fmt)
+    cams = camera_clips(scenes, durs, stage, run_id, cfg, fmt)
     styles = [TRANSITIONS.get(t, "fade") for t in vc["transitions"].get(fmt, ["fade"])]
     shots = []
     for i, (sc, st, d) in enumerate(zip(scenes, starts, durs)):
         vis = sc.get("visual") or {}
-        if i in cams:   # 3D camera clip replaces the flat move on this picture
-            vis = {**vis, "kind": "video", "path": cams[i]}
         shots.append({
             "start": round(st, 4), "dur": round(d, 4),
             "image": stage_file(vis.get("path")) if vis.get("kind") == "image" else None,
             "video": stage_file(vis.get("path")) if vis.get("kind") == "video" else None,
+            "frames": cams.get(i),   # 3D camera move replaces the flat one on this picture
             "chapter": sc.get("chapter_card") if fmt == "long" else None,
             "move": vis.get("move") or ["zoom_in", "pan_left", "zoom_out", "pan_right", "rise"][i % 5],
             "ambient": vis.get("ambient") or "none",
@@ -145,7 +143,8 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
              sum(1 for s in shots if s["graphic"]))
     try:
         run(["npx", "remotion", "render", "src/index.ts", "Main", str(out), f"--props={props_path}",
-             "--muted", "--codec=h264", f"--crf={vc['crf']}", f"--concurrency={conc}", "--log=error"], cwd=RDIR)
+             "--muted", "--codec=h264", f"--crf={vc['crf']}", f"--concurrency={conc}", "--log=error",
+             *[str(f) for f in vc.get("remotion_flags") or []]], cwd=RDIR)
     finally:
         shutil.rmtree(stage, ignore_errors=True)
     log.info("Remotion: picture track ready (%.1fs)", ffprobe_duration(out))

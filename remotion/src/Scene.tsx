@@ -34,6 +34,17 @@ export const KenBurns: React.FC<{src: string; move: string; len: number}> = ({sr
   );
 };
 
+/** Pre-rendered 3D camera move as numbered JPEG frames (cheaper to render than a video). */
+export const FrameSeq: React.FC<{dir: string; count: number}> = ({dir, count}) => {
+  const frame = useCurrentFrame();
+  const i = Math.min(count - 1, Math.max(0, frame));
+  return (
+    <AbsoluteFill>
+      <Img src={staticFile(`${dir}/${String(i).padStart(5, '0')}.jpg`)} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+    </AbsoluteFill>
+  );
+};
+
 export const ClipVideo: React.FC<{src: string}> = ({src}) => (
   <AbsoluteFill>
     <OffthreadVideo src={staticFile(src)} muted style={{width: '100%', height: '100%', objectFit: 'cover'}} />

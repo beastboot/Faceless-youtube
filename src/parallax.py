@@ -39,12 +39,9 @@ def camera(move, t, seconds):
     return zoom, pan, shift, dolly
 
 
-def render_clip(image, depth, move, frames, width, height, fps, out, crf=16, focus=0.3):
-    """Write an H.264 clip of `frames` frames; returns its path."""
+def _frames(image, depth, move, frames, width, height, fps, focus=0.3):
+    """Yield BGR frames of the 2.5D camera move."""
     import cv2
-    out = Path(out)
-    if out.exists():
-        return out
     img = cv2.imread(str(image), cv2.IMREAD_COLOR)
     dep = cv2.imread(str(depth), cv2.IMREAD_GRAYSCALE)
     ih, iw = img.shape[:2]
@@ -58,20 +55,28 @@ def render_clip(image, depth, move, frames, width, height, fps, out, crf=16, foc
     cover = (fa / ia, 1.0) if ia > fa else (1.0, ia / fa)       # object-fit: cover
     vx, vy = np.meshgrid((np.arange(width, dtype=np.float32) + 0.5) / width - 0.5,
                          (np.arange(height, dtype=np.float32) + 0.5) / height - 0.5)
+    for f in range(frames):
+        zoom, pan, shift, dolly = camera(move, min(1.0, f / max(1, frames)), f / fps)
+        px = 0.5 + vx * (cover[0] / zoom) + pan[0]
+        py = 0.5 + vy * (cover[1] / zoom) + pan[1]
+        d = cv2.remap(dep, px * iw - 0.5, py * ih - 0.5, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        k = d - focus
+        sx = px - (shift[0] + (px - 0.5) * dolly) * k
+        sy = py - (shift[1] + (py - 0.5) * dolly) * k
+        yield cv2.remap(img, sx * iw - 0.5, sy * ih - 0.5, cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+
+
+def render_clip(image, depth, move, frames, width, height, fps, out, crf=16):
+    """Write an H.264 clip of `frames` frames; returns its path."""
+    out = Path(out)
+    if out.exists():
+        return out
     proc = subprocess.Popen(
         ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{width}x{height}",
          "-r", str(fps), "-i", "-", "-c:v", "libx264", "-preset", "veryfast", "-crf", str(crf),
          "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out)], stdin=subprocess.PIPE)
     try:
-        for f in range(frames):
-            zoom, pan, shift, dolly = camera(move, min(1.0, f / max(1, frames)), f / fps)
-            px = 0.5 + vx * (cover[0] / zoom) + pan[0]
-            py = 0.5 + vy * (cover[1] / zoom) + pan[1]
-            d = cv2.remap(dep, px * iw - 0.5, py * ih - 0.5, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
-            k = d - focus
-            sx = px - (shift[0] + (px - 0.5) * dolly) * k
-            sy = py - (shift[1] + (py - 0.5) * dolly) * k
-            frame = cv2.remap(img, sx * iw - 0.5, sy * ih - 0.5, cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        for frame in _frames(image, depth, move, frames, width, height, fps):
             proc.stdin.write(frame.tobytes())
     finally:
         proc.stdin.close()
@@ -81,7 +86,20 @@ def render_clip(image, depth, move, frames, width, height, fps, out, crf=16, foc
     return out
 
 
-def render_clips(jobs, workers=None):
+def render_frames(image, depth, move, frames, width, height, fps, out, quality=88):
+    """Write the move as numbered JPEGs (00000.jpg...) in the folder `out`; returns the folder.
+    The renderer shows them as plain pictures, which is much faster than decoding a video."""
+    import cv2
+    out = Path(out)
+    if (out / f"{frames - 1:05d}.jpg").exists():
+        return out
+    out.mkdir(parents=True, exist_ok=True)
+    for i, frame in enumerate(_frames(image, depth, move, frames, width, height, fps)):
+        cv2.imwrite(str(out / f"{i:05d}.jpg"), frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
+    return out
+
+
+def render_clips(jobs, workers=None, fn=None):
     """jobs: [(key, kwargs)] -> {key: path}; a failed clip leaves that shot on the flat camera."""
     import os
     from concurrent.futures import ThreadPoolExecutor
@@ -90,7 +108,7 @@ def render_clips(jobs, workers=None):
     def one(job):
         key, kw = job
         try:
-            return key, render_clip(**kw)
+            return key, (fn or render_clip)(**kw)
         except Exception as e:
             log.warning("3D camera clip failed (%s); flat camera for that shot", e)
             return key, None

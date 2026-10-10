@@ -18,6 +18,7 @@ export type Shot = {
   dur: number; // narration length of the shot incl. tail (next shot starts at start + dur)
   image: string | null; // staticFile path
   video: string | null;
+  frames?: {dir: string; count: number} | null; // 3D camera move as JPEG frames
   move: string;
   ambient: string;
   transition: string;
