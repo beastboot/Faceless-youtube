@@ -84,7 +84,13 @@ def ask_json(cfg, system, prompt, temperature=None):
                 continue
             for retry in range(3):
                 try:
-                    return _parse_json(fn(model, system, prompt, temperature))
+                    data = _parse_json(fn(model, system, prompt, temperature))
+                    if isinstance(data, list) and len(data) == 1 and isinstance(data[0], dict):
+                        data = data[0]   # an object wrapped in a list
+                    if not isinstance(data, dict):
+                        # every prompt asks for a JSON object; a bare list is the wrong shape
+                        raise ValueError("expected a JSON object, got a list")
+                    return data
                 except requests.RequestException as e:
                     attempts.append(f"{model}: network error {e}")
                     log.warning("%s network error (%s), trying next model", model, type(e).__name__)

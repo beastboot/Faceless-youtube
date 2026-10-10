@@ -181,7 +181,9 @@ Return:
   "wikipedia_title": "Exact Wikipedia article title", "angle": "the specific hook/angle for this video",
   "why": "one line: why this will get views"}}]}}"""
     data = llm.ask_json(cfg, system, prompt)
-    topics = data.get("topics", data if isinstance(data, list) else [])
+    # Some fallback models return the list itself instead of {"topics": [...]}.
+    topics = data if isinstance(data, list) else data.get("topics", [])
+    topics = [t for t in topics if isinstance(t, dict) and t.get("topic")]
     # Enforce the data, not just ask for it: Indian series first, and at most ~1 in 4 slots for
     # world topics (the niche's outliers are overwhelmingly Indian temple/mythology/history stories).
     indian = {x["id"] for x in cfg.get("series", []) if x["id"] in ("mandir", "pauranik", "bharat")}
