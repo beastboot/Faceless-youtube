@@ -1,4 +1,5 @@
 """YouTube Data API v3: OAuth from env, upload, thumbnail, captions, playlists, stats, research."""
+import json
 import os
 import statistics
 from datetime import datetime, timedelta, timezone
@@ -11,25 +12,31 @@ from googleapiclient.http import MediaFileUpload
 from .common import log
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
-          "https://www.googleapis.com/auth/youtube.force-ssl"]
+          "https://www.googleapis.com/auth/youtube.force-ssl",
+          "https://www.googleapis.com/auth/yt-analytics.readonly"]
 
 _client = None
+_creds = None
 
 
 def available():
     return all(os.environ.get(k) for k in ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"))
 
 
+def credentials():
+    client()
+    return _creds
+
+
 def client():
-    global _client
+    global _client, _creds
     if _client is None:
-        creds = Credentials(
+        _creds = creds = Credentials(
             token=None,
             refresh_token=os.environ["YT_REFRESH_TOKEN"],
             token_uri="https://oauth2.googleapis.com/token",
             client_id=os.environ["YT_CLIENT_ID"],
             client_secret=os.environ["YT_CLIENT_SECRET"],
-            scopes=SCOPES,
         )
         _client = build("youtube", "v3", credentials=creds, cache_discovery=False)
     return _client
@@ -70,8 +77,8 @@ def upload(cfg, video_path, meta, publish_at=None):
             "description": meta["description"][:4900],
             "tags": tags,
             "categoryId": cfg["channel"]["category_id"],
-            "defaultLanguage": cfg["channel"]["language"],
-            "defaultAudioLanguage": cfg["channel"]["language"],
+            "defaultLanguage": meta.get("lang") or cfg["channel"]["language"],
+            "defaultAudioLanguage": meta.get("lang") or cfg["channel"]["language"],
         },
         "status": status,
     }
@@ -100,12 +107,51 @@ def upload_captions(video_id, srt_path, language="en"):
     try:
         client().captions().insert(
             part="snippet",
-            body={"snippet": {"videoId": video_id, "language": language, "name": "English",
+            body={"snippet": {"videoId": video_id, "language": language,
+                              "name": {"hi": "हिन्दी", "hi-Latn": "Hinglish", "en": "English"}.get(language, language),
                               "isDraft": False}},
             media_body=MediaFileUpload(str(srt_path), mimetype="application/octet-stream"),
         ).execute()
     except HttpError as e:
         log.warning("Captions not uploaded: %s", e)
+
+
+PLAYLISTS = {  # (format, lang) -> title; created automatically on first use
+    ("long", "hi"): "Odd Annals — रहस्यमयी इतिहास (पूरी कहानियाँ)",
+    ("short", "hi"): "Odd Annals — 1 मिनट के रहस्य",
+    ("long", "en"): "Odd Annals — Full Documentaries",
+    ("short", "en"): "Odd Annals — 60-Second Mysteries",
+}
+
+
+def playlist_for(cfg, fmt, lang):
+    """Playlist id for this format/language, creating it (50 quota units, once) if needed."""
+    from .common import ROOT
+    path = ROOT / "data" / "playlists.json"
+    known = json.loads(path.read_text()) if path.exists() else {}
+    key = f"{fmt}-{lang}"
+    if known.get(key):
+        return known[key]
+    if cfg["youtube"].get(f"{fmt}_playlist_id") and lang == cfg["channel"]["language"]:
+        return cfg["youtube"][f"{fmt}_playlist_id"]
+    try:
+        title = PLAYLISTS.get((fmt, lang), f"{cfg['channel']['name']} — {fmt} ({lang})")
+        pl = client().playlists().insert(part="snippet,status", body={
+            "snippet": {"title": title, "defaultLanguage": lang},
+            "status": {"privacyStatus": "public"}}).execute()
+        known[key] = pl["id"]
+        path.write_text(json.dumps(known, indent=1, ensure_ascii=False))
+        log.info("Created playlist %r", title)
+        return pl["id"]
+    except HttpError as e:
+        log.warning("Playlist create failed: %s", e)
+        return None
+
+
+def post_comment(video_id, text):
+    """Channel's own first comment with a question — comments drive distribution."""
+    client().commentThreads().insert(part="snippet", body={"snippet": {
+        "videoId": video_id, "topLevelComment": {"snippet": {"textOriginal": text}}}}).execute()
 
 
 def add_to_playlist(video_id, playlist_id):

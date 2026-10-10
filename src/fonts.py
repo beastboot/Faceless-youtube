@@ -1,11 +1,14 @@
 """Bold display font (Anton, OFL) downloaded once; system fallbacks."""
 from pathlib import Path
 
-from PIL import ImageFont
+from PIL import ImageFont, features
 
 from .common import ROOT, download, log
 
-ANTON_URL = "https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf"
+FONTS = {  # language -> (file name, download URL); both OFL-licensed Google Fonts
+    "en": ("Anton-Regular.ttf", "https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf"),
+    "hi": ("Mukta-ExtraBold.ttf", "https://github.com/google/fonts/raw/main/ofl/mukta/Mukta-ExtraBold.ttf"),
+}
 FALLBACKS = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/System/Library/Fonts/Supplemental/Impact.ttf",
@@ -13,24 +16,31 @@ FALLBACKS = [
 ]
 
 
-def font_path():
-    p = ROOT / "assets" / "fonts" / "Anton-Regular.ttf"
+def font_path(lang="en"):
+    name, url = FONTS.get(lang, FONTS["en"])
+    p = ROOT / "assets" / "fonts" / name
     if not p.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
         try:
-            download(ANTON_URL, p)
+            download(url, p)
         except Exception as e:
             log.warning("Font download failed (%s); using system font", e)
     if p.exists():
         return str(p)
+    if lang != "en":
+        raise RuntimeError(f"Font for {lang!r} unavailable; captions would render as boxes")
     for f in FALLBACKS:
         if Path(f).exists():
             return f
     raise RuntimeError("No bold TTF font found; add one at assets/fonts/Anton-Regular.ttf")
 
 
-def font(size):
-    return ImageFont.truetype(font_path(), size)
+def font(size, lang="en"):
+    # RAQM layout shapes Devanagari (vowel signs, conjuncts) correctly when libraqm is installed.
+    layout = ImageFont.Layout.RAQM if features.check("raqm") else ImageFont.Layout.BASIC
+    if lang == "hi" and layout != ImageFont.Layout.RAQM:
+        log.warning("libraqm missing: Hindi text will be mis-shaped (brew/apt install libraqm)")
+    return ImageFont.truetype(font_path(lang), size, layout_engine=layout)
 
 
 def wrap(draw, text, fnt, max_width):

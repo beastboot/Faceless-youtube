@@ -79,9 +79,10 @@ class MediaPicker:
         return None
 
     def _openverse_image(self, query):
-        """No key needed. Only licenses that allow commercial use and modification."""
+        """No key needed. Only licenses that allow commercial use and modification without share-alike
+        obligations on the whole video: CC0, public domain mark, CC BY (credited in the description)."""
         r = self.s.get(OPENVERSE_IMAGES, timeout=30, params={
-            "q": query, "license": "by,by-sa,cc0,pdm", "size": "large", "page_size": 20,
+            "q": query, "license": "by,cc0,pdm", "size": "large", "page_size": 20,
             "aspect_ratio": "tall" if self.portrait else "wide", "mature": "false"})
         if not r.ok:
             return None
@@ -89,7 +90,7 @@ class MediaPicker:
             if x["id"] in self.used_stock or (x.get("width") or 0) < 1000:
                 continue
             self.used_stock.add(x["id"])
-            if x["license"] in ("by", "by-sa"):
+            if x["license"] == "by":
                 self.credits.append(f"{x.get('title') or 'Image'} — {x.get('creator') or 'Unknown'} "
                                     f"(CC {x['license'].upper()} {x.get('license_version', '')}) "
                                     f"{x.get('foreign_landing_url', '')}")

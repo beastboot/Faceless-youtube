@@ -5,6 +5,7 @@
     python main.py --longs 0 --shorts 1 --no-upload    # local test, nothing published
     python main.py --topic "Dyatlov Pass incident" --format short --no-upload
     python main.py --upload-dir output/<run-folder>     # retry the upload of a rendered video
+    python main.py --reach                             # reach report + keep-public + comments only
 """
 import argparse
 import sys
@@ -13,7 +14,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src import pipeline, state, trends, youtube
+from src import pipeline, reach, state, trends, youtube
 from src.common import load_config, log, setup_logging
 
 
@@ -24,6 +25,7 @@ def main():
     ap.add_argument("--no-upload", action="store_true", help="render only, do not publish")
     ap.add_argument("--topic", help="skip trend picking and make this topic")
     ap.add_argument("--format", choices=["long", "short"], default="short")
+    ap.add_argument("--reach", action="store_true", help="only run the reach report/actions")
     ap.add_argument("--upload-dir", help="upload an already-rendered output/<run> folder")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
@@ -37,6 +39,14 @@ def main():
         log.error("YT_CLIENT_ID / YT_CLIENT_SECRET / YT_REFRESH_TOKEN missing. "
                   "Run scripts/get_youtube_token.py or use --no-upload.")
         return 2
+
+    if args.reach or (upload and not args.upload_dir):
+        try:
+            reach.run(cfg)  # measure + fix yesterday's videos before making today's
+        except Exception as e:
+            log.warning("Reach step failed: %s", e)
+        if args.reach:
+            return 0
 
     if args.upload_dir:
         work = Path(args.upload_dir)
@@ -54,22 +64,33 @@ def main():
         longs, shorts = trends.pick_topics(cfg, targets["long"], targets["short"])
         queues = {"long": longs, "short": shorts}
 
+    langs_cfg = cfg["languages"]
+    primary = [l for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" not in c]
+    extra = {l: c for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" in c}
     done = {"long": 0, "short": 0}
+    slots = {}  # (lang, fmt) -> publish slots used
     quota_hit = False
     for fmt in ("long", "short"):
         # Work down the ranked candidates (spares included) until this format's target is met.
         for topic in queues.get(fmt, []):
             if quota_hit or done[fmt] >= targets.get(fmt, 0):
                 break
-            publish_at = youtube.next_publish_time(sc[f"{fmt}_publish_utc"], done[fmt]) if upload else None
+            langs = primary + [l for l, c in extra.items() if done[fmt] < c.get(f"{fmt}s_per_run", 0)]
+            publish_at = {}
+            for lang in langs:
+                n = slots.get((lang, fmt), 0)
+                publish_at[lang] = (youtube.next_publish_time(langs_cfg[lang].get(f"{fmt}_publish_utc"), n)
+                                    if upload else None)
             try:
-                vid, work = pipeline.make_video(cfg, topic, fmt, upload=upload, publish_at=publish_at)
-                log.info("DONE %s %s", fmt, f"https://youtu.be/{vid}" if vid else work)
+                results = pipeline.produce(cfg, topic, fmt, langs, upload=upload, publish_at=publish_at)
+                for lang, vid, work in results:
+                    slots[(lang, fmt)] = slots.get((lang, fmt), 0) + 1
+                    log.info("DONE %s/%s %s", fmt, lang, f"https://youtu.be/{vid}" if vid else work)
                 done[fmt] += 1
             except Exception as e:
                 log.error("FAILED %s %r: %s — trying next candidate", fmt, topic.get("topic"), e)
                 log.debug(traceback.format_exc())
-                if "Not enough research" in str(e) or "No Wikipedia article" in str(e):
+                if any(k in str(e) for k in ("Not enough research", "No Wikipedia article", "Quality gate")):
                     # Remember it so the topic picker never proposes it again.
                     state.append({"format": f"{fmt}-skipped", "topic": topic.get("topic"),
                                   "reason": str(e)[:200]})

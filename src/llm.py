@@ -14,6 +14,9 @@ class LLMError(RuntimeError):
     pass
 
 
+_exhausted = set()  # models whose daily quota ran out during this run
+
+
 def _parse_json(text):
     text = text.strip()
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
@@ -75,12 +78,19 @@ def ask_json(cfg, system, prompt, temperature=None):
             attempts.append(f"{name}: {env} not set")
             continue
         for model in models:
+            if model in _exhausted:
+                continue
             for retry in range(3):
                 try:
                     return _parse_json(fn(model, system, prompt, temperature))
                 except LLMError as e:
                     msg = str(e)
                     attempts.append(msg)
+                    if "HTTP 429" in msg and ("quota" in msg.lower() or "billing" in msg.lower()):
+                        # Daily/plan quota is gone: retrying won't help today. Skip for this run.
+                        log.warning("%s: daily quota exhausted, skipping it for this run", model)
+                        _exhausted.add(model)
+                        break
                     if any(f"HTTP {c}" in msg for c in (429, 500, 503)):
                         wait = 20 * (retry + 1)
                         log.warning("%s rate-limited/unavailable, retrying in %ss", model, wait)

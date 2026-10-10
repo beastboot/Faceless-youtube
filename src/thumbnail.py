@@ -1,45 +1,143 @@
-"""1280x720 thumbnail: strongest visual + 2-3 huge words with heavy outline."""
-from PIL import Image, ImageDraw, ImageEnhance, ImageOps
+"""1280x720 thumbnails in two proven templates, A/B tested automatically.
+
+yellow:   full-width yellow top banner, big black text, *highlighted* words in red, image below
+          (the "Unsolved India" look).
+redstrip: darkened image, huge white words on the left, the *highlighted* words on a red strip
+          (the "ReBorn Mindset" look).
+Text marks highlights with asterisks: "दुनिया के 7 *सबसे रहस्यमयी* चीज़ें"."""
+import json
+import random
+import re
+
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 from . import fonts
-from .common import run
+from .common import ROOT, run
 
 W, H = 1280, 720
+YELLOW, RED, BLACK, WHITE = (255, 222, 0), (226, 18, 18), (10, 10, 10), (255, 255, 255)
+TEMPLATES = ("yellow", "redstrip")
 
 
 def background_from(visual, work):
-    if visual["kind"] == "image":
+    if visual and visual.get("kind") == "image" and visual.get("path"):
         return Image.open(visual["path"]).convert("RGB")
-    if visual["kind"] == "video":
+    if visual and visual.get("kind") == "video":
         frame = work / "thumb-frame.jpg"
         run(["ffmpeg", "-y", "-v", "error", "-ss", "1.5", "-i", visual["path"], "-frames:v", "1", frame])
         return Image.open(frame).convert("RGB")
     return Image.new("RGB", (W, H), (20, 24, 30))
 
 
-def make(visual, text, out, work):
-    bg = ImageOps.fit(background_from(visual, work), (W, H), Image.LANCZOS)
-    bg = ImageEnhance.Contrast(ImageEnhance.Color(bg).enhance(1.35)).enhance(1.15)
-    # Dark gradient on the left so text holds contrast at feed size.
+def parse(text):
+    """'a *b c* d' -> [('a', False), ('b', True), ('c', True), ('d', False)]."""
+    words, hot = [], False
+    for tok in (text or "").replace("**", "*").split():
+        start, end = tok.startswith("*"), tok.endswith("*") and len(tok) > 1
+        if start:
+            hot = True
+        words.append((tok.strip("*"), hot))
+        if end or (start and tok.endswith("*")):
+            hot = False
+    if words and not any(h for _, h in words):  # no marks: highlight the last word or two
+        k = 2 if len(words) > 3 else 1
+        words = [(w, i >= len(words) - k) for i, (w, _) in enumerate(words)]
+    return [(w, h) for w, h in words if w]
+
+
+def choose_template(cfg):
+    """Alternate templates until both have data, then mostly use the winner (see reach.py)."""
+    tc = cfg.get("thumbnails", {})
+    if tc.get("mode") in TEMPLATES:
+        return tc["mode"]
+    win = ROOT / "data" / "thumb_winner.json"
+    if win.exists():
+        best = json.loads(win.read_text()).get("winner")
+        if best in TEMPLATES and random.random() < 0.8:
+            return best
+    hist = ROOT / "data" / "history.json"
+    n = sum(1 for r in json.loads(hist.read_text()) if r.get("format") == "long") if hist.exists() else 0
+    return TEMPLATES[n % 2]
+
+
+def _lines(draw, words, fnt, max_w):
+    lines, cur = [], []
+    for w in words:
+        trial = " ".join(x for x, _ in cur + [w])
+        if cur and draw.textlength(trial, font=fnt) > max_w:
+            lines.append(cur)
+            cur = []
+        cur.append(w)
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def _draw_words(d, x, y, line, fnt, color, hot_color, stroke=0, stroke_fill=BLACK):
+    space = d.textlength(" ", font=fnt)
+    for w, hot in line:
+        d.text((x, y), w, font=fnt, fill=hot_color if hot else color, stroke_width=stroke, stroke_fill=stroke_fill)
+        x += d.textlength(w, font=fnt) + space
+
+
+def _fit(d, words, lang, max_w, max_lines, start, floor):
+    size = start
+    while size > floor:
+        fnt = fonts.font(size, lang)
+        lines = _lines(d, words, fnt, max_w)
+        if len(lines) <= max_lines:
+            return fnt, lines, size
+        size -= 6
+    fnt = fonts.font(floor, lang)
+    return fnt, _lines(d, words, fnt, max_w)[:max_lines], floor
+
+
+def yellow(bg, text, lang):
+    img = ImageOps.fit(bg, (W, H), Image.LANCZOS)
+    img = ImageEnhance.Contrast(ImageEnhance.Color(img).enhance(1.25)).enhance(1.12)
+    d = ImageDraw.Draw(img)
+    words = parse(text if lang != "en" else (text or "").upper())
+    fnt, lines, size = _fit(d, words, lang, W - 60, 2, 96, 54)
+    lh = int(size * (1.32 if lang != "en" else 1.08))
+    bar = lh * len(lines) + 34
+    d.rectangle((0, 0, W, bar), fill=YELLOW)
+    y = 14 if lang != "en" else 20
+    for line in lines:
+        lw = d.textlength(" ".join(w for w, _ in line), font=fnt)
+        _draw_words(d, (W - lw) / 2, y, line, fnt, BLACK, RED)
+        y += lh
+    return img
+
+
+def redstrip(bg, text, lang):
+    img = ImageOps.fit(bg, (W, H), Image.LANCZOS)
+    img = ImageEnhance.Brightness(ImageEnhance.Contrast(img).enhance(1.3)).enhance(0.8)
     shade = Image.new("L", (W, H))
     sd = ImageDraw.Draw(shade)
-    for x in range(W):
-        sd.line((x, 0, x, H), fill=int(210 * max(0, 1 - x / (W * 0.75))))
-    bg.paste(Image.new("RGB", (W, H), (0, 0, 0)), (0, 0), shade)
+    for x in range(W):  # dark vignette on the left for the text
+        sd.line((x, 0, x, H), fill=int(200 * max(0, 1 - x / (W * 0.6))))
+    img.paste(Image.new("RGB", (W, H), (8, 8, 8)), (0, 0), shade)
+    d = ImageDraw.Draw(img)
+    words = parse(text if lang != "en" else (text or "").upper())
+    plain = [(w, False) for w, h in words if not h] or words[:1]
+    hot = [(w, False) for w, h in words if h] or words[-1:]
+    f1, l1, s1 = _fit(d, plain, lang, W * 0.55, 2, 120, 64)
+    f2, l2, s2 = _fit(d, hot, lang, W * 0.55, 1, 140, 70)
+    lh1 = int(s1 * (1.3 if lang != "en" else 1.05))
+    block = lh1 * len(l1) + int(s2 * 1.45)
+    y = (H - block) / 2
+    for line in l1:
+        _draw_words(d, 50, y, line, f1, WHITE, WHITE, stroke=8)
+        y += lh1
+    tw = d.textlength(" ".join(w for w, _ in l2[0]), font=f2)
+    pad = 26
+    d.rectangle((0, y + 6, 50 + tw + pad, y + s2 * 1.3 + 6), fill=RED)
+    _draw_words(d, 50, y + (4 if lang == "en" else -2), l2[0], f2, WHITE, WHITE)
+    return img
 
-    d = ImageDraw.Draw(bg)
-    words = (text or "").upper().split()[:3]
-    size = 150
-    while size > 70:
-        fnt = fonts.font(size)
-        lines = fonts.wrap(d, " ".join(words), fnt, W * 0.62)
-        if len(lines) * size * 1.08 < H * 0.8:
-            break
-        size -= 10
-    y = (H - len(lines) * size * 1.08) / 2
-    for i, line in enumerate(lines):
-        color = (255, 214, 0) if i == len(lines) - 1 else (255, 255, 255)
-        d.text((60, y), line, font=fnt, fill=color, stroke_width=10, stroke_fill=(0, 0, 0))
-        y += size * 1.08
-    bg.save(out, quality=90)
+
+def make(visual, text, out, work, lang="en", template="yellow"):
+    bg = background_from(visual, work)
+    img = (yellow if template == "yellow" else redstrip)(bg, text, lang)
+    img.filter(ImageFilter.UnsharpMask(radius=2, percent=60)).save(out, quality=92)
     return out

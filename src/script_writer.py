@@ -65,11 +65,24 @@ Return {{"hooks": [{{"formula": "...", "hook": "..."}}]}}"""
     return scored[0][1]
 
 
+def _clean_scenes(data):
+    """Keep shots that have a spoken line; derive each scene's narration from its shots."""
+    scenes = []
+    for sc in data.get("scenes") or []:
+        shots = [{"line": (sh.get("line") or "").strip(),
+                  "image_prompt": (sh.get("image_prompt") or "").strip(),
+                  "stock_query": (sh.get("stock_query") or "").strip()}
+                 for sh in (sc.get("shots") or []) if (sh.get("line") or "").strip()]
+        if shots:
+            scenes.append({"chapter": (sc.get("chapter") or "").strip(), "shots": shots,
+                           "narration": " ".join(sh["line"] for sh in shots)})
+    return scenes
+
+
 def write(cfg, topic, research, fmt):
     fc = cfg[fmt]
     hook = best_hook(cfg, topic, research, fmt)
     structure = random.choice(STRUCTURES[fmt])
-    images = [f"{i}: {im['desc'] or im['title']}" for i, im in enumerate(research["images"][:40])]
     words = fc["target_words"]
     long_bits = """- Mark 5-8 scenes with a short "chapter" title where a new section starts (the first scene
   must have one). Chapters must be at least 30 seconds apart.
@@ -77,52 +90,78 @@ def write(cfg, topic, research, fmt):
 - End with one call to action to subscribe for the next story.""" if fmt == "long" else """- No chapters. No intro. Last line should loop back to the first line or end on a punch.
 - No call to action except optionally "Follow for more" in under 4 words."""
     n_titles = cfg["quality"]["title_candidates"]
-    prompt = f"""Write the full narration for a {fmt} YouTube video.
+    shot_rule = ("A shot is ONE short sentence or clause, 3-5 seconds when read aloud: Shorts need a new "
+                 "picture every few seconds (aim for 12-16 shots in total)." if fmt == "short" else
+                 "A shot is ONE spoken sentence (or two very short ones), about 5-9 seconds when read aloud.")
+    share = cfg["images"].get("stock_broll_share", 0) if fmt == "long" else 0
+    broll_rule = (f"For about {int(share * 100)}% of shots that show GENERIC scenery or atmosphere (ocean, "
+                  "desert, forest, night sky, crowd, old town street, candle, rain, ruins) also add "
+                  '"stock_query": 2-4 plain English words to find a real stock video clip. Never for '
+                  "shots showing specific people or events." if share else
+                  "Do not add stock_query fields.")
+    prompt = f"""Write the full narration for a {fmt} YouTube video, split into shots for an
+animated documentary. Every shot gets its own AI-generated illustration.
 
 TOPIC: {topic['topic']}
 ANGLE: {topic.get('angle', '')}
 STRUCTURE TO USE: {structure}
-THE FIRST SENTENCE MUST BE EXACTLY THIS HOOK: "{hook}"
+THE FIRST LINE MUST BE EXACTLY THIS HOOK: "{hook}"
 LENGTH: about {words} words of narration in total (this is important; at least {int(words * 0.85)}).
 
-Scene rules:
-- At least {fc['min_scenes']} scenes. Each scene is 1-4 sentences of narration and one visual.
-- Visual per scene: either an image from the AVAILABLE IMAGES list (by index) when it clearly fits,
-  or a stock-footage search query (2-4 plain English words, things a stock site has: "old map",
-  "foggy forest", "stormy ocean", "ancient ruins", "candle dark room"). Never names of real people
-  in stock queries.
-- Write numbers and years as they should be spoken. No stage directions, emojis or markdown in narration.
+Scene and shot rules:
+- At least {fc['min_scenes']} scenes. Each scene has 1-5 shots.
+- {shot_rule}
+- Every shot has an image_prompt that shows EXACTLY what that line is talking about: who (with the
+  correct region, ethnicity and age of the real people involved), doing what, where, era-accurate
+  clothing, buildings, vehicles and objects, camera framing (wide shot, close-up,
+  over-the-shoulder, aerial), mood and lighting. Vary the framing from shot to shot.
+- Define each recurring character once in "characters" (region/ethnicity, age, build, hair, clothing,
+  distinctive features) and repeat that exact description inside every image_prompt where they appear, so the
+  character looks the same in every shot.
+- {broll_rule}
+- Image prompts must never ask for text, captions, signs with words, logos, brand names, gore or real
+  photos, and never depict living or modern public figures (politicians, celebrities). Historical
+  figures are fine, described by their era-accurate appearance.
+- Retell the facts in your own words. Never copy sentences from the research notes.
+- Compose every image so the subject is centred: it will be cropped to fit the frame.
+  Depict violence and death only indirectly (aftermath, shadows, empty rooms).
+- Write numbers and years as they should be spoken. No stage directions, emojis or markdown in lines.
 {long_bits}
 
 Packaging (YouTube SEO):
 - {n_titles} title candidates: under 60 characters, front-load the subject, include a number, name
   or date, curiosity without clickbait lies. Max two ALL-CAPS words.
-- 3 thumbnail_text candidates: 2-3 words, must NOT repeat words from the titles.
+- 3 thumbnail_text candidates: 2-4 words, must NOT repeat words from the titles; wrap the 1-2 key words
+  in *asterisks* (shown in red).
+- thumbnail_prompt: one image prompt for a striking thumbnail scene (one clear subject, high
+  contrast, emotion), with empty space on the left for text.
 - description_intro: 2 sentences that contain the words people would search for.
 - description_body: 1 short paragraph summary (no spoilers of the ending).
+- engagement_question: one short question to ask viewers in a pinned-style comment.
 - search_queries: 3 queries this video should rank for.
 - tags: 12-15 tags (spellings, names, places, era, related searches).
 - hashtags: 3 hashtags.
-
-AVAILABLE IMAGES (index: description):
-{chr(10).join(images) if images else "none"}
 
 RESEARCH NOTES (the only allowed source of facts):
 {research['text']}
 
 Return JSON:
-{{"scenes": [{{"narration": "...", "image": <index or null>, "stock_query": "...",
-  "chapter": "optional chapter title"}}],
- "titles": ["..."], "thumbnail_texts": ["..."], "description_intro": "...",
- "description_body": "...", "search_queries": ["..."], "tags": ["..."], "hashtags": ["#..."]}}"""
+{{"characters": {{"Name": "visual description"}},
+ "scenes": [{{"chapter": "optional chapter title",
+   "shots": [{{"line": "spoken sentence", "image_prompt": "what the illustration shows",
+              "stock_query": "optional"}}]}}],
+ "titles": ["..."], "thumbnail_texts": ["..."], "thumbnail_prompt": "...",
+ "description_intro": "...", "description_body": "...", "engagement_question": "...",
+ "search_queries": ["..."], "tags": ["..."], "hashtags": ["#..."]}}"""
 
     best = None
     for attempt in range(cfg["quality"]["max_script_attempts"]):
         data = llm.ask_json(cfg, _system(cfg), prompt)
-        scenes = [s for s in (data.get("scenes") or []) if (s.get("narration") or "").strip()]
+        scenes = _clean_scenes(data)
         n_words = sum(len(s["narration"].split()) for s in scenes)
-        log.info("Script attempt %d: %d scenes, %d words (target %d)",
-                 attempt + 1, len(scenes), n_words, words)
+        n_shots = sum(len(s["shots"]) for s in scenes)
+        log.info("Script attempt %d: %d scenes, %d shots, %d words (target %d)",
+                 attempt + 1, len(scenes), n_shots, n_words, words)
         if best is None or n_words > best[1]:
             best = (data | {"scenes": scenes}, n_words)
         if n_words >= words * 0.75 and len(scenes) >= fc["min_scenes"] * 0.7:
@@ -132,8 +171,81 @@ Return JSON:
     data = best[0]
     data["hook"] = hook
     data["structure"] = structure
+    data["lang"] = "en"
     data.update(package(data, fmt))
     return data
+
+
+def translate_hindi(cfg, script, fmt, search_phrases=()):
+    """Same shots, same images: translate every line plus packaging into natural spoken Hindi."""
+    lines = [[sh["line"] for sh in sc["shots"]] for sc in script["scenes"]]
+    chapters = [sc["chapter"] for sc in script["scenes"]]
+    prompt = f"""Translate this {fmt} YouTube documentary script into natural, spoken Hindi
+(Devanagari script) for an Indian audience. Keep it conversational like a popular Hindi
+documentary narrator, not bookish/shuddh Hindi: common English loanwords are fine where Hindi
+speakers actually use them. Keep names, places and numbers accurate. Write numbers and years
+as they should be spoken in Hindi.
+
+STRICT: keep exactly the same structure: {len(lines)} scenes, and the same number of lines in
+each scene, in the same order. One Hindi line per English line.
+
+ENGLISH LINES (scene by scene):
+{json.dumps(lines, ensure_ascii=False)}
+
+CHAPTER TITLES (translate non-empty ones, keep empty ones empty):
+{json.dumps(chapters, ensure_ascii=False)}
+
+ALSO write "hinglish": the SAME Hindi lines written in Roman/Latin letters the way Indians type
+Hindi on WhatsApp (e.g. "1959 mein nau hikers achanak gayab ho gaye"). Same structure, one per line.
+Keep English loanwords in normal English spelling. No diacritics.
+
+SEARCH PHRASES Indian viewers actually type on YouTube about this topic (from autocomplete). Use the
+most relevant ones word-for-word in the titles, the first description sentence and the tags:
+{json.dumps(list(search_phrases)[:30], ensure_ascii=False)}
+
+Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hinglish:
+- 5 titles (under 70 characters, curiosity + a number, name or date; may mix Hindi with key English words)
+- 3 thumbnail_texts: 3-6 punchy Hindi words; wrap the 1-3 most emotional/curious words in *asterisks*
+  (they are shown in red), e.g. "दुनिया के 7 *सबसे रहस्यमयी* चीज़ें". Must not just repeat the title.
+- description_intro (2 sentences), description_body (1 paragraph), engagement_question
+- tags: 15 tags mixing Hindi, Hinglish (Hindi in Latin letters) and English keywords
+- hashtags: 3 hashtags
+
+Return JSON:
+{{"scenes": [["hindi line", ...], ...], "hinglish": [["roman hindi line", ...], ...],
+ "chapters": ["..."], "titles": ["..."],
+ "thumbnail_texts": ["..."], "description_intro": "...", "description_body": "...",
+ "engagement_question": "...", "tags": ["..."], "hashtags": ["#..."]}}"""
+    for attempt in range(3):
+        data = llm.ask_json(cfg, "You are an expert Hindi documentary translator. Reply with JSON only.",
+                            prompt, temperature=0.4)
+        hi = data.get("scenes") or []
+        hl = data.get("hinglish") or []
+        same = lambda xs: len(xs) == len(lines) and all(len(a) == len(b) for a, b in zip(xs, lines))
+        if same(hi) and same(hl):
+            break
+        log.warning("Hindi translation shape mismatch (attempt %d), retrying", attempt + 1)
+    else:
+        raise RuntimeError("Hindi translation did not keep the shot structure")
+    out = {k: v for k, v in script.items() if k not in ("scenes",)}
+    chs = data.get("chapters") or chapters
+    out["scenes"] = [
+        {"chapter": (chs[i] if i < len(chs) else "") or "",
+         "shots": [{"line": str(h).strip(), "caption": str(r).strip(),
+                    "image_prompt": sh["image_prompt"], "visual": sh.get("visual")}
+                   for h, r, sh in zip(hi[i], hl[i], sc["shots"])],
+         "narration": " ".join(str(x).strip() for x in hi[i])}
+        for i, sc in enumerate(script["scenes"])]
+    for k in ("description_intro", "description_body", "engagement_question", "tags", "hashtags"):
+        out[k] = data.get(k) or script.get(k)
+    titles = [t.strip() for t in (data.get("titles") or []) if t and t.strip()]
+    thumbs = [t.strip() for t in (data.get("thumbnail_texts") or []) if t and t.strip()]
+    out["title"] = (titles[0] if titles else script["title"])[:95]
+    if fmt == "short" and "#shorts" not in out["title"].lower():
+        out["title"] = out["title"][:88] + " #shorts"
+    out["thumbnail_text"] = thumbs[0] if thumbs else script["thumbnail_text"]
+    out["lang"] = "hi"
+    return out
 
 
 def package(data, fmt):

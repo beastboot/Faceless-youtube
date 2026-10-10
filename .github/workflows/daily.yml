@@ -2,7 +2,7 @@ name: Daily videos
 
 on:
   schedule:
-    - cron: "30 5 * * *"        # 05:30 UTC daily; publish times are set in config.yaml
+    - cron: "30 4 * * *"        # 04:30 UTC (10:00 IST) daily; publish times are set in config.yaml
   workflow_dispatch:
     inputs:
       longs:
@@ -11,6 +11,10 @@ on:
       shorts:
         description: "Shorts to make"
         default: "2"
+      reach_only:
+        description: "Only run the reach report (no new videos)"
+        type: boolean
+        default: false
       no_upload:
         description: "Render only (test run, nothing published)"
         type: boolean
@@ -26,12 +30,12 @@ permissions:
 jobs:
   produce:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300           # Pollinations fallback is slow if the Cloudflare budget runs out
     steps:
       - uses: actions/checkout@v4
 
       - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core libraqm0
 
       - uses: actions/setup-python@v5
         with:
@@ -50,11 +54,14 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           ARGS=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ARGS="--longs ${{ inputs.longs }} --shorts ${{ inputs.shorts }}"
             if [ "${{ inputs.no_upload }}" = "true" ]; then ARGS="$ARGS --no-upload"; fi
+            if [ "${{ inputs.reach_only }}" = "true" ]; then ARGS="--reach"; fi
           fi
           python main.py $ARGS
 
@@ -63,8 +70,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/history.json 2>/dev/null || exit 0
-          git diff --cached --quiet || git commit -m "history: $(date -u +%F) run" && git push
+          git add data/ reports/ 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "history + reach report: $(date -u +%F) run"
+          git pull --rebase -q && git push
 
       - name: Keep rendered files for debugging
         if: always()
@@ -72,9 +81,9 @@ jobs:
         with:
           name: output-${{ github.run_id }}
           path: |
-            output/*/script.json
-            output/*/metadata.json
-            output/*/thumbnail.jpg
+            output/*/*/metadata.json
+            output/*/*/thumbnail.jpg
+            output/*/*/script.json
           retention-days: 7
           if-no-files-found: ignore
 
@@ -83,5 +92,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: videos-${{ github.run_id }}
-          path: output/*/final.mp4
+          path: output/*/*/final.mp4
           retention-days: 3

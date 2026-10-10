@@ -48,3 +48,26 @@ def caption_chunks(words, max_words, max_chars=32):
         chunks.append(cur)
     return [{"text": " ".join(x["word"] for x in c), "start": c[0]["start"], "end": c[-1]["end"]}
             for c in chunks]
+
+
+def retext_captions(words, display_text, max_words, max_chars=32):
+    """Captions that SHOW display_text (e.g. Hinglish) but follow the timing of the spoken words
+    (e.g. Hindi). Display words are mapped onto spoken words proportionally."""
+    disp = display_text.split()
+    if not words or not disp:
+        return caption_chunks(words, max_words, max_chars)
+    n, m = len(words), len(disp)
+    chunks, cur = [], []
+    for i, w in enumerate(disp):
+        if cur and (len(cur) >= max_words or len(" ".join(disp[j] for j in cur + [i])) > max_chars):
+            chunks.append(cur)
+            cur = []
+        cur.append(i)
+    if cur:
+        chunks.append(cur)
+    out = []
+    for c in chunks:
+        a = min(n - 1, c[0] * n // m)
+        b = min(n - 1, max(a, -(-(c[-1] + 1) * n // m) - 1))  # ceil, inclusive end
+        out.append({"text": " ".join(disp[j] for j in c), "start": words[a]["start"], "end": words[b]["end"]})
+    return out

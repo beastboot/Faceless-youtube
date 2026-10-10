@@ -5,7 +5,7 @@ channel:
   name: "Odd Annals"                  # youtube.com/@OddAnnals
   niche: "history, little-known facts and unsolved mysteries"
   audience: "curious adults 18-45 who binge documentaries and 'rabbit hole' videos"
-  language: "en"
+  language: "hi"                      # main language (see languages: below)
   category_id: "27"                   # 27 = Education (22 People & Blogs, 24 Entertainment)
   voice_guide: "channel/voice.md"     # style guide every script prompt reads
 
@@ -14,10 +14,8 @@ channel:
 schedule:
   longs_per_run: 1
   shorts_per_run: 2
-  # Publish times (UTC, HH:MM). Videos upload as private and YouTube flips them public at this time.
-  # Empty list or a time already passed today => published immediately.
-  long_publish_utc: ["15:00"]          # ~11am US Eastern / 8:30pm India
-  short_publish_utc: ["13:00", "19:00"]
+  # Publish times per language are under languages: below (UTC). Videos upload as private and
+  # YouTube flips them public at that time; a time already passed today => published immediately.
 
 long:
   target_words: 1500                  # ~10 minutes at 150 wpm (8+ min allows mid-roll ads)
@@ -26,11 +24,11 @@ long:
   height: 1080
   voice: "en-US-AndrewNeural"
   rate: "+0%"
-  burn_captions: false                # long-form: upload SRT captions instead (better for SEO)
-  upload_captions: true
+  burn_captions: true                 # on-screen captions (Hinglish for Hindi videos)
+  upload_captions: true               # also upload them as a subtitle track
 
 short:
-  target_words: 130                   # ~50 seconds
+  target_words: 95                    # English words; the Hindi version runs ~40% longer => ~55 s
   min_scenes: 5
   width: 1080
   height: 1920
@@ -41,15 +39,62 @@ short:
 
 video:
   fps: 30
-  scene_tail_seconds: 0.25            # small breath between scenes
-  music_volume: 0.08                  # drop royalty-free .mp3s into assets/music/ (optional)
+  shot_tail_seconds: 0.08             # tiny gap between sentences
+  scene_tail_seconds: 0.35            # longer breath at the end of each scene
+  music_volume: 0.08                  # royalty-free .mp3s in assets/music/ (see README: copyright)
+  bed_volume: 1.0                     # synthesised ambient bed used when assets/music/ is empty
+  sfx_volume: 0.5                     # whoosh on every picture change (0 = off)
+  transition_seconds: 0.35            # animated transition between shots (0 = hard cuts)
+  transitions:
+    long: ["slideleft", "slideright", "smoothleft", "smoothright", "fade", "circleopen", "wipeleft"]
+    short: ["zoomin", "slideup", "slidedown", "slideleft", "hblur", "fadeblack"]
   crf: 23
   preset: "veryfast"
+
+# AI illustrations: one per sentence, in a single consistent animated style.
+images:
+  providers: ["cloudflare", "pollinations"]
+  # flux-1-schnell at 4 steps costs ~58 of the free 10,000 daily neurons (~170 images/day).
+  # (lucid-origin looks nicer but costs ~4,000 per image = 2 free images/day.)
+  cloudflare_models: ["@cf/black-forest-labs/flux-1-schnell"]
+  cloudflare_steps: 4
+  max_images: {long: 55, short: 14}   # more shots than this -> neighbouring shots share an image
+  styles:
+    # Long videos: epic semi-realistic scenes (like "Unsolved India").
+    long: >-
+      epic cinematic digital painting, semi-realistic, dramatic golden-hour or moody lighting,
+      volumetric light and dust, highly detailed, wide-angle composition, rich color grading,
+      no text, no letters, no watermark, no signature
+    # Shorts: expressive anime/comic characters (like "ReBorn Mindset").
+    short: >-
+      expressive anime illustration, bold clean line art, dramatic emotions on faces, cel-shaded,
+      dark moody background with a single red accent light, high contrast, manga panel energy,
+      no text, no letters, no speech bubbles, no watermark, no signature
+  stock_broll_share: 0.25             # long videos: about 1 in 4 shots uses a real stock video clip
+  fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
+
+# Languages. Hindi is the main channel language. Every topic is researched and scripted once,
+# illustrated once, then narrated per language (English versions reuse the same illustrations).
+languages:
+  hi:
+    enabled: true                     # main language: makes every video in schedule above
+    voice: "hi-IN-MadhurNeural"
+    captions: "hinglish"              # hinglish (Roman letters) | hindi (Devanagari)
+    long_rate: "+0%"
+    short_rate: "+8%"
+    long_publish_utc: ["14:30"]       # 8:00 PM IST
+    short_publish_utc: ["06:30", "12:30"]   # 12:00 PM and 6:00 PM IST
+  en:
+    enabled: false                    # set true to ALSO publish English versions
+    longs_per_run: 1                  # first N topics get an English version
+    shorts_per_run: 1                 #   (quota: keep total uploads per day <= 5)
+    long_publish_utc: ["15:00"]
+    short_publish_utc: ["13:00"]
 
 llm:
   # Tried in order; the first provider with an API key that succeeds wins.
   providers: ["gemini", "groq"]
-  gemini_models: ["gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-flash-lite-latest"]
+  gemini_models: ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
   groq_models: ["openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
   temperature: 0.9
 
@@ -67,10 +112,28 @@ research:
   outlier_min_multiple: 2.0
   videos_per_channel: 30
 
+keywords:
+  # YouTube autocomplete is queried with these to see what Indian viewers search for right now.
+  niche_seeds: ["रहस्य", "रहस्यमयी", "अनसुलझे रहस्य", "इतिहास की कहानी", "भारत का इतिहास",
+                "mystery in hindi", "history in hindi", "unsolved mystery hindi", "sach kya hai",
+                "duniya ke rahasya", "kaise hua", "kyon hua"]
+
 quality:
   hook_candidates: 5                  # LLM writes N hooks, hookscore.py keeps the best
   title_candidates: 10                # LLM writes N titles, title.py keeps the best
   max_script_attempts: 2
+  min_review_score: 6.5               # quality gate: average 1-10 score a script needs to be made
+
+thumbnails:
+  mode: "ab"                          # ab = alternate "yellow"/"redstrip", then favour the winner;
+                                      # or force one: "yellow" | "redstrip"
+
+reach:
+  auto_publish_private: true          # anything left private (and not scheduled) is made public
+  post_comments: true                 # channel posts the script's question as the first comment
+  max_replies_per_day: 10             # English replies to new viewer comments (0 = off)
+  repackage_after_hours: 72           # judge a video after 3 days...
+  repackage_below_median: 0.5         # ...and retitle it once if under half its peers' median views
 
 youtube:
   privacy: "public"                   # public | unlisted | private

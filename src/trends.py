@@ -5,7 +5,7 @@ import random
 import re
 from datetime import datetime, timedelta, timezone
 
-from . import llm, state, youtube
+from . import keywords, llm, state, youtube
 from .common import http, log
 
 SKIP_PREFIXES = ("Special:", "Main_Page", "Wikipedia:", "File:", "Portal:", "Help:", "Category:",
@@ -61,14 +61,15 @@ def rss_titles(session, url, limit=40):
     return [html.unescape(t.strip()) for t in titles[1:limit + 1]]  # first is the feed title
 
 
-def gather_candidates():
+def gather_candidates(cfg=None):
     s = http()
     reddit = "https://www.reddit.com/r/{}/top/.rss?t={}"
     sources = {
         "wikipedia_featured_and_did_you_know": lambda: wiki_featured(s),
         "wikipedia_on_this_day": lambda: wiki_on_this_day(s),
         "wikipedia_most_viewed_yesterday": lambda: wiki_most_viewed(s),
-        "google_trends_us": lambda: rss_titles(s, "https://trends.google.com/trending/rss?geo=US"),
+        "google_trends_india": lambda: rss_titles(s, "https://trends.google.com/trending/rss?geo=IN"),
+        "youtube_searches_hindi": lambda: keywords.niche_searches(cfg) if cfg else [],
         "reddit_todayilearned": lambda: rss_titles(s, reddit.format("todayilearned", "day")),
         "reddit_unresolvedmysteries": lambda: rss_titles(s, reddit.format("UnresolvedMysteries", "week"), 25),
         "reddit_historyporn": lambda: rss_titles(s, reddit.format("HistoryPorn", "week"), 25),
@@ -84,17 +85,22 @@ def gather_candidates():
 
 
 def channel_feedback():
-    """Our own recent uploads with view counts, so the picker learns what works."""
-    rows = [r for r in state.load()[-40:] if r.get("video_id")]
-    if not rows or not youtube.available():
+    """Our own uploads with views (+ retention when Analytics is enabled), best first."""
+    rows = [r for r in state.load()[-60:] if r.get("video_id")]
+    if not rows:
         return []
-    try:
-        views = youtube.video_stats([r["video_id"] for r in rows])
-    except Exception as e:
-        log.warning("Could not fetch own stats: %s", e)
-        return []
-    perf = [{"format": r["format"], "title": r["title"], "views": views.get(r["video_id"], 0)}
-            for r in rows]
+    stats_path = state.HISTORY.parent / "stats.json"
+    stats = json.loads(stats_path.read_text()) if stats_path.exists() else {}
+    if not stats and youtube.available():
+        try:
+            stats = {k: {"views": v} for k, v in youtube.video_stats([r["video_id"] for r in rows]).items()}
+        except Exception as e:
+            log.warning("Could not fetch own stats: %s", e)
+    perf = []
+    for r in rows:
+        s = stats.get(r["video_id"], {})
+        perf.append({"format": r["format"], "lang": r.get("lang", "en"), "title": r["title"],
+                     "views": s.get("views", 0), "avg_percent_watched": s.get("avg_pct")})
     return sorted(perf, key=lambda r: -r["views"])
 
 
@@ -103,7 +109,7 @@ def pick_topics(cfg, n_long, n_short, spares=2):
     Wikipedia article turns out too thin can be replaced without a second LLM call."""
     want_long = n_long + spares if n_long else 0
     want_short = n_short + spares if n_short else 0
-    cands = gather_candidates()
+    cands = gather_candidates(cfg)
     for k in cands:
         random.shuffle(cands[k])
     outliers, feedback = [], channel_feedback()
@@ -135,13 +141,20 @@ Rules:
 - For LONG topics, the Wikipedia article must be long and detailed (a major article, not a stub).
 - Learn from the competitor outliers (videos that beat their own channel's median views by the multiple
   shown): borrow the angle and framing patterns, never copy the title.
-- Learn from our own channel performance: do more of what got views.
+- Learn from our own channel performance: do more of what got views AND high average % watched.
+- The audience is mainly Hindi-speaking Indians. About HALF of the topics should be Indian: forts,
+  temples, kings and empires, freedom struggle, unsolved Indian cases and places (Bhangarh, Roopkund,
+  Kuldhara, Netaji, Indus script...). The rest: world mysteries that Indians search for.
+- Use the youtube_searches_hindi candidates as evidence of what Indians search for right now.
 
 TRENDING CANDIDATES:
 {json.dumps({k: v[:40] for k, v in cands.items()}, ensure_ascii=False, indent=0)}
 
 COMPETITOR OUTLIERS (multiple of own-channel median):
 {json.dumps(outliers, ensure_ascii=False, indent=0) if outliers else "none available"}
+
+WEEKLY STRATEGY INSIGHTS (follow these):
+{json.dumps(json.loads((state.HISTORY.parent / "insights.json").read_text()) if (state.HISTORY.parent / "insights.json").exists() else [], ensure_ascii=False)}
 
 OUR CHANNEL PERFORMANCE (most viewed first):
 {json.dumps(feedback[:15], ensure_ascii=False, indent=0) if feedback else "no data yet (new channel)"}

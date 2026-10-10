@@ -7,19 +7,20 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
-from . import fonts
+from . import audio, fonts
 from .common import ROOT, ffprobe_duration, log, run, srt_ts
 
 
 # ---- stills -------------------------------------------------------------------------------
-def prepare_still(src, out, w, h, scale=2):
-    """Fit any image into a (scale*w x scale*h) canvas: blurred cover background + sharp foreground."""
+def prepare_still(src, out, w, h, scale=2, fill=False):
+    """Fit any image into a (scale*w x scale*h) canvas: blurred cover background + sharp foreground,
+    or crop to fill the frame (fill=True, for AI illustrations composed for any crop)."""
     W, H = w * scale, h * scale
     im = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
     bg = ImageOps.fit(im, (W, H), Image.LANCZOS).filter(ImageFilter.GaussianBlur(40))
     bg = Image.blend(bg, Image.new("RGB", (W, H), (0, 0, 0)), 0.35)
     ratio_img, ratio_out = im.width / im.height, W / H
-    if abs(ratio_img - ratio_out) / ratio_out < 0.2:
+    if fill or abs(ratio_img - ratio_out) / ratio_out < 0.2:
         canvas = ImageOps.fit(im, (W, H), Image.LANCZOS)  # close enough: fill the frame
     else:
         fg = ImageOps.contain(im, (W, H), Image.LANCZOS)
@@ -29,26 +30,35 @@ def prepare_still(src, out, w, h, scale=2):
     return out
 
 
-def ken_burns(frames):
+def ken_burns(frames, short=False):
+    """A camera move for a still. Shorts get punchier moves (punch-in, shake) like anime edits."""
     n = max(frames - 1, 1)
     c = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
-    return random.choice([
+    k = 10  # frames for a punch-in
+    calm = [
         (f"1+0.18*on/{n}", *c),                                   # slow zoom in
         (f"1.18-0.18*on/{n}", *c),                                # slow zoom out
         ("1.15", f"(iw-iw/zoom)*on/{n}", c[1]),                   # pan left -> right
         ("1.15", f"(iw-iw/zoom)*(1-on/{n})", c[1]),               # pan right -> left
-    ])
+        ("1.15", c[0], f"(ih-ih/zoom)*(1-on/{n})"),               # tilt up
+    ]
+    punchy = [
+        (f"if(lt(on,{k}),1+0.22*on/{k},1.22+0.05*(on-{k})/{n})", *c),            # punch-in then drift
+        ("1.1", f"{c[0]}+8*sin(on*0.9)", f"{c[1]}+6*cos(on*1.3)"),               # handheld shake
+        (f"1.25-0.2*on/{n}", f"{c[0]}+5*sin(on*0.7)", c[1]),                     # pull back + sway
+    ]
+    return random.choice(calm + punchy * 2 if short else calm * 2 + punchy[:1])
 
 
 # ---- captions ----------------------------------------------------------------------------
-def caption_png(text, out, w, h, short):
-    size = int(w * (0.085 if short else 0.034))
-    fnt = fonts.font(size)
+def caption_png(text, out, w, h, short, lang="en"):
+    size = int(w * ((0.085 if lang == "en" else 0.075) if short else 0.034))
+    fnt = fonts.font(size, lang)
     tmp = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
-    text = text.upper() if short else text
+    text = text.upper() if short and lang == "en" else text
     lines = fonts.wrap(tmp, text, fnt, w * 0.86)
     stroke = max(3, size // 9)
-    line_h = int(size * 1.18)
+    line_h = int(size * (1.18 if lang == "en" else 1.45))  # Devanagari needs room for matras
     bw = int(max(tmp.textlength(l, font=fnt) for l in lines)) + stroke * 2 + 40
     bh = line_h * len(lines) + stroke * 2 + 24
     img = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
@@ -69,34 +79,46 @@ def render_scene(scene, idx, work, cfg, fmt):
     fc, vc = cfg[fmt], cfg["video"]
     w, h, fps = fc["width"], fc["height"], vc["fps"]
     short = fmt == "short"
-    frames = math.ceil((scene["audio_dur"] + vc["scene_tail_seconds"]) * fps)
+    frames = math.ceil((scene["audio_dur"] + scene.get("tail", vc["scene_tail_seconds"])) * fps)
     dur = frames / fps
+    # Video runs a little past the narration so the next shot can transition over it.
+    extra = 0 if scene.get("last") else round(vc.get("transition_seconds", 0) * fps)
+    vframes = frames + extra
+    vdur = vframes / fps
     seg = work / f"seg-{idx:03d}.mp4"
     wav = work / f"seg-{idx:03d}.wav"
 
-    run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-af", "apad",
-         "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
+    if scene.get("whoosh") and vc.get("sfx_volume", 0) > 0:
+        # Transition whoosh under the first moments of every new shot.
+        run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-i", audio.whoosh(), "-filter_complex",
+             f"[0]aresample=44100,aformat=channel_layouts=stereo,apad[n];"
+             f"[1]volume={vc['sfx_volume']}[w];[n][w]amix=inputs=2:duration=first:normalize=0[a]",
+             "-map", "[a]", "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
+    else:
+        run(["ffmpeg", "-y", "-v", "error", "-i", scene["audio"], "-af", "apad",
+             "-t", f"{dur:.6f}", "-ar", "44100", "-ac", "2", wav])
 
     inputs, base = [], ""
     vis = scene["visual"]
     if vis["kind"] == "video":
         inputs = ["-stream_loop", "-1", "-i", vis["path"]]
         base = (f"[0:v]scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},"
-                f"setsar=1,fps={fps},trim=duration={dur:.6f},setpts=PTS-STARTPTS[v0]")
+                f"setsar=1,fps={fps},trim=duration={vdur:.6f},setpts=PTS-STARTPTS[v0]")
     elif vis["kind"] == "image":
-        still = prepare_still(vis["path"], work / f"still-{idx:03d}.jpg", w, h)
-        z, x, y = ken_burns(frames)
+        still = prepare_still(vis["path"], work / f"still-{idx:03d}.jpg", w, h, fill=vis.get("fill", False))
+        z, x, y = ken_burns(frames, short)
         inputs = ["-i", still]
-        base = (f"[0:v]zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={w}x{h}:fps={fps},"
-                f"setsar=1,trim=duration={dur:.6f}[v0]")
+        base = (f"[0:v]zoompan=z='{z}':x='{x}':y='{y}':d={vframes}:s={w}x{h}:fps={fps},"
+                f"setsar=1,trim=duration={vdur:.6f}[v0]")
     else:
         inputs = ["-f", "lavfi", "-i", f"color=c=0x101418:s={w}x{h}:r={fps}"]
-        base = f"[0:v]trim=duration={dur:.6f},setsar=1[v0]"
+        base = f"[0:v]trim=duration={vdur:.6f},setsar=1[v0]"
 
     graph, last = [base], "v0"
     if fc["burn_captions"]:
         for k, cap in enumerate(scene["captions"]):
-            png, bw, bh = caption_png(cap["text"], work / f"cap-{idx:03d}-{k:03d}.png", w, h, short)
+            png, bw, bh = caption_png(cap["text"], work / f"cap-{idx:03d}-{k:03d}.png", w, h, short,
+                                      scene.get("caption_lang", scene.get("lang", "en")))
             inputs += ["-i", png]
             y_pos = int(h * 0.66) if short else int(h * 0.86 - bh)
             nxt = f"v{k + 1}"
@@ -104,7 +126,7 @@ def render_scene(scene, idx, work, cfg, fmt):
                          f"enable='between(t,{cap['start']:.3f},{cap['end'] + 0.05:.3f})'[{nxt}]")
             last = nxt
     run(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(graph),
-         "-map", f"[{last}]", "-frames:v", str(frames), "-r", str(fps), "-an",
+         "-map", f"[{last}]", "-frames:v", str(vframes), "-r", str(fps), "-an",
          "-c:v", "libx264", "-preset", vc["preset"], "-crf", str(vc["crf"]),
          "-pix_fmt", "yuv420p", "-threads", "2", seg])
     return seg, wav, dur
@@ -113,9 +135,12 @@ def render_scene(scene, idx, work, cfg, fmt):
 def assemble(scenes, work, out_path, cfg, fmt):
     """scenes: [{audio, audio_dur, visual, captions}] -> final mp4. Returns scene start times."""
     work = Path(work)
-    fonts.font_path()  # fetch once before threads start
+    for lang in {s.get("caption_lang", s.get("lang", "en")) for s in scenes}:
+        fonts.font_path(lang)  # fetch once before threads start
     workers = max(1, min(4, (os.cpu_count() or 2) // 2))
     log.info("Rendering %d scenes with %d workers", len(scenes), workers)
+    for i, sc in enumerate(scenes):
+        sc["last"] = i == len(scenes) - 1
     with ThreadPoolExecutor(workers) as ex:
         results = list(ex.map(lambda a: render_scene(a[1], a[0], work, cfg, fmt), enumerate(scenes)))
 
@@ -123,30 +148,69 @@ def assemble(scenes, work, out_path, cfg, fmt):
     for _, _, d in results:
         starts.append(t)
         t += d
-    (work / "video.txt").write_text("".join(f"file '{r[0].name}'\n" for r in results))
     (work / "audio.txt").write_text("".join(f"file '{r[1].name}'\n" for r in results))
-    run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", work / "video.txt",
-         "-c", "copy", work / "video.mp4"])
+    xd = cfg["video"].get("transition_seconds", 0)
+    if xd and len(results) > 1:
+        join_with_transitions(results, scenes, work / "video.mp4", cfg, fmt, xd)
+    else:
+        (work / "video.txt").write_text("".join(f"file '{r[0].name}'\n" for r in results))
+        run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", work / "video.txt",
+             "-c", "copy", work / "video.mp4"])
     run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", work / "audio.txt",
          "-c", "copy", work / "narration.wav"])
 
-    music = sorted((ROOT / "assets" / "music").glob("*.mp3"))
-    cmd = ["ffmpeg", "-y", "-v", "error", "-i", work / "video.mp4", "-i", work / "narration.wav"]
-    if music:
-        track = random.choice(music)
-        vol = cfg["video"]["music_volume"]
-        cmd += ["-stream_loop", "-1", "-i", track, "-filter_complex",
-                f"[2:a]volume={vol},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m];"
-                f"[1:a][m]amix=inputs=2:duration=first:normalize=0[a]",
-                "-map", "0:v", "-map", "[a]"]
-        log.info("Background music: %s", track.name)
-    else:
-        cmd += ["-map", "0:v", "-map", "1:a"]
+    track, is_file = audio.music_for(t, work)
+    vol = cfg["video"]["music_volume"] if is_file else cfg["video"].get("bed_volume", 0.35)
+    cmd = ["ffmpeg", "-y", "-v", "error", "-i", work / "video.mp4", "-i", work / "narration.wav",
+           *(["-stream_loop", "-1"] if is_file else []), "-i", track, "-filter_complex",
+           f"[2:a]volume={vol},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m];"
+           f"[1:a][m]amix=inputs=2:duration=first:normalize=0[a]",
+           "-map", "0:v", "-map", "[a]"]
     cmd += ["-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-t", f"{t:.3f}",
             "-movflags", "+faststart", out_path]
     run(cmd)
     log.info("Video ready: %s (%.1fs)", out_path, ffprobe_duration(out_path))
     return starts, t
+
+
+def join_with_transitions(results, scenes, out, cfg, fmt, xd, batch=40):
+    """xfade every cut. Segment k (except the last) is xd longer than its audio, and its successor
+    starts transitioning in at exactly the audio boundary, so picture and narration stay in sync.
+    Joined in batches to keep ffmpeg's open-file count sane on long videos."""
+    vc = cfg["video"]
+    styles = vc["transitions"][fmt]
+    durs = [r[2] for r in results]
+
+    def chain(seg_paths, seg_durs, seg_scenes, dst, tail_extra):
+        inputs, graph, prev, offset = [], [], "0:v", 0.0
+        for p in seg_paths:
+            inputs += ["-i", p]
+        for k in range(1, len(seg_paths)):
+            offset += seg_durs[k - 1]
+            # Same picture continuing (shared image) -> soft dissolve; new picture -> styled move.
+            kind = random.choice(styles) if seg_scenes[k].get("whoosh") else "fade"
+            graph.append(f"[{prev}][{k}:v]xfade=transition={kind}:duration={xd}:offset={offset:.4f}[x{k}]")
+            prev = f"x{k}"
+        total = sum(seg_durs) + tail_extra
+        run(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(graph) or "[0:v]null[x0]",
+             "-map", f"[{prev if graph else 'x0'}]", "-t", f"{total:.4f}", "-r", str(vc["fps"]),
+             "-c:v", "libx264", "-preset", vc["preset"], "-crf", str(vc["crf"]), "-pix_fmt", "yuv420p", dst])
+
+    paths = [r[0] for r in results]
+    if len(paths) <= batch:
+        chain(paths, durs, scenes, out, 0)
+        return
+    # Batch: each batch ends with its last segment's extra xd so batches can be xfaded together.
+    parts, part_durs, part_scenes = [], [], []
+    for b in range(0, len(paths), batch):
+        sl = slice(b, b + batch)
+        dst = out.with_name(f"part-{b // batch:02d}.mp4")
+        last_batch = b + batch >= len(paths)
+        chain(paths[sl], durs[sl], scenes[sl], dst, 0 if last_batch else xd)
+        parts.append(dst)
+        part_durs.append(sum(durs[sl]))
+        part_scenes.append(scenes[b])
+    chain(parts, part_durs, part_scenes, out, 0)
 
 
 def write_srt(scenes, starts, path):
