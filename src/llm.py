@@ -4,6 +4,8 @@ import os
 import re
 import time
 
+import requests
+
 from .common import http, log
 
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -39,7 +41,7 @@ def _gemini(model, system, prompt, temperature):
                              "responseMimeType": "application/json",
                              "maxOutputTokens": 16384},
     }
-    r = http().post(GEMINI_URL.format(model=model), params={"key": key}, json=body, timeout=180)
+    r = http().post(GEMINI_URL.format(model=model), params={"key": key}, json=body, timeout=(15, 150))
     if r.status_code >= 400:
         raise LLMError(f"gemini {model} HTTP {r.status_code}: {r.text[:300]}")
     data = r.json()
@@ -83,6 +85,10 @@ def ask_json(cfg, system, prompt, temperature=None):
             for retry in range(3):
                 try:
                     return _parse_json(fn(model, system, prompt, temperature))
+                except requests.RequestException as e:
+                    attempts.append(f"{model}: network error {e}")
+                    log.warning("%s network error (%s), trying next model", model, type(e).__name__)
+                    break
                 except LLMError as e:
                     msg = str(e)
                     attempts.append(msg)

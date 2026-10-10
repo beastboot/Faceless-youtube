@@ -1,6 +1,8 @@
 """YouTube Data API v3: OAuth from env, upload, thumbnail, captions, playlists, stats, research."""
 import json
 import os
+import ssl
+import time
 import statistics
 from datetime import datetime, timedelta, timezone
 
@@ -86,13 +88,33 @@ def upload(cfg, video_path, meta, publish_at=None):
     if meta.get("localizations"):  # e.g. English title/description shown to English-language viewers
         body["localizations"] = meta["localizations"]
         parts += ",localizations"
-    media = MediaFileUpload(str(video_path), mimetype="video/mp4", chunksize=8 << 20, resumable=True)
-    req = client().videos().insert(part=parts, body=body, media_body=media)
-    resp = None
-    while resp is None:
-        prog, resp = req.next_chunk()
-        if prog:
-            log.info("  upload %d%%", int(prog.progress() * 100))
+    # Resumable upload that survives network blips: each chunk retries with backoff, and the whole
+    # upload restarts (up to 3 times) if the session itself breaks. Losing a rendered video hurts.
+    resp, last_err = None, None
+    for attempt in range(3):
+        try:
+            media = MediaFileUpload(str(video_path), mimetype="video/mp4", chunksize=8 << 20, resumable=True)
+            req = client().videos().insert(part=parts, body=body, media_body=media)
+            resp = None
+            while resp is None:
+                try:
+                    prog, resp = req.next_chunk(num_retries=6)
+                except (ssl.SSLError, OSError, ConnectionError, TimeoutError) as e:
+                    last_err = e
+                    log.warning("  upload chunk failed (%s), retrying", e)
+                    time.sleep(10)
+                    continue
+                if prog:
+                    log.info("  upload %d%%", int(prog.progress() * 100))
+            break
+        except HttpError as e:
+            if e.status_code in (400, 401, 403) or "quotaExceeded" in str(e):
+                raise
+            last_err = e
+            log.warning("Upload attempt %d failed (%s); restarting upload", attempt + 1, e)
+            time.sleep(30)
+    if resp is None:
+        raise RuntimeError(f"Upload failed after retries: {last_err}")
     vid = resp["id"]
     log.info("Uploaded https://youtu.be/%s (%s%s)", vid, status["privacyStatus"],
              f", publishes {publish_at}" if publish_at else "")

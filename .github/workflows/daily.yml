@@ -90,8 +90,8 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-      - name: Keep videos from test runs
-        if: inputs.no_upload
+      - name: Keep videos from test runs, or when something failed (re-upload with --upload-dir)
+        if: inputs.no_upload || failure()
         uses: actions/upload-artifact@v4
         with:
           name: videos-${{ github.run_id }}
