@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
-from . import audio, fonts
+from . import audio, fonts, sketch
 from .common import ROOT, ffprobe_duration, log, run, srt_ts
 
 
@@ -104,6 +104,14 @@ def render_scene(scene, idx, work, cfg, fmt):
         inputs = ["-stream_loop", "-1", "-i", vis["path"]]
         base = (f"[0:v]scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},"
                 f"setsar=1,fps={fps},trim=duration={vdur:.6f},setpts=PTS-STARTPTS[v0]")
+    elif vis["kind"] == "image" and vc.get("animation") == "sketch":
+        # Pen draws the cartoon, colours wash in, camera drifts (src/sketch.py).
+        clip = work / f"sketch-{idx:03d}.mp4"
+        sketch.render(vis["path"], clip, w, h, fps, vframes,
+                      draw_share=vc.get("sketch_draw_share", 0.55) if scene.get("whoosh", True) or idx == 0 else 0,
+                      seed=idx, crf=vc["crf"], preset=vc["preset"])
+        inputs = ["-i", clip]
+        base = f"[0:v]setsar=1,trim=duration={vdur:.6f},setpts=PTS-STARTPTS[v0]"
     elif vis["kind"] == "image":
         still = prepare_still(vis["path"], work / f"still-{idx:03d}.jpg", w, h, fill=vis.get("fill", False))
         z, x, y = ken_burns(frames, short)

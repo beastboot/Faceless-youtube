@@ -44,6 +44,8 @@ video:
   music_volume: 0.08                  # royalty-free .mp3s in assets/music/ (see README: copyright)
   bed_volume: 1.0                     # synthesised ambient bed used when assets/music/ is empty
   sfx_volume: 0.5                     # whoosh on every picture change (0 = off)
+  animation: "sketch"                 # sketch = pen draws each cartoon live | kenburns = pan/zoom stills
+  sketch_draw_share: 0.55             # share of each shot spent drawing before colours wash in
   transition_seconds: 0.35            # animated transition between shots (0 = hard cuts)
   transitions:
     long: ["slideleft", "slideright", "smoothleft", "smoothright", "fade", "circleopen", "wipeleft"]
@@ -62,17 +64,16 @@ images:
   max_minutes: {long: 35, short: 10}  # time budget for AI images per video (backups are slow);
                                       # shots left over use stock clips / reuse earlier images
   styles:
-    # Long videos: epic semi-realistic scenes (like "Unsolved India").
+    # Sketch-cartoon animation draws each picture's outlines live, so pictures need bold ink lines.
     long: >-
-      epic cinematic digital painting, semi-realistic, dramatic golden-hour or moody lighting,
-      volumetric light and dust, highly detailed, wide-angle composition, rich color grading,
+      hand-drawn cartoon illustration, bold clean black ink outlines, flat bright colors, simple
+      shapes, expressive characters, light simple background, explainer animation style,
       no text, no letters, no watermark, no signature
-    # Shorts: expressive anime/comic characters (like "ReBorn Mindset").
     short: >-
-      expressive anime illustration, bold clean line art, dramatic emotions on faces, cel-shaded,
-      dark moody background with a single red accent light, high contrast, manga panel energy,
+      hand-drawn cartoon illustration, thick bold black ink outlines, flat vivid colors, expressive
+      exaggerated faces, comic style, light simple background, explainer animation style,
       no text, no letters, no speech bubbles, no watermark, no signature
-  stock_broll_share: 0.25             # long videos: about 1 in 4 shots uses a real stock video clip
+  stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
 
 # Languages. Hindi is the main channel language. Every topic is researched and scripted once,
@@ -82,8 +83,8 @@ languages:
     enabled: true                     # main language: makes every video in schedule above
     voice: "hi-IN-MadhurNeural"
     captions: "hinglish"              # hinglish (Roman letters) | hindi (Devanagari)
-    long_rate: "+0%"
-    short_rate: "+8%"
+    long_rate: "+12%"                 # Madhur is slow at +0%; this is a natural documentary pace
+    short_rate: "+20%"
     long_publish_utc: ["14:30"]       # 8:00 PM IST
     short_publish_utc: ["06:30", "12:30"]   # 12:00 PM and 6:00 PM IST
   en:
