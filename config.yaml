@@ -88,7 +88,7 @@ images:
   # Same face all video long: a master picture per main character, then FLUX.2 Klein draws the
   # character's shots from it (~125 neurons per shot vs ~58 for schnell, so it is budgeted).
   character_refs: 2                   # main characters per story that get a master picture
-  reference_shots: {long: 16, short: 5}
+  reference_shots: {long: 16, short: 10}
   reference_size: [1024, 576]
   stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
@@ -241,8 +241,10 @@ series:
     about: "dramatic true stories of real people: survivors, spies, explorers, rulers"
 
 # Extra Shorts cut from each long video (same pictures, new hook), linking to the full video.
+# Off: fewer, better Shorts beat volume while the channel is learning (each Short gets YouTube's
+# full test audience, and the free AI budget goes into quality). Set 1-2 once Shorts hold viewers.
 clips:
-  per_long: 2
+  per_long: 0
   publish_utc: ["09:30", "16:30"]     # 3:00 PM and 10:00 PM IST
 
 # Each long video also becomes a website article and a podcast episode (site/ on GitHub Pages).
@@ -281,7 +283,7 @@ keywords:
                 "duniya ke rahasya", "kaise hua", "kyon hua"]
 
 quality:
-  hook_candidates: 5                  # LLM writes N hooks, hookscore.py keeps the best
+  hook_candidates: 6                  # hooks written AFTER the full script; hookscore.py keeps the best
   title_candidates: 10                # LLM writes N titles, title.py keeps the best
   max_script_attempts: 2
   min_review_score: 6.5               # quality gate: average 1-10 score a script needs to be made

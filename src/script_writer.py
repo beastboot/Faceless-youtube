@@ -3,7 +3,7 @@ import json
 import random
 import re
 
-from . import llm
+from . import llm, state
 from .common import ROOT, log
 from .quality import hookscore
 from .quality import title as titlelint
@@ -73,6 +73,76 @@ Return {{"hooks": [{{"formula": "...", "hook": "..."}}]}}"""
         log.debug("hook %3d  %s", s, h)
     log.info("Best hook (%d/100, %s): %s", scored[0][0], hookscore.band(scored[0][0]), scored[0][1])
     return scored[0][1]
+
+
+def past_hooks(fmt, n=4):
+    """Our own opening lines with how much of the video people watched: (best, worst), or ([], [])
+    until at least 6 videos of this format have retention data."""
+    stats_path = ROOT / "data" / "stats.json"
+    if not stats_path.exists():
+        return [], []
+    stats = json.loads(stats_path.read_text())
+    rows = []
+    for r in state.load():
+        s = stats.get(r.get("video_id") or "", {})
+        if r.get("format") == fmt and r.get("hook") and s.get("avg_pct") is not None:
+            rows.append((float(s["avg_pct"]), r["hook"]))
+    if len(rows) < 6:
+        return [], []
+    rows.sort(reverse=True)
+    return rows[:n], rows[-n:]
+
+
+def rehook(cfg, data, research, fmt):
+    """Write the opening line LAST: with the whole story in front of it, the hook can tease the real
+    twist and promise exactly what the video pays off. Picks the best of several by hookscore, guided
+    by which of our own past hooks kept viewers watching."""
+    shots = [sh for sc in data["scenes"] for sh in sc["shots"]]
+    if not shots or data.get("special") in ("question", "quiz", "quiz_answer", "part2"):
+        return data   # these formats have a fixed first line
+    n = max(6, cfg["quality"]["hook_candidates"])
+    best, worst = past_hooks(fmt)
+    learned = ""
+    if best:
+        learned = ("\nOUR OWN RESULTS (% of the video viewers watched after this opening line):\nKEPT VIEWERS:\n"
+                   + "\n".join(f"- {p:.0f}%: {h}" for p, h in best) + "\nLOST VIEWERS:\n"
+                   + "\n".join(f"- {p:.0f}%: {h}" for p, h in worst)
+                   + "\nWrite hooks more like the first group and unlike the second.\n")
+    story = " ".join(sh["line"] for sh in shots)
+    prompt = f"""Here is the COMPLETE script of a {fmt} video. Write {n} alternative OPENING LINES (the
+first spoken line, 9-22 words) for it. The viewer decides in the first 1-2 seconds whether to swipe away.
+
+Each hook must:
+- tease the story's most surprising fact, twist or payoff that really comes later in this script
+  (promise exactly what the video delivers; never lie);
+- be specific: a number, a name, a date or a place;
+- open a question the viewer needs answered; no greetings, no "in this video", no context first;
+- fit the opening picture: "{shots[0].get('image_prompt', '')[:300]}"
+- work as the first line before the current line 2: "{shots[1]['line'] if len(shots) > 1 else ''}"
+Use a different technique for each (shocking fact, question, contradiction, countdown, "you" stake,
+mystery statement).
+{learned}
+SCRIPT: {story[:7000]}
+
+Return {{"hooks": ["...", "..."]}}"""
+    try:
+        hooks = [str(h).strip() for h in llm.ask_json(cfg, _system(cfg), prompt, temperature=0.9).get("hooks", [])
+                 if str(h).strip()]
+    except Exception as e:
+        log.warning("Re-hook failed (%s); keeping the first hook", e)
+        return data
+    if not hooks:
+        return data
+    old = shots[0]["line"]
+    scored = sorted(((hookscore.score(h)[1], h) for h in hooks + [old]), reverse=True)
+    top, line = scored[0]
+    if line != old:
+        shots[0]["line"] = line
+        sc0 = data["scenes"][0]
+        sc0["narration"] = " ".join(sh["line"] for sh in sc0["shots"])
+        log.info("Hook written after the script (%d/100): %s", top, line)
+    data["hook"] = line
+    return data
 
 
 # Special formats queued in data/followups.json (see reach.py / pipeline.queue_followups)
@@ -256,6 +326,8 @@ Return JSON:
     data["hook"] = hook
     data["structure"] = structure
     data["lang"] = "en"
+    data["special"] = topic.get("special")
+    data = rehook(cfg, data, research, fmt)
     data.update(package(data, fmt))
     return data
 

@@ -585,6 +585,7 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                               "video_id": video_id, "duration": round(total, 1), "publish_at": when,
                               "dir": f"{base.name}/{lang}", "thumb_template": template,
                               "series": (series or {}).get("id"), "episode": episode,
+                              "hook": script_en.get("hook") or "",   # learned from in rehook()
                               "pending_comment": meta["engagement_question"] if video_id else ""})
             if video_id and fmt == "long":
                 try:
