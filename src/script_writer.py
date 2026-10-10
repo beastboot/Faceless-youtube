@@ -245,6 +245,11 @@ Return JSON:
         out["title"] = out["title"][:88] + " #shorts"
     out["thumbnail_text"] = thumbs[0] if thumbs else script["thumbnail_text"]
     out["lang"] = "hi"
+    # Keep the English packaging: shown to English-language viewers via YouTube localizations,
+    # and as an English summary inside the Hindi description.
+    out["en_chapters"] = chapters
+    out["en"] = {"title": script["title"], "description_intro": script.get("description_intro") or "",
+                 "description_body": script.get("description_body") or ""}
     return out
 
 

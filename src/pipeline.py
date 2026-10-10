@@ -16,7 +16,7 @@ TEXT = {
            "ai": "Illustrations: AI-generated. Narration: AI voice.",
            "subscribe": "Subscribe to {name} for a new story every day.",
            "full": "▶ Watch the full documentary: {url}", "intro": "Intro"},
-    "hi": {"chapters": "अध्याय:", "sources": "स्रोत:",
+    "hi": {"chapters": "अध्याय:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
            "ai": "चित्र: AI द्वारा बनाए गए। आवाज़: AI वॉइस।",
            "subscribe": "ऐसी ही रोचक कहानियों के लिए {name} को सब्सक्राइब करें।",
            "full": "▶ पूरी डॉक्यूमेंट्री देखें: {url}", "intro": "शुरुआत"},
@@ -143,6 +143,9 @@ def build_description(cfg, script, res, chapters, fmt, lang):
     if chapters:
         parts.append(f"{t['chapters']}\n{chapters}")
     parts.append((script.get("description_body") or "").strip())
+    if lang != "en" and script.get("en"):
+        en = script["en"]
+        parts.append(f"{t['english']}\n{en['description_intro']} {en['description_body']}".strip())
     parts.append(f"{t['sources']}\n{res['wiki_url']}")
     parts.append(t["ai"])
     if script.get("credits"):
@@ -158,6 +161,12 @@ def build_description(cfg, script, res, chapters, fmt, lang):
 
 
 # ---- one language version -----------------------------------------------------------------
+def script_en_scenes(script, lang):
+    """Chapter names in English for the English localization (falls back to the localized ones)."""
+    names = script.get("en_chapters") or [sc.get("chapter") for sc in script["scenes"]]
+    return {"scenes": [{"chapter": n or ""} for n in names]}
+
+
 def voice_for(cfg, fmt, lang):
     lc = cfg["languages"].get(lang, {})
     if lc.get("voice"):
@@ -203,7 +212,15 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow"):
         scene_starts.setdefault(it["scene"], st)
     chapters = (chapters_block(script, [scene_starts[i] for i in range(len(script["scenes"]))], total, lang)
                 if fmt == "long" else "")
+    localizations = {}
+    if lang != "en" and script.get("en"):
+        en_script = {**script, **script["en"], "lang": "en"}
+        en_chapters = chapters_block(script_en_scenes(script, lang), [scene_starts[i] for i in range(len(script["scenes"]))],
+                                     total, "en") if fmt == "long" else ""
+        localizations["en"] = {"title": script["en"]["title"][:100],
+                               "description": build_description(cfg, en_script, res, en_chapters, fmt, "en")[:4900]}
     meta = {"title": script["title"], "lang": lang, "caption_track": caption_track,
+            "localizations": localizations,
             "description": build_description(cfg, script, res, chapters, fmt, lang),
             "tags": script.get("tags") or [],
             "engagement_question": script.get("engagement_question") or ""}

@@ -30,12 +30,16 @@ def text_assets(cfg):
 Channel: {ch['name']}. Niche: {ch['niche']}. Main language: Hindi (animated documentaries with
 Hinglish captions), audience: curious Indians 16-40. New videos daily: one 10-minute story + Shorts.
 Write:
-- description: YouTube "About" text, 600-900 characters, mostly Hindi with a short English line,
-  first sentence must contain the search words people use (रहस्य, इतिहास, mystery, history in hindi),
-  what viewers get, upload schedule, and a subscribe line. No fake claims, no emojis spam (max 3).
+- description_hi: YouTube "About" text in Hindi, 380-450 characters. First sentence must contain the
+  search words people use (रहस्य, इतिहास, history in hindi). What viewers get, upload schedule, subscribe line.
+- description_en: the same in natural English, 380-450 characters, first sentence with "history",
+  "mysteries", "animated documentaries", "Hindi".
+No fake claims, max 2 emojis each.
 - keywords: 15 channel keywords (Hindi, Hinglish and English), multi-word ones in double quotes.
 - tagline: banner tagline in Hindi, max 6 words.
-Return {{"description": "...", "keywords": ["..."], "tagline": "..."}}""", temperature=0.6)
+Return {{"description_hi": "...", "description_en": "...", "keywords": ["..."], "tagline": "..."}}""",
+                        temperature=0.6)
+    data["description"] = f"{data['description_hi'].strip()}\n\n— English —\n{data['description_en'].strip()}"
     OUT.mkdir(exist_ok=True)
     p.write_text(json.dumps(data, indent=1, ensure_ascii=False))
     return data
@@ -93,6 +97,9 @@ def apply(text, banner_path):
     })
     bs.setdefault("image", {})["bannerExternalUrl"] = up["url"]
     yt.channels().update(part="brandingSettings", body={"id": ch["id"], "brandingSettings": bs}).execute()
+    # English translation of the channel: shown to viewers whose YouTube language is English.
+    yt.channels().update(part="localizations", body={"id": ch["id"], "localizations": {
+        "en": {"title": load_config()["channel"]["name"], "description": text["description_en"][:1000]}}}).execute()
     log.info("Channel description, keywords, country and banner updated.")
 
 

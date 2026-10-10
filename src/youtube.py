@@ -82,8 +82,12 @@ def upload(cfg, video_path, meta, publish_at=None):
         },
         "status": status,
     }
+    parts = "snippet,status"
+    if meta.get("localizations"):  # e.g. English title/description shown to English-language viewers
+        body["localizations"] = meta["localizations"]
+        parts += ",localizations"
     media = MediaFileUpload(str(video_path), mimetype="video/mp4", chunksize=8 << 20, resumable=True)
-    req = client().videos().insert(part="snippet,status", body=body, media_body=media)
+    req = client().videos().insert(part=parts, body=body, media_body=media)
     resp = None
     while resp is None:
         prog, resp = req.next_chunk()
