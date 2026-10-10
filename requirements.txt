@@ -7,3 +7,6 @@ google-auth>=2.23
 google-auth-oauthlib>=1.1
 python-dotenv>=1.0
 numpy>=1.26
+onnxruntime>=1.18
+huggingface_hub>=0.23
+opencv-python-headless>=4.9

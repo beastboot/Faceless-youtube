@@ -119,7 +119,8 @@ def write(cfg, topic, research, fmt):
     structure = random.choice(STRUCTURES[fmt])
     words = fc["target_words"]
     long_bits = """- Mark 5-8 scenes with a short "chapter" title where a new section starts (the first scene
-  must have one). Chapters must be at least 30 seconds apart.
+  must have one). Chapters must be at least 30 seconds apart. Titles are 1-3 punchy words
+  (e.g. "The Curse", "Night of Escape"): each later one appears as a full-screen title card.
 - Around the middle, add one soft line teasing what is coming later (open loop) to hold retention.
 - Within the first 15 seconds, promise the payoff ("by the end you'll know what really happened that
   night") and deliver it explicitly near the end: viewers who get what the title promised are satisfied.
@@ -174,6 +175,10 @@ Scene and shot rules:
   Brahmin villagers in Rajasthani pagdi turbans and white dhotis", never a different community's
   dress), doing what, where, era-accurate clothing, buildings, vehicles and objects, camera framing (wide shot, close-up,
   over-the-shoulder, aerial), mood and lighting. Vary the framing from shot to shot.
+- The pictures are 3D animated-movie stills (Pixar-like), so direct them like an animation film: one clear
+  main character the story follows, faces showing a strong readable emotion (fear, awe, anger, joy),
+  a visible action or gesture (pointing, running, whispering, holding up the key object), and a
+  cinematic camera (low angle for power, close-up for emotion, wide establishing shots for places).
 - Every shot also has "cast" (names of the recurring characters visible in it, [] if none),
   "move" (camera: zoom_in | zoom_out | pan_left | pan_right | rise | push_focus — vary them, push_focus
   for emotional beats) and "ambient" (a moving light/weather layer matching the mood: fireflies |
@@ -188,6 +193,8 @@ Scene and shot rules:
     {{"type": "quote", "text": "short quote or legend line", "by": "who/what"}} (a real quote or the legend)
     {{"type": "timeline", "points": [{{"year": "1291", "label": "Paliwals settle"}}, ...]}}  (2-4 points)
     {{"type": "fact", "text": "4-7 word punchline"}}                             (the big reveal of a scene)
+    {{"type": "keyword", "text": "Dewan"}}                                       (1-3 word key term the line hinges on)
+    {{"type": "labels", "items": ["Heavy taxes", "Fear", "One night"]}}         (2-4 short causes/parts of the idea)
 - Define each recurring character once in "characters" (region/ethnicity, age, build, hair, clothing,
   distinctive features) and repeat that exact description inside every image_prompt where they appear, so the
   character looks the same in every shot.
@@ -263,6 +270,9 @@ def _merge_graphic(orig, translated):
     for k in ("text", "sub", "label", "name", "role", "by", "prefix", "suffix"):
         if translated.get(k):
             out[k] = translated[k]
+    if orig.get("type") == "labels" and isinstance(translated.get("items"), list) \
+            and len(translated["items"]) == len(orig.get("items") or []):
+        out["items"] = [str(x) for x in translated["items"]]
     if orig.get("type") == "timeline" and isinstance(translated.get("points"), list) \
             and len(translated["points"]) == len(orig.get("points") or []):
         out["points"] = [{"year": a.get("year"), "label": b.get("label") or a.get("label")}

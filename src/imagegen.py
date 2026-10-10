@@ -32,7 +32,10 @@ def _cloudflare_reference(prompt, reference, cfg, seed, landscape):
     acct, token = os.environ.get("CF_ACCOUNT_ID"), os.environ.get("CF_API_TOKEN")
     if not (acct and token) or _cf_exhausted:
         raise ImageGenError("Cloudflare unavailable for reference generation")
-    w, h = (1344, 768) if landscape else (768, 1344)
+    # Cost grows with output 512px tiles (~26 neurons each): 1024x576 = 4 tiles, about 125 neurons.
+    w, h = cfg["images"].get("reference_size") or (1024, 576)
+    if not landscape:
+        w, h = h, w
     model = cfg["images"].get("reference_model", "@cf/black-forest-labs/flux-2-klein-4b")
     with open(reference, "rb") as f:
         r = http().post(CF_URL.format(acct=acct, model=model), headers={"Authorization": f"Bearer {token}"},
@@ -103,8 +106,9 @@ def generate(prompt, out_path, cfg, seed, landscape=True, fmt=None, style=None, 
     errors = []
     if reference and os.path.exists(reference):
         try:
-            _cloudflare_reference(f"Use the person in the reference image exactly (same face, beard, glasses, "
-                                  f"clothes). {full}", reference, cfg, seed, landscape).save(out_path, quality=93)
+            _cloudflare_reference(f"Keep the character from the reference image exactly the same (same face, "
+                                  f"hair, age, skin tone, clothes) and show them in this new scene: {full}",
+                                  reference, cfg, seed, landscape).save(out_path, quality=93)
             return "cloudflare-reference"
         except Exception as e:
             errors.append(f"reference: {e}")

@@ -18,6 +18,9 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const narrationFrames = Math.round(shot.dur * fps);
+  const cardFrames = shot.chapter ? Math.min(narrationFrames, Math.round(fps * 1.7)) : 0;
+  // graphics wait for the chapter card to clear; "instant" ones (Short hooks) show on frame one
+  const gStart = cardFrames ? Math.min(cardFrames, Math.max(0, narrationFrames - fps)) : (shot.graphic as any)?.instant ? 0 : Math.round(fps * 0.25);
   return (
     <AbsoluteFill style={index === 0 ? {} : entrance(shot.transition, frame, xf)}>
       {shot.video ? <ClipVideo src={shot.video} />
@@ -26,9 +29,13 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
       <Particles kind={shot.ambient} seed={`shot-${index}`} />
       <Vignette />
       {shot.graphic ? (
-        <Sequence from={(shot.graphic as any).instant ? 0 : Math.round(fps * 0.25)}
-          durationInFrames={Math.max(1, narrationFrames - ((shot.graphic as any).instant ? 0 : Math.round(fps * 0.25)))} layout="none">
-          <GraphicLayer g={shot.graphic} len={Math.max(1, narrationFrames - ((shot.graphic as any).instant ? 0 : Math.round(fps * 0.25)))} fonts={props.fonts} short={props.short} />
+        <Sequence from={gStart} durationInFrames={Math.max(1, narrationFrames - gStart)} layout="none">
+          <GraphicLayer g={shot.graphic} len={Math.max(1, narrationFrames - gStart)} fonts={props.fonts} short={props.short} />
+        </Sequence>
+      ) : null}
+      {shot.chapter ? (
+        <Sequence durationInFrames={cardFrames} layout="none">
+          <ChapterCard n={shot.chapter.n} title={shot.chapter.title} fonts={props.fonts} len={cardFrames} />
         </Sequence>
       ) : null}
       {props.captionsOn ? (
@@ -36,6 +43,29 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
           <Captions captions={shot.captions} short={props.short} fonts={props.fonts} />
         </Sequence>
       ) : null}
+    </AbsoluteFill>
+  );
+};
+
+/** Full-screen chapter card ("[ 02 ]  THE CURSE") that opens a new part of a long video. */
+const ChapterCard: React.FC<{n: number; title: string; fonts: Props['fonts']; len: number}> = ({n, title, fonts, len}) => {
+  const frame = useCurrentFrame();
+  const {fps, width} = useVideoConfig();
+  const out = interpolate(frame, [len - fps * 0.35, len], [1, 0], clamp);
+  const line = interpolate(frame, [2, fps * 0.5], [0, 1], {...clamp, easing: (x) => 1 - Math.pow(1 - x, 3)});
+  const p = pop(frame, fps, 4, 13);
+  const size = width * 0.06;
+  const num = String(n).padStart(2, '0');
+  return (
+    <AbsoluteFill style={{background: '#050507', opacity: out, justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{display: 'flex', alignItems: 'center', gap: size * 0.35, fontFamily: fonts.display, color: '#fff', fontSize: size * 0.55}}>
+        <div style={{width: size * 2.2 * line, height: 2, background: 'rgba(255,255,255,0.7)'}} />
+        <span>[</span><span style={{color: YELLOW, transform: `scale(${p})`, display: 'inline-block'}}>{num}</span><span>]</span>
+        <div style={{width: size * 2.2 * line, height: 2, background: 'rgba(255,255,255,0.7)'}} />
+      </div>
+      <div style={{fontFamily: fontFor(title, fonts), fontSize: size, color: '#fff', marginTop: size * 0.2, letterSpacing: 1,
+        opacity: interpolate(frame, [6, 14], [0, 1], clamp), transform: `translateY(${(1 - p) * 30}px)`,
+        textTransform: 'uppercase'}}>{title}</div>
     </AbsoluteFill>
   );
 };

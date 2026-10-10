@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig} from 'remotion';
 import {geoMercator, geoPath} from 'd3-geo';
 import {feature} from 'topojson-client';
 import world from 'world-atlas/countries-50m.json';
@@ -11,22 +11,92 @@ type GP<T> = {g: T; len: number; fonts: Fonts; short: boolean};
 
 const stroke = (px: number) => ({WebkitTextStroke: `${px}px #000`, paintOrder: 'stroke fill' as const});
 
-/** Big year/date stamp that types in, with a red underline that draws itself. */
+/** Cinematic year reveal: golden dust gathers into the year in the centre of a darkened frame,
+ * glows, then the year shrinks into the top-left corner and stays there while the shot plays. */
 const DateStamp: React.FC<GP<Extract<Graphic, {type: 'date'}>>> = ({g, len, fonts, short}) => {
   const frame = useCurrentFrame();
-  const {fps, width} = useVideoConfig();
-  const chars = Math.round(interpolate(frame, [4, 4 + g.text.length * 3], [0, g.text.length], clamp));
-  const size = width * (short ? 0.15 : 0.075);
-  const line = interpolate(frame, [10, 28], [0, 100], clamp);
+  const {fps, width, height} = useVideoConfig();
+  const hold = Math.min(Math.round(fps * 1.5), Math.max(1, len - fps));       // centre stage time
+  const gather = interpolate(frame, [0, fps * 0.8], [0, 1], {...clamp, easing: (x) => 1 - Math.pow(1 - x, 3)});
+  const dock = interpolate(frame, [hold, hold + fps * 0.45], [0, 1], {...clamp, easing: (x) => x * x * (3 - 2 * x)});
+  const big = width * (short ? 0.24 : 0.14);
+  const small = width * (short ? 0.11 : 0.055);
+  const size = big + (small - big) * dock;
+  const cx = width / 2 + ((short ? width * 0.07 : width * 0.05) + 0 - width / 2) * dock;
+  const cy = height / 2 + ((short ? height * 0.16 : height * 0.1) - height / 2) * dock;
+  const scrim = 0.62 * (1 - dock) * interpolate(frame, [0, 6], [0, 1], clamp);
+  const n = 70;
   return (
-    <AbsoluteFill style={{padding: short ? '14% 7%' : '5% 5%', opacity: fadeInOut(frame, len)}}>
-      <div style={{fontFamily: fontFor(g.text, fonts), fontSize: size, color: YELLOW, lineHeight: 1, ...stroke(size * 0.06),
-        textShadow: '0 8px 30px rgba(0,0,0,0.6)', transform: `scale(${0.85 + 0.15 * pop(frame, fps)})`, transformOrigin: 'left'}}>
-        {g.text.slice(0, chars)}
+    <AbsoluteFill style={{opacity: fadeInOut(frame, len, 1, 8), pointerEvents: 'none'}}>
+      <AbsoluteFill style={{background: `rgba(0,0,0,${scrim})`}} />
+      {dock < 1 ? new Array(n).fill(0).map((_, i) => {
+        // dust grains fly from scattered points into the text, then sparkle out
+        const r = (k: string) => random(`yr-${g.text}-${i}-${k}`);
+        const sx = (r('x') - 0.5) * width * 0.9, sy = (r('y') - 0.5) * height * 0.8;
+        const tx = (r('tx') - 0.5) * size * g.text.length * 0.5, ty = (r('ty') - 0.5) * size * 0.6;
+        const x = width / 2 + sx + (tx - sx) * gather, y = height / 2 + sy + (ty - sy) * gather;
+        const o = (1 - dock) * (gather < 1 ? 0.9 : 0.6 * Math.abs(Math.sin(frame / 4 + i)));
+        const d = (2 + r('s') * 5) * (width / 1920);
+        return <div key={i} style={{position: 'absolute', left: x, top: y, width: d, height: d, borderRadius: '50%', opacity: o,
+          background: '#ffe9a8', boxShadow: `0 0 ${d * 3}px #ffcc4d`}} />;
+      }) : null}
+      <div style={{position: 'absolute', left: cx, top: cy - size * 0.55, transform: `translateX(${-50 * (1 - dock)}%)`, whiteSpace: 'nowrap'}}>
+        <div style={{fontFamily: fontFor(g.text, fonts), fontSize: size, lineHeight: 1, color: YELLOW, opacity: gather,
+          filter: `blur(${(1 - gather) * 12}px)`, ...stroke(size * 0.035),
+          textShadow: `0 0 ${size * 0.25 * (1 - dock * 0.7)}px rgba(255,190,60,0.85), 0 8px 30px rgba(0,0,0,0.6)`}}>{g.text}</div>
+        {g.sub ? <div style={{fontFamily: fontFor(g.sub, fonts), fontSize: Math.max(size * 0.26, small * 0.34), color: '#fff',
+          marginTop: size * 0.06, opacity: interpolate(frame, [fps * 0.6, fps * 0.9], [0, 1], clamp), ...stroke(2),
+          textAlign: dock > 0.5 ? 'left' : 'center'}}>{g.sub}</div> : null}
       </div>
-      <div style={{height: size * 0.08, width: `${line * (short ? 0.7 : 0.25)}%`, background: RED, marginTop: size * 0.08}} />
-      {g.sub ? <div style={{fontFamily: fontFor(g.sub, fonts), fontSize: size * 0.32, color: '#fff', marginTop: size * 0.12,
-        opacity: interpolate(frame, [16, 26], [0, 1], clamp), ...stroke(size * 0.02)}}>{g.sub}</div> : null}
+    </AbsoluteFill>
+  );
+};
+
+/** One to three words in bold yellow that punch in near the top-left (SeeKen-style key word). */
+const Keyword: React.FC<GP<Extract<Graphic, {type: 'keyword'}>>> = ({g, len, fonts, short}) => {
+  const frame = useCurrentFrame();
+  const {fps, width} = useVideoConfig();
+  const p = pop(frame, fps, 0, 9);
+  const size = width * (short ? 0.11 : 0.06);
+  const wobble = Math.sin(frame / 9) * 1.2;
+  return (
+    <AbsoluteFill style={{padding: short ? '17% 7% 0' : '4.5% 5% 0', opacity: fadeInOut(frame, len, 1, 6),
+      alignItems: short ? 'center' : 'flex-start'}}>
+      <div style={{fontFamily: fontFor(g.text, fonts), fontSize: size, color: YELLOW, lineHeight: 1.05, ...stroke(size * 0.06),
+        textShadow: '0 6px 0 rgba(0,0,0,0.55), 0 12px 40px rgba(0,0,0,0.6)',
+        transform: `scale(${0.3 + 0.7 * p}) rotate(${wobble - 2}deg)`, transformOrigin: short ? 'center' : 'left center'}}>{g.text}</div>
+    </AbsoluteFill>
+  );
+};
+
+/** Short labels that pop in around the subject, each with a dot and a hairline pointing inwards. */
+const SLOTS_WIDE = [[0.06, 0.2], [0.72, 0.16], [0.07, 0.62], [0.73, 0.6]];
+const SLOTS_TALL = [[0.08, 0.2], [0.55, 0.28], [0.08, 0.66], [0.55, 0.74]];
+const Labels: React.FC<GP<Extract<Graphic, {type: 'labels'}>>> = ({g, len, fonts, short}) => {
+  const frame = useCurrentFrame();
+  const {fps, width, height} = useVideoConfig();
+  const items = (g.items || []).slice(0, 4);
+  const size = width * (short ? 0.046 : 0.025);
+  const slots = short ? SLOTS_TALL : SLOTS_WIDE;
+  return (
+    <AbsoluteFill style={{opacity: fadeInOut(frame, len, 1, 8)}}>
+      {items.map((t, i) => {
+        const [x, y] = slots[i];
+        const s = pop(frame, fps, 4 + i * Math.round(fps * 0.45), 12);
+        const left = x < 0.5;
+        const line = interpolate(frame, [4 + i * fps * 0.45, 14 + i * fps * 0.45], [0, 1], clamp);
+        return (
+          <div key={i} style={{position: 'absolute', left: x * width, top: y * height, display: 'flex', alignItems: 'center',
+            flexDirection: left ? 'row' : 'row-reverse', transform: `scale(${s})`, transformOrigin: left ? 'left center' : 'right center'}}>
+            <div style={{fontFamily: fontFor(t, fonts), fontSize: size, color: '#fff', background: 'rgba(11,11,16,0.62)',
+              padding: `${size * 0.25}px ${size * 0.55}px`, borderRadius: size * 0.3, border: '1.5px solid rgba(255,255,255,0.55)',
+              backdropFilter: 'blur(4px)', whiteSpace: 'nowrap'}}>{t}</div>
+            <div style={{width: size * 2.6 * line, height: 2, background: 'rgba(255,255,255,0.85)'}} />
+            <div style={{width: size * 0.45, height: size * 0.45, borderRadius: '50%', background: YELLOW,
+              boxShadow: `0 0 0 ${size * 0.18 * (1 + Math.sin(frame / 5 + i))}px rgba(255,214,10,0.3)`}} />
+          </div>
+        );
+      })}
     </AbsoluteFill>
   );
 };
@@ -185,6 +255,8 @@ export const GraphicLayer: React.FC<{g: Graphic; len: number; fonts: Fonts; shor
     case 'quote': return <QuoteCard {...(p as any)} />;
     case 'timeline': return <Timeline {...(p as any)} />;
     case 'fact': return <Fact {...(p as any)} />;
+    case 'keyword': return <Keyword {...(p as any)} />;
+    case 'labels': return <Labels {...(p as any)} />;
     default: return null;
   }
 };

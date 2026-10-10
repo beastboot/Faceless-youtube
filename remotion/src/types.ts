@@ -9,7 +9,9 @@ export type Graphic =
   | {type: 'name'; name: string; role?: string}
   | {type: 'quote'; text: string; by?: string}
   | {type: 'timeline'; points: {year: string; label: string}[]}
-  | {type: 'fact'; text: string};
+  | {type: 'fact'; text: string}
+  | {type: 'keyword'; text: string}
+  | {type: 'labels'; items: string[]};
 
 export type Shot = {
   start: number;
@@ -21,6 +23,7 @@ export type Shot = {
   transition: string;
   captions: Caption[];
   graphic?: Graphic | null;
+  chapter?: {n: number; title: string} | null; // full-screen chapter card at the start of this shot
 };
 
 export type Props = {

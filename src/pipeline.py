@@ -2,6 +2,7 @@
 edit, thumbnail -> upload. English and Hindi versions share the same illustrations."""
 import json
 import re
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -62,6 +63,34 @@ def ensure_host_reference(cfg):
 
 
 
+def character_references(cfg, script, shots, art, landscape):
+    """Master picture for each main character of this story (most screen time, up to
+    images.character_refs): later shots draw them from it, so they look the same throughout."""
+    n = cfg["images"].get("character_refs", 0)
+    chars = script.get("characters") or {}
+    host = (cfg.get("host") or {}).get("name_en")
+    if not n or not chars or imagegen._cf_exhausted:
+        return {}
+    counts = {c: sum(1 for sh in shots if c in (sh.get("cast") or [])) for c in chars if c != host}
+    main = [c for c in sorted(counts, key=counts.get, reverse=True) if counts[c] >= 3][:n]
+    refs = {}
+    for k, name in enumerate(main):
+        path = art / f"character-{slugify(name)[:30] or k}.jpg"
+        if not path.exists():
+            prompt = (f"character design sheet, single character standing, full body, front view, neutral "
+                      f"expression, plain light studio background: {chars[name]}")
+            try:
+                im = imagegen._cloudflare(f"{prompt}. {cfg['images']['styles']['long']}", cfg, 300 + k, landscape)
+                im.save(path, quality=95)
+            except Exception as e:
+                log.warning("Reference picture for %s failed (%s); described in words instead", name, e)
+                continue
+        refs[name] = str(path)
+    if refs:
+        log.info("Character references: %s", ", ".join(refs))
+    return refs
+
+
 def illustrate(cfg, script, art, fmt, res):
     """One AI image per shot (+ thumbnail art). Falls back to stock footage per shot if needed."""
     art.mkdir(parents=True, exist_ok=True)
@@ -69,6 +98,9 @@ def illustrate(cfg, script, art, fmt, res):
     host_ref = ensure_host_reference(cfg)
     shots = [sh for sc in script["scenes"] for sh in sc["shots"]]
     chars = script.get("characters") or {}
+    refs = character_references(cfg, script, shots, art, landscape)
+    ref_left = [(cfg["images"].get("reference_shots") or {}).get(fmt, 0)]   # reference shots cost ~2x
+    ref_lock = threading.Lock()
 
     deadline = time.time() + 60 * (cfg["images"].get("max_minutes") or {}).get(fmt, 30)
 
@@ -85,7 +117,15 @@ def illustrate(cfg, script, art, fmt, res):
         if names:
             prompt = f"{prompt}. " + "; ".join(f"{n}: {chars[n]}" for n in names)
         host = cfg.get("host") or {}
-        ref = host_ref if host_ref and host.get("name_en") in (sh.get("cast") or []) else None
+        cast = sh.get("cast") or []
+        ref = host_ref if host_ref and host.get("name_en") in cast else next(
+            (refs[n] for n in cast if n in refs), None)
+        if ref:   # same face in every shot, within the reference-shot budget
+            with ref_lock:
+                if ref_left[0] > 0:
+                    ref_left[0] -= 1
+                else:
+                    ref = None
         try:
             provider = imagegen.generate(prompt, path, cfg, seed=1000 + i, landscape=landscape, fmt=fmt,
                                          reference=ref)
@@ -161,6 +201,18 @@ def illustrate(cfg, script, art, fmt, res):
                         "fill": vis.get("fill", False), "move": sh.get("move"), "ambient": sh.get("ambient")}
         if vis.get("kind") != "color":
             last_ok = sh["visual"]
+    if cfg["video"].get("parallax", True):   # depth maps -> 2.5D camera moves in the renderer
+        try:
+            from . import depth
+            maps = depth.depth_maps(sorted({sh["visual"]["path"] for sh in shots
+                                            if sh["visual"]["kind"] == "image" and sh["visual"]["path"]}))
+            for sh in shots:
+                d = maps.get(sh["visual"]["path"] or "")
+                if d and sh["visual"]["kind"] == "image":
+                    sh["visual"]["depth"] = str(d)
+            log.info("Depth maps: %d pictures get the 3D camera", len(maps))
+        except Exception as e:
+            log.warning("Depth maps unavailable (%s); flat camera moves", e)
     n_ai = sum(1 for i in need if made.get(leaders[min(need.index(i) // group, len(leaders) - 1)]))
     log.info("Visuals: %d AI-illustrated, %d stock B-roll, %d fallbacks",
              n_ai, len(broll), len(shots) - n_ai - len(broll))
@@ -339,10 +391,16 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             items = list(ex.map(speak, enumerate(flat)))
         log.info("[%s] narrated %d shots", lang, len(items))
     seen_scene = set()
+    n_chapter = 0
     for it in items:  # sound design + music need the mood and where chapters begin
         it["mood"] = script.get("mood")
         if it["scene"] not in seen_scene:
             seen_scene.add(it["scene"])
+            title = (script["scenes"][it["scene"]].get("chapter") or "").strip()
+            if title and fmt == "long":
+                n_chapter += 1
+                if it["scene"] > 0:   # the hook opens the video; cards mark the later parts
+                    it["chapter_card"] = {"n": n_chapter, "title": title}
             it["chapter_start"] = bool((script["scenes"][it["scene"]].get("chapter") or "").strip()) or (
                 fmt == "short" and it["scene"] == len(script["scenes"]) - 1)
     limit = cfg["languages"].get(lang, {}).get("short_max_seconds") if fmt == "short" else None

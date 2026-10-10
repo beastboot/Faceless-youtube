@@ -33,6 +33,34 @@ def ensure_node():
     run(["npx", "remotion", "browser", "ensure"], cwd=RDIR)
 
 
+def camera_clips(scenes, durs, work, cfg, fmt):
+    """2.5D camera clip for every picture shot that has a depth map ({shot index: clip path})."""
+    vc, fc = cfg["video"], cfg[fmt]
+    if not vc.get("parallax", True):
+        return {}
+    from . import parallax
+    fps, xf = vc["fps"], vc.get("transition_seconds", 0.35)
+    (work / "cam").mkdir(exist_ok=True)
+    jobs = []
+    for i, (sc, d) in enumerate(zip(scenes, durs)):
+        vis = sc.get("visual") or {}
+        if vis.get("kind") != "image" or not vis.get("depth"):
+            continue
+        move = vis.get("move") or ["zoom_in", "pan_left", "zoom_out", "pan_right", "rise"][i % 5]
+        frames = int(round((d + xf) * fps)) + 2   # covers the shot plus the next shot's transition
+        key = hashlib.sha1(f"{vis['path']}|{move}|{frames}|{fc['width']}x{fc['height']}".encode()).hexdigest()[:12]
+        jobs.append((i, {"image": vis["path"], "depth": vis["depth"], "move": move, "frames": frames,
+                         "width": fc["width"], "height": fc["height"], "fps": fps,
+                         "out": work / "cam" / f"{key}.mp4"}))
+    if not jobs:
+        return {}
+    import time
+    t0 = time.time()
+    done = parallax.render_clips(jobs)
+    log.info("3D camera: %d/%d shots in %.0fs", len(done), len(jobs), time.time() - t0)
+    return {i: str(p) for i, p in done.items()}
+
+
 def render(scenes, starts, durs, work, out, cfg, fmt):
     vc, fc = cfg["video"], cfg[fmt]
     ensure_node()
@@ -62,14 +90,18 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
             copied[path] = f"run/{run_id}/{name}"
         return copied[path]
 
+    cams = camera_clips(scenes, durs, work, cfg, fmt)
     styles = [TRANSITIONS.get(t, "fade") for t in vc["transitions"].get(fmt, ["fade"])]
     shots = []
     for i, (sc, st, d) in enumerate(zip(scenes, starts, durs)):
         vis = sc.get("visual") or {}
+        if i in cams:   # 3D camera clip replaces the flat move on this picture
+            vis = {**vis, "kind": "video", "path": cams[i]}
         shots.append({
             "start": round(st, 4), "dur": round(d, 4),
             "image": stage_file(vis.get("path")) if vis.get("kind") == "image" else None,
             "video": stage_file(vis.get("path")) if vis.get("kind") == "video" else None,
+            "chapter": sc.get("chapter_card") if fmt == "long" else None,
             "move": vis.get("move") or ["zoom_in", "pan_left", "zoom_out", "pan_right", "rise"][i % 5],
             "ambient": vis.get("ambient") or "none",
             # a new picture arrives with a styled move; the same picture continuing just dissolves

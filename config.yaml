@@ -46,6 +46,7 @@ video:
   sfx_volume: 0.5                     # whoosh on every picture change (0 = off)
   renderer: "remotion"                # remotion = motion graphics (maps, dates, counters, karaoke captions)
                                       # ffmpeg = the simpler built-in renderer (uses "animation" below)
+  parallax: true                      # depth maps -> 2.5D camera (foreground moves against background)
   animation: "storybook"              # storybook = camera move + light particles + glow on painted scenes
                                       # sketch = pen draws each picture live | kenburns = plain pan/zoom
   sketch_draw_share: 0.55             # share of each shot spent drawing before colours wash in
@@ -68,18 +69,26 @@ images:
   max_minutes: {long: 45, short: 15}  # time budget for AI images per video (backups are slow);
                                       # shots left over use stock clips / reuse earlier images
   styles:
-    # Storybook look (hand-painted anime watercolour), same for long videos and Shorts.
+    # 3D animated-movie look (Pixar/Disney-like characters in detailed real-looking places).
     long: >-
-      hand-painted anime watercolor storybook illustration, soft painterly textures, warm cinematic
-      light, lush detailed background, expressive characters, gentle glow, rich colors,
+      3D animated movie still, Pixar and Disney style, stylized expressive characters with big
+      expressive eyes and soft rounded features, detailed realistic environment and props, cinematic
+      volumetric lighting, soft depth of field, warm filmic color grade, highly detailed render,
       no text, no letters, no watermark, no signature
     short: >-
-      hand-painted anime watercolor storybook illustration, soft painterly textures, dramatic warm
-      light, detailed background, expressive emotional characters, vivid colors, close framing,
+      3D animated movie still, Pixar and Disney style, stylized expressive characters with big
+      expressive eyes, strong emotion on the face, detailed realistic environment, dramatic cinematic
+      lighting, close framing, soft depth of field, vivid filmic colors, highly detailed render,
       no text, no letters, no watermark, no signature
   thumbnail_style: >-
-    hyper-detailed vibrant epic digital painting, saturated colors, dramatic golden-hour light, glowing
-    highlights, high contrast, cinematic, main subject large on the right half, no text, no watermark
+    3D animated movie poster still, Pixar style, one expressive character with a strong emotion (shock,
+    awe, fear), saturated vivid colors, dramatic rim light, high contrast, cinematic, main subject large
+    on the right half, no text, no watermark
+  # Same face all video long: a master picture per main character, then FLUX.2 Klein draws the
+  # character's shots from it (~125 neurons per shot vs ~58 for schnell, so it is budgeted).
+  character_refs: 2                   # main characters per story that get a master picture
+  reference_shots: {long: 16, short: 5}
+  reference_size: [1024, 576]
   stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
 
