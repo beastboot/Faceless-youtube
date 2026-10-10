@@ -83,6 +83,11 @@ def illustrate(cfg, script, art, fmt, res):
     leaders = need[::group]
     with ThreadPoolExecutor(3) as ex:
         made = dict(ex.map(one, [(i, shots[i]) for i in leaders]))
+    failed = [i for i in leaders if not made.get(i)]
+    if failed:  # second chance, one at a time (rate limits ease off), before anything is reused
+        log.info("Retrying %d failed illustrations", len(failed))
+        for i in failed:
+            made[i] = one((i, shots[i]))[1]
     results = dict(broll)
     for k, i in enumerate(need):
         results[i] = made.get(leaders[min(k // group, len(leaders) - 1)])
@@ -93,10 +98,19 @@ def illustrate(cfg, script, art, fmt, res):
     # feel new). Random stock search is the last resort: it can return unrelated footage.
     ai = sorted(i for i, v in results.items() if v and v.get("kind") == "image")
     last_ok = None
+    details = ["detail_left", "detail_right", "detail_top"]
     for i, sh in enumerate(shots):
         vis = results.get(i)
         if vis is None and ai:
-            vis = results[min(ai, key=lambda j: abs(j - i))]
+            near = min(ai, key=lambda j: abs(j - i))
+            vis = dict(results[near])
+            # Reused picture: a different framing (close-up on another part of the scene) and the
+            # line's key words on screen, so the visual still follows the script.
+            sh["move"] = details[i % len(details)]
+            if not sh.get("graphic"):
+                words = (sh.get("caption") or sh["line"]).split()
+                key = " ".join(words[: min(6, len(words))])
+                sh["graphic"] = {"type": "fact", "text": key}
         if vis is None and cfg["images"].get("fallback_to_stock"):
             query = sh.get("stock_query") or " ".join((sh["image_prompt"] or sh["line"]).split()[:5])
             vis = picker.for_scene({"stock_query": query}, i)

@@ -15,6 +15,10 @@ export const KenBurns: React.FC<{src: string; move: string; len: number}> = ({sr
     case 'pan_right': scale = 1.14; x = -6 + 12 * t; break;
     case 'rise': scale = 1.14; y = 5 - 10 * t; break;
     case 'push_focus': scale = 1.0 + 0.22 * t; break;
+    // close-ups on one part of the painting: a different camera angle on a reused picture
+    case 'detail_left': scale = 1.7 + 0.08 * t; x = 14 - 3 * t; break;
+    case 'detail_right': scale = 1.7 + 0.08 * t; x = -14 + 3 * t; break;
+    case 'detail_top': scale = 1.7 + 0.08 * t; y = 12 - 3 * t; break;
   }
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>

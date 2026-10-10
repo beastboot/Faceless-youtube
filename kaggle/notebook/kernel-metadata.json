@@ -1,0 +1,13 @@
+{
+  "id": "oddannals/odd-annals-motion",
+  "title": "odd-annals-motion",
+  "code_file": "motion.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["oddannals/odd-annals-motion-input"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

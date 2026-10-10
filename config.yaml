@@ -64,8 +64,8 @@ images:
   # (lucid-origin looks nicer but costs ~4,000 per image = 2 free images/day.)
   cloudflare_models: ["@cf/black-forest-labs/flux-1-schnell"]
   cloudflare_steps: 4
-  max_images: {long: 70, short: 14}   # more shots than this -> neighbouring shots share an image
-  max_minutes: {long: 45, short: 10}  # time budget for AI images per video (backups are slow);
+  max_images: {long: 70, short: 20}   # more shots than this -> neighbouring shots share an image
+  max_minutes: {long: 45, short: 15}  # time budget for AI images per video (backups are slow);
                                       # shots left over use stock clips / reuse earlier images
   styles:
     # Storybook look (hand-painted anime watercolour), same for long videos and Shorts.
