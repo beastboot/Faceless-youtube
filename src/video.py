@@ -182,8 +182,18 @@ def assemble(scenes, work, out_path, cfg, fmt):
         t += d
     (work / "audio.txt").write_text("".join(f"file '{r[1].name}'\n" for r in results))
     xd = cfg["video"].get("transition_seconds", 0)
+    remotion_ok = False
     if cfg["video"].get("renderer") == "remotion":
-        motion.render(scenes, starts, [r[2] for r in results], work, work / "video.mp4", cfg, fmt)
+        try:
+            motion.render(scenes, starts, [r[2] for r in results], work, work / "video.mp4", cfg, fmt)
+            remotion_ok = True
+        except Exception as e:
+            # Never lose a video to the renderer: fall back to the built-in ffmpeg renderer.
+            log.error("Remotion render failed (%s); falling back to the ffmpeg renderer", e)
+            with ThreadPoolExecutor(workers) as ex:
+                results = list(ex.map(lambda a: render_scene(a[1], a[0], work, cfg, fmt), enumerate(scenes)))
+    if remotion_ok:
+        pass
     elif xd and len(results) > 1:
         join_with_transitions(results, scenes, work / "video.mp4", cfg, fmt, xd)
     else:
