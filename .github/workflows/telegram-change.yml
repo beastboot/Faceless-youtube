@@ -1,0 +1,182 @@
+name: Change from Telegram
+
+# Started by the Telegram bot (bot/worker.js) after the owner confirms a change request. Claude Code
+# edits the repository and the checks below must pass; the change is then parked on a branch and the
+# owner gets ✅/❌ buttons in Telegram. Nothing reaches main (the daily videos) until they tap ✅
+# ("merge"). "undo" reverts the most recent Telegram change on main.
+on:
+  workflow_dispatch:
+    inputs:
+      request:
+        description: "What to change (owner's words)"
+        required: true
+      mode:
+        description: "change | merge | drop | undo"
+        default: "change"
+      branch:
+        description: "Branch to merge or drop (merge/drop modes)"
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: telegram-change     # one change at a time, in order
+  cancel-in-progress: false
+
+jobs:
+  change:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      REQUEST: ${{ inputs.request }}
+      BRANCH: ${{ inputs.branch }}
+      MODE: ${{ inputs.mode }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Telegram helper
+        run: |
+          cat > /tmp/tg.sh <<'EOF'
+          #!/usr/bin/env bash
+          # usage: tg.sh "message"  (plain text, cut to Telegram's limit)
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" --data-urlencode "text=${1:0:4000}" \
+            -d disable_web_page_preview=true > /dev/null
+          EOF
+          chmod +x /tmp/tg.sh
+          git config user.name "beastboot"
+          git config user.email "93203344+beastboot@users.noreply.github.com"
+
+      - name: Undo the last Telegram change
+        if: inputs.mode == 'undo'
+        run: |
+          sha=$(git log --format=%H --grep='^Telegram change:' -n 1)
+          if [ -z "$sha" ]; then /tmp/tg.sh "↩️ Koi Telegram change mila hi nahi jise undo karun."; exit 0; fi
+          subject=$(git log -1 --format=%s "$sha")
+          if git revert --no-edit "$sha" && git push -q origin HEAD:main; then
+            /tmp/tg.sh "↩️ Undo ho gaya: ${subject#Telegram change: }
+          https://github.com/${{ github.repository }}/commit/$(git rev-parse HEAD)"
+          else
+            /tmp/tg.sh "⚠️ Undo nahi ho paya (baad ke changes usi hisse ko chhoo rahe hain). Claude Code mein batayein."
+            exit 1
+          fi
+
+      - name: Make a reviewed change live, or throw it away
+        if: inputs.mode == 'merge' || inputs.mode == 'drop'
+        run: |
+          case "$BRANCH" in telegram/*) ;; *) /tmp/tg.sh "⚠️ Galat branch."; exit 1;; esac
+          if ! git fetch -q origin "$BRANCH"; then
+            /tmp/tg.sh "⚠️ Yeh change ab maujood nahi hai (shayad pehle hi live/discard ho chuka)."; exit 0
+          fi
+          if [ "$MODE" = "drop" ]; then
+            git push -q origin --delete "$BRANCH"
+            /tmp/tg.sh "🗑 Change discard kar diya. Kuch nahi badla."; exit 0
+          fi
+          git checkout -q -B live "origin/$BRANCH"
+          if ! git rebase -q origin/main; then
+            git rebase --abort
+            /tmp/tg.sh "⚠️ Is beech main code badal gaya, yeh change ab fit nahi hota. Dobara maangein."; exit 1
+          fi
+          git push -q origin live:main && git push -q origin --delete "$BRANCH"
+          /tmp/tg.sh "✅ Live ho gaya! Agle daily run (8:47 AM IST) se lagu hoga.
+          https://github.com/${{ github.repository }}/commit/$(git rev-parse HEAD)
+          Pasand nahi aaya? /undo bhejein."
+
+      - uses: actions/setup-python@v5
+        if: inputs.mode == 'change'
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-node@v4
+        if: inputs.mode == 'change'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: remotion/package-lock.json
+      - name: Install
+        if: inputs.mode == 'change'
+        run: |
+          pip install -q -r requirements.txt
+          (cd remotion && npm ci --no-audit --no-fund --silent)
+          npm install -g --silent @anthropic-ai/claude-code@2.1.283
+          /tmp/tg.sh "🛠 Kaam shuru: \"${REQUEST:0:300}\" (5-15 min lagenge)"
+
+      - name: Claude makes the change
+        if: inputs.mode == 'change'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          printf '%s\n\nTHE OWNER ASKED (from Telegram):\n%s\n' "$(cat .github/telegram-change-rules.md)" "$REQUEST" > /tmp/prompt.md
+          claude -p "$(cat /tmp/prompt.md)" \
+            --permission-mode acceptEdits \
+            --allowedTools "Read" "Edit" "Write" "Glob" "Grep" \
+              "Bash(python -m py_compile:*)" "Bash(python -c:*)" "Bash(ls:*)" "Bash(cat:*)" "Bash(grep:*)" \
+              "Bash(git diff:*)" "Bash(git status:*)" "Bash(git log:*)" "Bash(npx tsc:*)" \
+            --disallowedTools "WebFetch" "WebSearch" \
+            --max-turns 60 > /tmp/summary.txt || { /tmp/tg.sh "⚠️ Claude yeh change poora nahi kar paya. Kuch nahi badla."; exit 1; }
+          cat /tmp/summary.txt
+
+      - name: Safety checks
+        if: inputs.mode == 'change'
+        id: check
+        run: |
+          changed=$(git status --porcelain | awk '{print $2}')
+          echo "Changed: $changed"
+          if [ -z "$changed" ]; then echo "none=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          fail() { /tmp/tg.sh "🛑 Change rok diya: $1. Kuch nahi badla."; exit 1; }
+          if echo "$changed" | grep -qE '^(\.github/|\.env|client_secret|voice/)'; then fail "protected files chhue gaye"; fi
+          git add -A
+          [ "$(git diff --cached --numstat | awk '{s+=$1+$2} END {print s+0}')" -le 1500 ] || fail "change bahut bada tha"
+          if git diff --cached | grep -qiE '(api[_-]?key|secret|token)[^=:]{0,20}[:=][[:space:]]*["'"'"'][A-Za-z0-9_-]{20,}'; then
+            fail "code mein secret jaisa text tha"
+          fi
+          python -m py_compile src/*.py main.py scripts/*.py || fail "Python code mein error"
+          python -c "from src.common import load_config; load_config(); import src.pipeline, src.reach" || fail "config.yaml ya imports toot gaye"
+          (cd remotion && npx tsc --noEmit -p .) || fail "video (Remotion) code mein error"
+          node --check bot/worker.js || fail "bot code mein error"
+
+      - name: Park the change and ask the owner
+        if: inputs.mode == 'change'
+        run: |
+          if [ "${{ steps.check.outputs.none }}" = "1" ]; then
+            /tmp/tg.sh "ℹ️ $(cat /tmp/summary.txt)"
+            exit 0
+          fi
+          git commit -q -m "Telegram change: ${REQUEST:0:120}" \
+            -m "Requested by the owner from Telegram; made by Claude Code in GitHub Actions; approved in Telegram before going live." \
+            -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+          branch="telegram/${{ github.run_id }}"
+          git push -q origin "HEAD:refs/heads/$branch"
+          files=$(git show --stat --format= HEAD | tail -25)
+          bot_note=""
+          if git show --name-only --format= HEAD | grep -q '^bot/'; then
+            bot_note="
+          ℹ️ Bot ka code bhi badla hai: live hone ke baad naya bot chalu karne ke liye Claude Code mein 'deploy bot' bolein."
+          fi
+          text="🛠 Change taiyaar hai (abhi live NAHI hai):
+          $(cat /tmp/summary.txt)
+
+          Badli files:
+          $files
+          Pura diff: https://github.com/${{ github.repository }}/compare/main...$branch$bot_note
+
+          ✅ dabane par hi live hoga."
+          python3 - "$branch" "$text" <<'EOF'
+          import json, os, sys, urllib.parse, urllib.request
+          branch, text = sys.argv[1], sys.argv[2][:3900]
+          kb = {"inline_keyboard": [[{"text": "✅ Live karo", "callback_data": f"merge:{branch}"},
+                                     {"text": "❌ Discard", "callback_data": f"drop:{branch}"}]]}
+          data = urllib.parse.urlencode({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": text,
+                                         "reply_markup": json.dumps(kb), "disable_web_page_preview": "true"}).encode()
+          urllib.request.urlopen(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage", data)
+          EOF
+
+      - name: Report a crash
+        if: failure()
+        run: |
+          /tmp/tg.sh "⚠️ Change job fail hua — kuch live nahi hua. Log: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true

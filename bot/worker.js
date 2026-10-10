@@ -17,14 +17,24 @@ const HELP = `<b>Odd Annals bot</b> — ask anything, or use:
 /report — today's reach report
 /runs — recent automation runs (made / failed)
 /dashboard — open the dashboard
+/change &lt;what to change&gt; — change the channel's videos/settings (you approve first)
+/undo — undo the last change
 Add <code>ta</code> for the Tamil channel, e.g. <code>/latest ta</code>.
-Or just type a question: "aaj kaunsi video sabse achhi chal rahi hai?"`;
+Or just type a question: "aaj kaunsi video sabse achhi chal rahi hai?"
+Or a change: "shorts mein captions bade kar do" — I ask before doing anything.`;
 
 export default {
   async fetch(req, env, ctx) {
     if (req.method !== 'POST') return new Response('ok');
     if (req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.WEBHOOK_SECRET) return new Response('no', {status: 403});
     const update = await req.json().catch(() => ({}));
+    const cb = update.callback_query;
+    if (cb) {   // ✅/❌ buttons; only the owner's own chat counts
+      if (String(cb.message?.chat?.id) === String(env.TELEGRAM_CHAT_ID) && String(cb.from?.id) === String(env.TELEGRAM_CHAT_ID)) {
+        ctx.waitUntil(onButton(env, cb).catch((e) => send(env, cb.message.chat.id, `⚠️ ${esc(String(e && e.message || e)).slice(0, 300)}`)));
+      }
+      return new Response('ok');
+    }
     const msg = update.message || update.edited_message;
     if (!msg || String(msg.chat.id) !== String(env.TELEGRAM_CHAT_ID)) return new Response('ok');
     ctx.waitUntil(handle(env, msg.chat.id, (msg.text || '').trim()).catch((e) =>
@@ -50,7 +60,83 @@ async function handle(env, chat, text) {
     case '/report': return send(env, chat, await reportText());
     case '/runs': return send(env, chat, await runsText());
     case '/dashboard': return send(env, chat, `📊 <a href="${DASHBOARD}">Open the dashboard</a>`);
-    default: return send(env, chat, await askGemini(env, text, ch));
+    case '/change':
+      return args.length ? confirmChange(env, chat, args.join(' '))
+        : send(env, chat, 'Likhiye kya badalna hai, jaise: <code>/change shorts ki awaaz thodi tez kar do</code>');
+    case '/undo': return confirmUndo(env, chat);
+    default:
+      if (!text.startsWith('/') && await isChangeRequest(env, text)) return confirmChange(env, chat, text);
+      return send(env, chat, await askGemini(env, text, ch));
+  }
+}
+
+// ---------- changes from Telegram ----------
+// Two approvals, both in Telegram: (1) "do this change?" starts .github/workflows/telegram-change.yml,
+// where Claude Code edits the repo on a separate branch and checks run; (2) the job sends the result
+// with "✅ Live karo / ❌ Discard", and only ✅ puts it on main (what the daily run uses).
+// The request text travels inside the confirmation message itself, so no storage is needed.
+const CHANGE_HEAD = '🛠 Change request:';
+const CHANGE_ASK = 'Yeh change karun?';
+
+async function isChangeRequest(env, text) {
+  const prompt = `A YouTube channel owner sent this message to their channel's automation bot. Is it a request to
+CHANGE how the automation works (videos, Shorts, voice, captions, pictures, titles, schedule, uploads,
+thumbnails, bot behaviour, settings) — as opposed to a question about stats/performance, or chat?
+Message: ${JSON.stringify(text)}
+Answer with exactly one word: CHANGE or OTHER.`;
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${env.GEMINI_API_KEY}`, {
+      method: 'POST', headers: {'content-type': 'application/json'},
+      body: JSON.stringify({contents: [{parts: [{text: prompt}]}], generationConfig: {temperature: 0, maxOutputTokens: 5}})});
+    const out = ((await r.json()).candidates?.[0]?.content?.parts?.[0]?.text || '').toUpperCase();
+    if (out.includes('CHANGE')) return true;
+    if (out.includes('OTHER')) return false;
+  } catch (e) { /* fall through to the keyword check */ }
+  return /\b(change|badal|badlo|kar do|kardo|add karo|hata|remove|increase|decrease|bada|chhota|tez|slow|band kar|chalu kar)\b/i.test(text);
+}
+
+function confirmChange(env, chat, request) {
+  return tg(env, 'sendMessage', {chat_id: chat,
+    text: `${CHANGE_HEAD}\n${request.slice(0, 1500)}\n\n${CHANGE_ASK} Claude GitHub par change taiyaar karega aur checks chalayega; live tabhi hoga jab aap dobara ✅ dabayenge.`,
+    reply_markup: {inline_keyboard: [[{text: '✅ Haan, taiyaar karo', callback_data: 'apply'}, {text: '❌ Nahi', callback_data: 'cancel'}]]}});
+}
+
+function confirmUndo(env, chat) {
+  return tg(env, 'sendMessage', {chat_id: chat, text: '↩️ Telegram se kiya gaya aakhri live change undo karun?',
+    reply_markup: {inline_keyboard: [[{text: '✅ Undo karo', callback_data: 'undo'}, {text: '❌ Rehne do', callback_data: 'cancel'}]]}});
+}
+
+async function dispatch(env, inputs) {
+  if (!env.GH_DISPATCH_TOKEN) throw new Error('GitHub access set nahi hai (GITHUB_CHANGE_TOKEN). Claude Code mein "deploy bot" bolein.');
+  const r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/telegram-change.yml/dispatches`, {
+    method: 'POST', headers: {Authorization: `Bearer ${env.GH_DISPATCH_TOKEN}`, Accept: 'application/vnd.github+json',
+      'User-Agent': 'odd-annals-bot', 'content-type': 'application/json'},
+    body: JSON.stringify({ref: 'main', inputs: {request: 'telegram', mode: 'change', branch: '', ...inputs}})});
+  if (r.status !== 204) throw new Error(`GitHub ne job shuru nahi kiya (HTTP ${r.status}): ${(await r.text()).slice(0, 150)}`);
+}
+
+async function onButton(env, cb) {
+  const chat = cb.message.chat.id, id = cb.message.message_id, data = cb.data || '';
+  await tg(env, 'answerCallbackQuery', {callback_query_id: cb.id});
+  // replace the buttons with what happened, so nothing can be pressed twice
+  const done = (line) => tg(env, 'editMessageText', {chat_id: chat, message_id: id,
+    text: `${(cb.message.text || '').slice(0, 3500)}\n\n${line}`, disable_web_page_preview: true});
+  if (data === 'cancel') return done('❌ Theek hai, kuch nahi badla.');
+  if (data === 'undo') {
+    await dispatch(env, {mode: 'undo', request: 'undo the last Telegram change'});
+    return done('⏳ Undo shuru… 1-2 min mein batata hoon.');
+  }
+  if (data === 'apply') {
+    const t = cb.message.text || '';
+    const request = t.startsWith(CHANGE_HEAD) ? t.slice(CHANGE_HEAD.length).split(`\n\n${CHANGE_ASK}`)[0].trim() : '';
+    if (!request) return done('⚠️ Request samajh nahi aayi, dobara bhejein.');
+    await dispatch(env, {mode: 'change', request});
+    return done('⏳ Kaam shuru. Taiyaar hone par yahin ✅/❌ ke saath dikhaunga.');
+  }
+  const m = /^(merge|drop):(telegram\/\d+)$/.exec(data);
+  if (m) {
+    await dispatch(env, {mode: m[1], branch: m[2], request: `${m[1]} ${m[2]}`});
+    return done(m[1] === 'merge' ? '⏳ Live kar raha hoon…' : '⏳ Discard kar raha hoon…');
   }
 }
 
