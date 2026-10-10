@@ -258,11 +258,12 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
             meta, total = render_language(cfg, script, res, fmt, lang, work, template)
             when = publish_at.get(lang)
             video_id = publish(cfg, work, fmt, meta, when) if upload else None
-            state.append({"format": fmt, "lang": lang, "topic": topic["topic"],
-                          "wiki_title": res["wiki_title"], "title": meta["title"],
-                          "video_id": video_id, "duration": round(total, 1), "publish_at": when,
-                          "dir": f"{base.name}/{lang}", "thumb_template": template,
-                          "pending_comment": meta["engagement_question"] if video_id else ""})
+            if upload:  # test renders (--no-upload) don't use up the topic
+                state.append({"format": fmt, "lang": lang, "topic": topic["topic"],
+                              "wiki_title": res["wiki_title"], "title": meta["title"],
+                              "video_id": video_id, "duration": round(total, 1), "publish_at": when,
+                              "dir": f"{base.name}/{lang}", "thumb_template": template,
+                              "pending_comment": meta["engagement_question"] if video_id else ""})
             cleanup(work)
             results.append((lang, video_id, work))
         except Exception as e:
