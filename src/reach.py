@@ -35,7 +35,8 @@ def _analytics(video_ids, since):
             r = api.reports().query(
                 ids="channel==MINE", startDate=since, endDate=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 metrics="views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,subscribersGained,shares",
-                dimensions="video", filters="video==" + ",".join(ids), maxResults=200).execute()
+                dimensions="video", filters="video==" + ",".join(ids), sort="-views",
+                maxResults=200).execute()
             cols = [c["name"] for c in r.get("columnHeaders", [])]
             for row in r.get("rows", []):
                 d = dict(zip(cols, row))

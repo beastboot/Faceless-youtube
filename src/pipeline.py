@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from . import imagegen, keywords, review
 from . import research as research_mod
 from . import llm, script_writer, social, state, thumbnail, tts, video, youtube
-from .common import ROOT, ffprobe_duration, fmt_ts, log, slugify
+from .common import ROOT, ffprobe_duration, fmt_ts, log, run, slugify
 from .media import MediaPicker
 
 TEXT = {
@@ -115,7 +115,7 @@ def illustrate(cfg, script, art, fmt, res):
     if not thumb_art.exists():
         try:
             imagegen.generate(script.get("thumbnail_prompt") or shots[0]["image_prompt"], thumb_art, cfg,
-                              seed=7, landscape=True, fmt="long")
+                              seed=7, landscape=True, fmt="long", style=cfg["images"].get("thumbnail_style"))
         except Exception as e:
             log.warning("Thumbnail art failed (%s); using first shot", e)
     script["thumb_visual"] = ({"kind": "image", "path": str(thumb_art)} if thumb_art.exists()
@@ -214,6 +214,16 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
     with ThreadPoolExecutor(4) as ex:
         items = list(ex.map(speak, enumerate(flat)))
     log.info("[%s] narrated %d shots", lang, len(items))
+    limit = cfg["languages"].get(lang, {}).get("short_max_seconds") if fmt == "short" else None
+    spoken = sum(it["audio_dur"] + it["tail"] for it in items)
+    if limit and spoken > limit:
+        factor = min(1.18, spoken / (limit - 1.5))
+        log.info("[%s] Short is %.0fs; speeding narration up x%.2f to fit %ss", lang, spoken, factor, limit)
+        for it in items:
+            fast = it["audio"].with_name(it["audio"].stem + "-fast.mp3")
+            run(["ffmpeg", "-y", "-v", "error", "-i", it["audio"], "-filter:a", f"atempo={factor:.4f}", fast])
+            it["audio"], it["audio_dur"] = fast, ffprobe_duration(fast)
+            it["captions"] = [{**c, "start": c["start"] / factor, "end": c["end"] / factor} for c in it["captions"]]
 
     out = work / "final.mp4"
     starts, total = video.assemble(items, work, out, cfg, fmt)

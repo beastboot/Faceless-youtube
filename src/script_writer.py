@@ -165,8 +165,8 @@ Packaging (YouTube SEO):
   or date, curiosity without clickbait lies. Max two ALL-CAPS words.
 - 3 thumbnail_text candidates: 2-4 words, must NOT repeat words from the titles; wrap the 1-2 key words
   in *asterisks* (shown in red).
-- thumbnail_prompt: one image prompt for a striking thumbnail scene (one clear subject, high
-  contrast, emotion), with empty space on the left for text.
+- thumbnail_prompt: one image prompt for a striking thumbnail scene: one clear, large subject on the
+  RIGHT half (it gets a circled close-up), dramatic light, high contrast, emotion; left side calmer for text.
 - description_intro: 2 sentences that contain the words people would search for.
 - description_body: 1 short paragraph summary (no spoilers of the ending).
 - engagement_question: one short question to ask viewers in a pinned-style comment.
@@ -247,7 +247,9 @@ most relevant ones word-for-word in the titles, the first description sentence a
 Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hinglish:
 - 5 titles (under 70 characters, curiosity + a number, name or date). Write them in Hindi (Devanagari);
   only proper nouns or search keywords may stay in English letters (e.g. "Roopkund", "Titanic").
-  Never write Hindi words in Roman letters in titles. Proofread every title word by word: each word must
+  Never write Hindi words in Roman letters in titles. Proven formulas in this niche: "<place> का रहस्य",
+  "चौंका देने वाला रहस्य!", "सच जानकर हैरान रह जाओगे", "यह सच आप नहीं जानते", numbered lists
+  ("7 सबसे रहस्यमयी ..."). At most one emoji (😱 or 🔥) at the end. Proofread every title word by word: each word must
   mean exactly what you intend (e.g. इतिहास = history, जाति = caste). Never mention caste, religion or
   community in a title unless the story is specifically about it.
 - 3 thumbnail_texts: 3-6 punchy Hindi words; wrap the 1-3 most emotional/curious words in *asterisks*

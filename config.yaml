@@ -18,7 +18,7 @@ schedule:
   # YouTube flips them public at that time; a time already passed today => published immediately.
 
 long:
-  target_words: 1500                  # ~10 minutes at 150 wpm (8+ min allows mid-roll ads)
+  target_words: 2000                  # English words; Hindi version ~18-20 min (niche winners median 22 min)
   min_scenes: 18
   width: 1920
   height: 1080
@@ -62,8 +62,8 @@ images:
   # (lucid-origin looks nicer but costs ~4,000 per image = 2 free images/day.)
   cloudflare_models: ["@cf/black-forest-labs/flux-1-schnell"]
   cloudflare_steps: 4
-  max_images: {long: 55, short: 14}   # more shots than this -> neighbouring shots share an image
-  max_minutes: {long: 35, short: 10}  # time budget for AI images per video (backups are slow);
+  max_images: {long: 70, short: 14}   # more shots than this -> neighbouring shots share an image
+  max_minutes: {long: 45, short: 10}  # time budget for AI images per video (backups are slow);
                                       # shots left over use stock clips / reuse earlier images
   styles:
     # Storybook look (hand-painted anime watercolour), same for long videos and Shorts.
@@ -75,6 +75,9 @@ images:
       hand-painted anime watercolor storybook illustration, soft painterly textures, dramatic warm
       light, detailed background, expressive emotional characters, vivid colors, close framing,
       no text, no letters, no watermark, no signature
+  thumbnail_style: >-
+    hyper-detailed vibrant epic digital painting, saturated colors, dramatic golden-hour light, glowing
+    highlights, high contrast, cinematic, main subject large on the right half, no text, no watermark
   stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
 
@@ -87,6 +90,7 @@ languages:
     captions: "hinglish"              # hinglish (Roman letters) | hindi (Devanagari)
     long_rate: "+12%"                 # Madhur is slow at +0%; this is a natural documentary pace
     short_rate: "+20%"
+    short_max_seconds: 60             # Shorts longer than this are sped up slightly (max 18%)
     long_publish_utc: ["14:30"]       # 8:00 PM IST
     short_publish_utc: ["06:30", "12:30"]   # 12:00 PM and 6:00 PM IST
   en:
@@ -126,6 +130,18 @@ host:
     round brass spectacles, saffron shawl over a white kurta, holding a glowing brass lantern
   # He opens each video right after the hook and closes it with the call to action.
 series:
+  - id: "mandir"
+    name: "मंदिरों के रहस्य"
+    label: "मंदिर का रहस्य"
+    about: >-
+      mysteries, legends and history of famous Indian temples and shrines (architecture, miracles
+      believed by devotees, origin stories), told respectfully; beliefs presented as beliefs
+  - id: "pauranik"
+    name: "पौराणिक रहस्य"
+    label: "पौराणिक रहस्य"
+    about: >-
+      places and stories linked to the Ramayana, Mahabharata and Puranas (Ram Setu, Dwarka, Kurukshetra),
+      what history, archaeology and tradition each say; respectful, never mocking
   - id: "bharat"
     name: "भारत के अनसुलझे रहस्य"
     label: "भारत के रहस्य"
@@ -162,8 +178,8 @@ quality:
   min_review_score: 6.5               # quality gate: average 1-10 score a script needs to be made
 
 thumbnails:
-  mode: "ab"                          # ab = rotate "storybook"/"yellow"/"redstrip", then favour the winner;
-                                      # or force one: "storybook" | "yellow" | "redstrip"
+  mode: "ab"                          # ab = rotate templates, then favour the winner (data/thumb_winner.json)
+  templates: ["rahasya", "storybook", "yellow"]   # rahasya = the niche's winning look (see README)
   label: "ODD ANNALS • रहस्य"          # yellow series label at the bottom of storybook thumbnails
 
 reach:

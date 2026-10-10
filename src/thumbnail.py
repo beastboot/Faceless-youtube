@@ -6,6 +6,7 @@ redstrip: darkened image, huge white words on the left, the *highlighted* words 
           (the "ReBorn Mindset" look).
 Text marks highlights with asterisks: "दुनिया के 7 *सबसे रहस्यमयी* चीज़ें"."""
 import json
+import math
 import random
 import re
 
@@ -16,7 +17,7 @@ from .common import ROOT, run
 
 W, H = 1280, 720
 YELLOW, RED, BLACK, WHITE = (255, 222, 0), (226, 18, 18), (10, 10, 10), (255, 255, 255)
-TEMPLATES = ("storybook", "yellow", "redstrip")
+TEMPLATES = ("rahasya", "storybook", "yellow", "redstrip")
 
 
 def background_from(visual, work):
@@ -45,18 +46,19 @@ def parse(text):
 
 
 def choose_template(cfg):
-    """Alternate templates until both have data, then mostly use the winner (see reach.py)."""
+    """Rotate templates until each has data, then mostly use the winner (see reach.py)."""
     tc = cfg.get("thumbnails", {})
     if tc.get("mode") in TEMPLATES:
         return tc["mode"]
+    pool = [t for t in tc.get("templates") or TEMPLATES[:2] if t in TEMPLATES]
     win = ROOT / "data" / "thumb_winner.json"
     if win.exists():
         best = json.loads(win.read_text()).get("winner")
-        if best in TEMPLATES and random.random() < 0.8:
+        if best in pool and random.random() < 0.8:
             return best
     hist = ROOT / "data" / "history.json"
     n = sum(1 for r in json.loads(hist.read_text()) if r.get("format") == "long") if hist.exists() else 0
-    return TEMPLATES[n % 2]
+    return pool[n % len(pool)]
 
 
 def _lines(draw, words, fnt, max_w):
@@ -167,10 +169,67 @@ def storybook(bg, text, lang, label="ODD ANNALS"):
     return img.convert("RGB")
 
 
+def _arrow(d, start, end, color=RED, width=22):
+    """Thick arrow with a triangular head, YouTube-thumbnail style."""
+    (x0, y0), (x1, y1) = start, end
+    ang = math.atan2(y1 - y0, x1 - x0)
+    head = width * 2.6
+    bx, by = x1 - head * math.cos(ang), y1 - head * math.sin(ang)
+    for wd, col in ((width + 10, (255, 255, 255)), (width, color)):
+        d.line((x0, y0, bx, by), fill=col, width=wd)
+    left = (bx + head * 0.75 * math.sin(ang), by - head * 0.75 * math.cos(ang))
+    right = (bx - head * 0.75 * math.sin(ang), by + head * 0.75 * math.cos(ang))
+    d.polygon([(x1, y1), left, right], fill=color, outline=(255, 255, 255))
+
+
+def rahasya(bg, text, lang):
+    """The Hindi mystery niche's winning look: saturated epic art, huge stacked text with the key
+    words biggest in yellow, a circled close-up inset and a red arrow pointing at it."""
+    img = ImageOps.fit(bg, (W, H), Image.LANCZOS)
+    img = ImageEnhance.Contrast(ImageEnhance.Color(img).enhance(1.4)).enhance(1.15)
+    img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=110))
+    # darken the left side for the text
+    shade = Image.new("L", (W, H))
+    sd = ImageDraw.Draw(shade)
+    for x in range(W):
+        sd.line((x, 0, x, H), fill=int(170 * max(0, 1 - x / (W * 0.62))))
+    img.paste(Image.new("RGB", (W, H), (0, 0, 0)), (0, 0), shade)
+    # inset: 2x close-up of the art's focal area, in a ringed circle, bottom-right
+    src = ImageOps.fit(bg, (W, H), Image.LANCZOS)
+    cx, cy, r = int(W * 0.62), int(H * 0.45), 150
+    crop = src.crop((cx - r, cy - r, cx + r, cy + r)).resize((2 * 170, 2 * 170), Image.LANCZOS)
+    crop = ImageEnhance.Color(crop).enhance(1.3)
+    mask = Image.new("L", crop.size)
+    ImageDraw.Draw(mask).ellipse((0, 0, crop.width - 1, crop.height - 1), fill=255)
+    ix, iy = W - crop.width - 40, H - crop.height - 40
+    d = ImageDraw.Draw(img)
+    d.ellipse((ix - 14, iy - 14, ix + crop.width + 14, iy + crop.height + 14), fill=RED)
+    d.ellipse((ix - 6, iy - 6, ix + crop.width + 6, iy + crop.height + 6), fill=YELLOW)
+    img.paste(crop, (ix, iy), mask)
+    # text: plain words white, highlighted words huge yellow
+    words = parse(text if lang != "en" else (text or "").upper())
+    plain = [(w, False) for w, h in words if not h]
+    hot = [(w, True) for w, h in words if h] or words[-1:]
+    f1, l1, s1 = _fit(d, plain, lang, W * 0.56, 2, 104, 60) if plain else (None, [], 0)
+    f2, l2, s2 = _fit(d, hot, lang, W * 0.58, 2, 170, 80)
+    lh1, lh2 = int(s1 * (1.25 if lang != "en" else 1.05)), int(s2 * (1.2 if lang != "en" else 1.0))
+    y = (H - (lh1 * len(l1) + lh2 * len(l2))) / 2 - 20
+    for line in l1:
+        _draw_words(d, 46, y, line, f1, WHITE, WHITE, stroke=9)
+        y += lh1
+    for line in l2:
+        _draw_words(d, 40, y, line, f2, YELLOW, YELLOW, stroke=12)
+        y += lh2
+    _arrow(d, (int(W * 0.58), int(H * 0.30)), (ix - 10, iy + 40))
+    return img
+
+
 def make(visual, text, out, work, lang="en", template="yellow", label="ODD ANNALS"):
     bg = background_from(visual, work)
     if template == "storybook":
         img = storybook(bg, text, lang, label)
+    elif template == "rahasya":
+        img = rahasya(bg, text, lang)
     else:
         img = (yellow if template == "yellow" else redstrip)(bg, text, lang)
     img.filter(ImageFilter.UnsharpMask(radius=2, percent=60)).save(out, quality=92)

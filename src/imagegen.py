@@ -72,10 +72,10 @@ def _pollinations(prompt, cfg, seed, landscape):
     raise ImageGenError("Pollinations kept refusing (rate limit)")
 
 
-def generate(prompt, out_path, cfg, seed, landscape=True, fmt=None):
+def generate(prompt, out_path, cfg, seed, landscape=True, fmt=None, style=None):
     """Write one illustration to out_path; tries each configured provider in order."""
     styles = cfg["images"]["styles"]
-    style = styles.get(fmt) or styles.get("long" if landscape else "short")
+    style = style or styles.get(fmt) or styles.get("long" if landscape else "short")
     full = f"{prompt}. {style}"
     errors = []
     for provider in cfg["images"]["providers"]:
