@@ -37,9 +37,62 @@ def ambient_bed(seconds, out):
     return out
 
 
-def music_for(seconds, work):
-    """A royalty-free track from assets/music if present, else a synthesised bed."""
-    tracks = sorted((ROOT / "assets" / "music").glob("*.mp3"))
+def _gen(name, args):
+    p = SFX / name
+    if not p.exists():
+        SFX.mkdir(parents=True, exist_ok=True)
+        run(["ffmpeg", "-y", "-v", "error", *args, "-ac", "2", "-ar", "44100", p])
+    return p
+
+
+def pop():
+    """Short bright 'pop' as a graphic lands."""
+    return _gen("pop.wav", ["-f", "lavfi", "-i", "sine=f=880:d=0.14", "-af",
+                            "asetrate=44100*1.0,vibrato=f=12:d=0.3,afade=t=out:st=0.02:d=0.12,volume=1.6"])
+
+
+def impact():
+    """Low cinematic boom for big reveals (counters, facts)."""
+    return _gen("impact.wav", ["-f", "lavfi", "-i", "sine=f=48:d=1.4", "-f", "lavfi", "-i",
+                               "anoisesrc=d=0.5:c=brown:a=0.8", "-filter_complex",
+                               "[0]afade=t=out:st=0.05:d=1.3,volume=3[b];[1]lowpass=f=400,afade=t=out:st=0.02:d=0.45[n];"
+                               "[b][n]amix=inputs=2:normalize=0,aecho=0.7:0.5:90:0.25"])
+
+
+def riser():
+    """1.6 s rising swell that leads into a new chapter or the final reveal."""
+    return _gen("riser.wav", ["-f", "lavfi", "-i", "anoisesrc=d=1.6:c=pink:a=0.5", "-f", "lavfi", "-i",
+                              "aevalsrc=0.4*sin(2*PI*(200*t+300*t*t)):d=1.6", "-filter_complex",
+                              "[0]highpass=f=600,lowpass=f=6000[n];[n][1]amix=inputs=2:normalize=0,"
+                              "afade=t=in:d=1.5:curve=exp,afade=t=out:st=1.5:d=0.1,volume=1.5"])
+
+
+def sfx_track(events, seconds, out):
+    """events: [(time_seconds, path, volume)] -> one wav of `seconds` with every effect placed."""
+    if not events:
+        return None
+    events = events[:60]
+    inputs, chains = [], []
+    for k, (t, path, vol) in enumerate(events):
+        inputs += ["-i", path]
+        ms = max(0, int(t * 1000))
+        chains.append(f"[{k}]volume={vol},adelay={ms}|{ms}[e{k}]")
+    graph = ";".join(chains) + ";" + "".join(f"[e{k}]" for k in range(len(events))) + \
+        f"amix=inputs={len(events)}:normalize=0:duration=longest,apad=whole_dur={seconds:.2f}[a]"
+    run(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", graph, "-map", "[a]",
+         "-t", f"{seconds:.2f}", "-ac", "2", "-ar", "44100", out])
+    return out
+
+
+MOODS = ("mystery", "epic", "devotional", "sad", "adventure", "dark")
+
+
+def music_for(seconds, work, mood=None):
+    """A royalty-free track for the video's mood (assets/music/<mood>/*.mp3), any track in
+    assets/music, or else a synthesised bed."""
+    base = ROOT / "assets" / "music"
+    tracks = sorted((base / mood).glob("*.mp3")) if mood else []
+    tracks = tracks or sorted(base.rglob("*.mp3"))
     if tracks:
         t = random.choice(tracks)
         log.info("Background music: %s", t.name)

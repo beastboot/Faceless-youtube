@@ -203,14 +203,29 @@ def assemble(scenes, work, out_path, cfg, fmt):
     run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", work / "audio.txt",
          "-c", "copy", work / "narration.wav"])
 
-    track, is_file = audio.music_for(t, work)
-    vol = cfg["video"]["music_volume"] if is_file else cfg["video"].get("bed_volume", 0.35)
+    mood = next((s.get("mood") for s in scenes if s.get("mood")), None)
+    track, is_file = audio.music_for(t, work, mood)
     vc = cfg["video"]
-    # Voice: gentle compression for presence; final mix normalised to YouTube's -14 LUFS.
-    audio_graph = (f"[1:a]acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2[v];"
-                   f"[2:a]volume={vol},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m];"
-                   f"[v][m]amix=inputs=2:duration=first:normalize=0,"
-                   f"loudnorm=I=-14:TP=-1.5:LRA=11[a]")
+    vol = vc["music_volume"] if is_file else vc.get("bed_volume", 0.35)
+    # Sound design synced to picture: pop on graphics, impact on big reveals, riser into chapters.
+    events = []
+    for sc, st in zip(scenes, starts):
+        g = (sc.get("graphic") or {}).get("type")
+        if g in ("counter", "fact"):
+            events.append((st + 0.25, audio.impact(), vc.get("impact_volume", 0.45)))
+        elif g:
+            events.append((st + 0.25, audio.pop(), vc.get("pop_volume", 0.35)))
+        if sc.get("chapter_start") and st > 2:
+            events.append((st - 1.55, audio.riser(), vc.get("riser_volume", 0.4)))
+    sfx = audio.sfx_track(events, t, work / "sfx.wav") if vc.get("sound_design", True) else None
+    # Voice: gentle compression; music ducks under the narration (sidechain) like a documentary
+    # mix; SFX on top; final mix normalised to YouTube's -14 LUFS.
+    audio_graph = (f"[1:a]acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2,asplit=2[v][vkey];"
+                   f"[2:a]volume={vol * (2.2 if is_file else 1)},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m0];"
+                   f"[m0][vkey]sidechaincompress=threshold=0.03:ratio=8:attack=30:release=450[m];"
+                   + (f"[3:a]anull[fx];[v][m][fx]amix=inputs=3:duration=first:normalize=0," if sfx else
+                      "[v][m]amix=inputs=2:duration=first:normalize=0,")
+                   + "loudnorm=I=-14:TP=-1.5:LRA=11[a]")
     up_h = (vc.get("upload_height") or {}).get(fmt)
     w, h = cfg[fmt]["width"], cfg[fmt]["height"]
     if up_h and up_h > h:
@@ -222,7 +237,8 @@ def assemble(scenes, work, out_path, cfg, fmt):
     else:
         video_args = ["-filter_complex", audio_graph, "-map", "0:v", "-map", "[a]", "-c:v", "copy"]
     cmd = ["ffmpeg", "-y", "-v", "error", "-i", work / "video.mp4", "-i", work / "narration.wav",
-           *(["-stream_loop", "-1"] if is_file else []), "-i", track, *video_args]
+           *(["-stream_loop", "-1"] if is_file else []), "-i", track,
+           *(["-i", sfx] if sfx else []), *video_args]
     cmd += ["-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-t", f"{t:.3f}",
             "-movflags", "+faststart", out_path]
     run(cmd)

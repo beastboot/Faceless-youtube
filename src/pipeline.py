@@ -25,10 +25,36 @@ TEXT = {
 
 
 # ---- illustrations (shared by every language) ---------------------------------------------
+def ensure_host_reference(cfg):
+    """Master picture of the recurring host, made once and kept in the repo (assets/host/), so
+    every video draws the same face. Only a FLUX-quality image is accepted as the master."""
+    host = cfg.get("host") or {}
+    if not host:
+        return None
+    path = ROOT / "assets" / "host" / "host.jpg"
+    if path.exists():
+        return str(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    prompt = (f"character design portrait of {host['look'].strip()}, waist-up, facing the viewer with a kind "
+              f"knowing smile, simple warm background")
+    try:
+        if imagegen._cf_exhausted:
+            return None
+        im = imagegen._cloudflare(f"{prompt}. {cfg['images']['styles']['long']}", cfg, 4242, True)
+        im.save(path, quality=95)
+        log.info("Created the host's master reference picture: %s", path)
+        return str(path)
+    except Exception as e:
+        log.warning("Host reference not created yet (%s); will retry next run", e)
+        return None
+
+
+
 def illustrate(cfg, script, art, fmt, res):
     """One AI image per shot (+ thumbnail art). Falls back to stock footage per shot if needed."""
     art.mkdir(parents=True, exist_ok=True)
     landscape = cfg[fmt]["width"] > cfg[fmt]["height"]
+    host_ref = ensure_host_reference(cfg)
     shots = [sh for sc in script["scenes"] for sh in sc["shots"]]
     chars = script.get("characters") or {}
 
@@ -46,8 +72,11 @@ def illustrate(cfg, script, art, fmt, res):
         names = [n for n in chars if n in (sh.get("cast") or []) or n.lower() in prompt.lower()]
         if names:
             prompt = f"{prompt}. " + "; ".join(f"{n}: {chars[n]}" for n in names)
+        host = cfg.get("host") or {}
+        ref = host_ref if host_ref and host.get("name_en") in (sh.get("cast") or []) else None
         try:
-            provider = imagegen.generate(prompt, path, cfg, seed=1000 + i, landscape=landscape, fmt=fmt)
+            provider = imagegen.generate(prompt, path, cfg, seed=1000 + i, landscape=landscape, fmt=fmt,
+                                         reference=ref)
             log.debug("shot %d via %s", i, provider)
             return i, {"kind": "image", "path": path, "fill": True}
         except Exception as e:
@@ -200,7 +229,7 @@ def build_description(cfg, script, res, chapters, fmt, lang):
     if lang != "en" and script.get("en"):
         en = script["en"]
         parts.append(f"{t['english']}\n{en['description_intro']} {en['description_body']}".strip())
-    parts.append(f"{t['sources']}\n{res['wiki_url']}")
+    parts.append(f"{t['sources']}\n{res['wiki_url']}" + (f"\n{res['hi_wiki_url']}" if res.get("hi_wiki_url") else ""))
     parts.append(t["ai"])
     if script.get("credits"):
         parts.append("Image credits:\n" + "\n".join(list(dict.fromkeys(script["credits"]))[:20]))
@@ -287,6 +316,13 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         with ThreadPoolExecutor(4) as ex:
             items = list(ex.map(speak, enumerate(flat)))
         log.info("[%s] narrated %d shots", lang, len(items))
+    seen_scene = set()
+    for it in items:  # sound design + music need the mood and where chapters begin
+        it["mood"] = script.get("mood")
+        if it["scene"] not in seen_scene:
+            seen_scene.add(it["scene"])
+            it["chapter_start"] = bool((script["scenes"][it["scene"]].get("chapter") or "").strip()) or (
+                fmt == "short" and it["scene"] == len(script["scenes"]) - 1)
     limit = cfg["languages"].get(lang, {}).get("short_max_seconds") if fmt == "short" else None
     spoken = sum(it["audio_dur"] + it["tail"] for it in items)
     if limit and spoken > limit:
@@ -304,8 +340,13 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         log.warning("Short is %.0fs (>3 min limit); YouTube will treat it as a regular video", total)
     video.write_srt(items, starts, work / "captions.srt")
     caption_track = "hi-Latn" if hinglish else lang  # YouTube's "Hindi (Latin)" subtitle language
+    label = (series or {}).get("label") or cfg["thumbnails"].get("label") or cfg["channel"]["name"].upper()
     thumbnail.make(script["thumb_visual"], script["thumbnail_text"], work / "thumbnail.jpg", work, lang, template,
-                   label=(series or {}).get("label") or cfg["thumbnails"].get("label") or cfg["channel"]["name"].upper())
+                   label=label)
+    if fmt == "long":  # every template, for YouTube Studio's "Test & Compare" (A/B/C on real viewers)
+        for tpl in cfg["thumbnails"].get("templates") or []:
+            thumbnail.make(script["thumb_visual"], script["thumbnail_text"], work / f"thumbnail-{tpl}.jpg",
+                           work, lang, tpl, label=label)
 
     scene_starts = {}
     for it, st in zip(items, starts):
@@ -494,5 +535,5 @@ KEEP = {"final.mp4", "thumbnail.jpg", "script.json", "metadata.json", "captions.
 def cleanup(work):
     """Drop intermediates (segments, voice, downloads): ~80% of the folder's size."""
     for p in work.iterdir():
-        if p.is_file() and p.name not in KEEP:
+        if p.is_file() and p.name not in KEEP and not p.name.startswith("thumbnail"):
             p.unlink()

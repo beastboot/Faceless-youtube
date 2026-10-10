@@ -180,6 +180,7 @@ Packaging (YouTube SEO):
 - description_intro: 2 sentences that contain the words people would search for.
 - description_body: 1 short paragraph summary (no spoilers of the ending).
 - engagement_question: one short question to ask viewers in a pinned-style comment.
+- mood: the music mood for the whole video, one of mystery | epic | devotional | sad | adventure | dark.
 - search_queries: 3 queries this video should rank for.
 - tags: 12-15 tags (spellings, names, places, era, related searches).
 - hashtags: 3 hashtags.
@@ -194,7 +195,7 @@ Return JSON:
               "cast": ["Name"], "move": "zoom_in", "ambient": "dust", "graphic": null,
               "stock_query": "optional"}}]}}],
  "titles": ["..."], "thumbnail_texts": ["..."], "thumbnail_prompt": "...",
- "description_intro": "...", "description_body": "...", "engagement_question": "...",
+ "description_intro": "...", "description_body": "...", "engagement_question": "...", "mood": "mystery",
  "search_queries": ["..."], "tags": ["..."], "hashtags": ["#..."]}}"""
 
     best = None

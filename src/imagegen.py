@@ -27,6 +27,28 @@ def _cf_body(model, prompt, cfg, seed, landscape):
     return {"prompt": prompt[:2000], "width": w, "height": h, "seed": seed}
 
 
+def _cloudflare_reference(prompt, reference, cfg, seed, landscape):
+    """FLUX 2 Klein with a reference image (multipart): keeps a recurring character's face/outfit."""
+    acct, token = os.environ.get("CF_ACCOUNT_ID"), os.environ.get("CF_API_TOKEN")
+    if not (acct and token) or _cf_exhausted:
+        raise ImageGenError("Cloudflare unavailable for reference generation")
+    w, h = (1344, 768) if landscape else (768, 1344)
+    model = cfg["images"].get("reference_model", "@cf/black-forest-labs/flux-2-klein-4b")
+    with open(reference, "rb") as f:
+        r = http().post(CF_URL.format(acct=acct, model=model), headers={"Authorization": f"Bearer {token}"},
+                        data={"prompt": prompt[:2000], "width": str(w), "height": str(h), "seed": str(seed)},
+                        files={"input_image_0": (os.path.basename(reference), f, "image/jpeg")}, timeout=180)
+    if r.headers.get("content-type", "").startswith("image"):
+        return Image.open(io.BytesIO(r.content)).convert("RGB")
+    try:
+        b64 = (r.json().get("result") or {}).get("image")
+    except ValueError:
+        b64 = None
+    if r.ok and b64:
+        return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
+    raise ImageGenError(f"{model} HTTP {r.status_code}: {r.text[:160]}")
+
+
 def _cloudflare(prompt, cfg, seed, landscape):
     global _cf_exhausted
     acct, token = os.environ.get("CF_ACCOUNT_ID"), os.environ.get("CF_API_TOKEN")
@@ -72,12 +94,21 @@ def _pollinations(prompt, cfg, seed, landscape):
     raise ImageGenError("Pollinations kept refusing (rate limit)")
 
 
-def generate(prompt, out_path, cfg, seed, landscape=True, fmt=None, style=None):
-    """Write one illustration to out_path; tries each configured provider in order."""
+def generate(prompt, out_path, cfg, seed, landscape=True, fmt=None, style=None, reference=None):
+    """Write one illustration to out_path; tries each configured provider in order. With a
+    `reference` image (recurring host), the reference model is tried first for a consistent look."""
     styles = cfg["images"]["styles"]
     style = style or styles.get(fmt) or styles.get("long" if landscape else "short")
     full = f"{prompt}. {style}"
     errors = []
+    if reference and os.path.exists(reference):
+        try:
+            _cloudflare_reference(f"Use the person in the reference image exactly (same face, beard, glasses, "
+                                  f"clothes). {full}", reference, cfg, seed, landscape).save(out_path, quality=93)
+            return "cloudflare-reference"
+        except Exception as e:
+            errors.append(f"reference: {e}")
+            log.debug("Reference generation failed, falling back: %s", e)
     for provider in cfg["images"]["providers"]:
         try:
             if provider == "cloudflare":

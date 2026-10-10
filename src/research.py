@@ -84,12 +84,37 @@ def images(session, title, extra_query, min_width=700):
     return uniq
 
 
+def hindi_article(session, en_title, max_chars=6000):
+    """The Hindi Wikipedia article for the same subject (via the language link), if one exists.
+    Hindi articles often carry the local legends and details Indian viewers know."""
+    try:
+        r = session.get(WIKI_API, params={"action": "query", "titles": en_title, "prop": "langlinks",
+                                          "lllang": "hi", "redirects": 1, "format": "json"}, timeout=30).json()
+        links = next(iter(r["query"]["pages"].values())).get("langlinks") or []
+        if not links:
+            return "", None
+        hi_title = links[0]["*"]
+        r = session.get("https://hi.wikipedia.org/w/api.php", params={
+            "action": "query", "titles": hi_title, "prop": "extracts", "explaintext": 1,
+            "redirects": 1, "format": "json"}, timeout=30).json()
+        text = next(iter(r["query"]["pages"].values())).get("extract", "")
+        return text[:max_chars], hi_title
+    except Exception as e:
+        log.debug("Hindi Wikipedia lookup failed: %s", e)
+        return "", None
+
+
 def research(topic):
     s = http()
     title = resolve_title(s, topic.get("wikipedia_title") or topic["topic"])
     text = article_text(s, title)
+    hi_text, hi_title = hindi_article(s, title)
+    if hi_text:
+        text += f"\n\nHINDI WIKIPEDIA ({hi_title}) — local details and legends (same rules: facts as stated, legends as legends):\n{hi_text}"
+        log.info("Research: + Hindi Wikipedia '%s' (%d chars)", hi_title, len(hi_text))
     imgs = images(s, title, topic["topic"])
     log.info("Research: %s — %d chars, %d free images", title, len(text), len(imgs))
     return {"wiki_title": title,
+            "hi_wiki_url": ("https://hi.wikipedia.org/wiki/" + hi_title.replace(" ", "_")) if hi_title else None,
             "wiki_url": "https://en.wikipedia.org/wiki/" + title.replace(" ", "_"),
             "text": text, "images": imgs}

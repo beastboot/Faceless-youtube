@@ -72,9 +72,10 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
         })
     if fmt == "long":  # keep the closing seconds clear for the animated subscribe card
         end_at = sum(durs) - 7
-        for sh in shots:
+        for sh, sc in zip(shots, scenes):
             if sh["start"] + sh["dur"] > end_at:
                 sh["graphic"] = None
+                sc["graphic"] = None   # keep sound design in sync with what is on screen
     grain = pub / "fonts" / "grain.png"  # fine film grain texture, generated once
     if not grain.exists():
         import numpy as np

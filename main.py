@@ -14,8 +14,30 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src import pipeline, reach, state, trends, youtube
+from src import notify, pipeline, reach, state, trends, youtube
 from src.common import load_config, log, setup_logging
+
+
+def send_report(report, failures, upload):
+    """Telegram summary: every video with link + publish time, failures, and the 3 thumbnail
+    options of each long video for YouTube Studio's Test & Compare."""
+    import json
+    lines = [f"📺 Odd Annals run: {len([r for r in report if r[2] or not upload])} video(s)"]
+    for fmt, lang, vid, work in report:
+        try:
+            meta = json.loads((work / "metadata.json").read_text())
+        except Exception:
+            meta = {}
+        when = next((r.get("publish_at") for r in state.load() if r.get("video_id") == vid and vid), None)
+        link = f"https://youtu.be/{vid}" if vid else "(test render, not uploaded)"
+        lines.append(f"• {fmt}/{lang}: {meta.get('title', work.name)}\n  {link}" + (f"\n  ⏰ public at {when} UTC" if when else ""))
+    if failures:
+        lines.append("⚠️ Failed:\n" + "\n".join(failures[:6]))
+    notify.send("\n".join(lines))
+    for fmt, lang, vid, work in report:
+        if fmt == "long":
+            thumbs = sorted(str(p) for p in work.glob("thumbnail-*.jpg"))
+            notify.send_photos(thumbs, "Thumbnail options for YouTube Studio → Test & compare")
 
 
 def main():
@@ -68,6 +90,7 @@ def main():
     primary = [l for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" not in c]
     extra = {l: c for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" in c}
     done = {"long": 0, "short": 0}
+    report, failures = [], []
     slots = {}  # (lang, fmt) -> publish slots used
     quota_hit = False
     for fmt in ("long", "short"):
@@ -83,12 +106,14 @@ def main():
                                     if upload else None)
             try:
                 results = pipeline.produce(cfg, topic, fmt, langs, upload=upload, publish_at=publish_at)
+                report.extend((fmt, lang, vid, work) for lang, vid, work in results)
                 for lang, vid, work in results:
                     slots[(lang, fmt)] = slots.get((lang, fmt), 0) + 1
                     log.info("DONE %s/%s %s", fmt, lang, f"https://youtu.be/{vid}" if vid else work)
                 done[fmt] += 1
             except Exception as e:
                 log.error("FAILED %s %r: %s — trying next candidate", fmt, topic.get("topic"), e)
+                failures.append(f"{fmt}: {topic.get('topic')} — {str(e)[:120]}")
                 log.debug(traceback.format_exc())
                 if any(k in str(e) for k in ("Not enough research", "No Wikipedia article", "Quality gate")):
                     # Remember it so the topic picker never proposes it again.
@@ -99,6 +124,7 @@ def main():
                     quota_hit = True
 
     ok, wanted = sum(done.values()), sum(targets.values())
+    send_report(report, failures, upload)
     log.info("Finished: %d/%d videos", ok, wanted)
     return 0 if ok else 1
 
