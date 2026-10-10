@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
-from . import audio, fonts, sketch
+from . import audio, fonts, sketch, storybook
 from .common import ROOT, ffprobe_duration, log, run, srt_ts
 
 
@@ -104,6 +104,16 @@ def render_scene(scene, idx, work, cfg, fmt):
         inputs = ["-stream_loop", "-1", "-i", vis["path"]]
         base = (f"[0:v]scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},"
                 f"setsar=1,fps={fps},trim=duration={vdur:.6f},setpts=PTS-STARTPTS[v0]")
+    elif vis["kind"] == "image" and vc.get("animation") == "storybook":
+        # Painted scene comes alive: camera move + drifting light particles + soft glow.
+        clip = work / f"story-{idx:03d}.mp4"
+        move = vis.get("move") or random.Random(idx).choice(storybook.MOVES)
+        if not scene.get("whoosh", True) and idx > 0:   # same painting continues: change the move
+            move = {"zoom_in": "pan_right", "zoom_out": "pan_left"}.get(move, "zoom_out")
+        storybook.render(vis["path"], clip, w, h, fps, vframes, move=move,
+                         ambient=vis.get("ambient") or "none", seed=idx, crf=vc["crf"], preset=vc["preset"])
+        inputs = ["-i", clip]
+        base = f"[0:v]setsar=1,trim=duration={vdur:.6f},setpts=PTS-STARTPTS[v0]"
     elif vis["kind"] == "image" and vc.get("animation") == "sketch":
         # Pen draws the cartoon, colours wash in, camera drifts (src/sketch.py).
         clip = work / f"sketch-{idx:03d}.mp4"

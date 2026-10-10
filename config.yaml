@@ -44,7 +44,8 @@ video:
   music_volume: 0.08                  # royalty-free .mp3s in assets/music/ (see README: copyright)
   bed_volume: 1.0                     # synthesised ambient bed used when assets/music/ is empty
   sfx_volume: 0.5                     # whoosh on every picture change (0 = off)
-  animation: "sketch"                 # sketch = pen draws each cartoon live | kenburns = pan/zoom stills
+  animation: "storybook"              # storybook = camera move + light particles + glow on painted scenes
+                                      # sketch = pen draws each picture live | kenburns = plain pan/zoom
   sketch_draw_share: 0.55             # share of each shot spent drawing before colours wash in
   transition_seconds: 0.35            # animated transition between shots (0 = hard cuts)
   transitions:
@@ -64,15 +65,15 @@ images:
   max_minutes: {long: 35, short: 10}  # time budget for AI images per video (backups are slow);
                                       # shots left over use stock clips / reuse earlier images
   styles:
-    # Sketch-cartoon animation draws each picture's outlines live, so pictures need bold ink lines.
+    # Storybook look (hand-painted anime watercolour), same for long videos and Shorts.
     long: >-
-      hand-drawn cartoon illustration, bold clean black ink outlines, flat bright colors, simple
-      shapes, expressive characters, light simple background, explainer animation style,
+      hand-painted anime watercolor storybook illustration, soft painterly textures, warm cinematic
+      light, lush detailed background, expressive characters, gentle glow, rich colors,
       no text, no letters, no watermark, no signature
     short: >-
-      hand-drawn cartoon illustration, thick bold black ink outlines, flat vivid colors, expressive
-      exaggerated faces, comic style, light simple background, explainer animation style,
-      no text, no letters, no speech bubbles, no watermark, no signature
+      hand-painted anime watercolor storybook illustration, soft painterly textures, dramatic warm
+      light, detailed background, expressive emotional characters, vivid colors, close framing,
+      no text, no letters, no watermark, no signature
   stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
 
@@ -128,11 +129,13 @@ quality:
   min_review_score: 6.5               # quality gate: average 1-10 score a script needs to be made
 
 thumbnails:
-  mode: "ab"                          # ab = alternate "yellow"/"redstrip", then favour the winner;
-                                      # or force one: "yellow" | "redstrip"
+  mode: "ab"                          # ab = rotate "storybook"/"yellow"/"redstrip", then favour the winner;
+                                      # or force one: "storybook" | "yellow" | "redstrip"
+  label: "ODD ANNALS • रहस्य"          # yellow series label at the bottom of storybook thumbnails
 
 reach:
-  auto_publish_private: true          # anything left private (and not scheduled) is made public
+  auto_publish_private: false         # true = make our private, unscheduled uploads public. Off so a
+                                      # video YOU set to private is never re-published automatically.
   post_comments: true                 # channel posts the script's question as the first comment
   max_replies_per_day: 10             # English replies to new viewer comments (0 = off)
   repackage_after_hours: 72           # judge a video after 3 days...

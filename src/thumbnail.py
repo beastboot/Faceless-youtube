@@ -16,7 +16,7 @@ from .common import ROOT, run
 
 W, H = 1280, 720
 YELLOW, RED, BLACK, WHITE = (255, 222, 0), (226, 18, 18), (10, 10, 10), (255, 255, 255)
-TEMPLATES = ("yellow", "redstrip")
+TEMPLATES = ("storybook", "yellow", "redstrip")
 
 
 def background_from(visual, work):
@@ -136,8 +136,43 @@ def redstrip(bg, text, lang):
     return img
 
 
-def make(visual, text, out, work, lang="en", template="yellow"):
+def storybook(bg, text, lang, label="ODD ANNALS"):
+    """Painted scene, dark translucent top band with big multicolour words, yellow series label."""
+    img = ImageOps.fit(bg, (W, H), Image.LANCZOS).convert("RGBA")
+    img = Image.alpha_composite(img, Image.new("RGBA", (W, H), (0, 0, 0, 0)))
+    d = ImageDraw.Draw(img)
+    words = parse(text if lang != "en" else (text or "").title())
+    fnt, lines, size = _fit(d, words, lang, W - 80, 2, 92, 52)
+    lh = int(size * (1.32 if lang != "en" else 1.12))
+    band = Image.new("RGBA", (W, lh * len(lines) + 40), (10, 10, 14, 170))
+    img.alpha_composite(band, (0, 26))
+    d = ImageDraw.Draw(img)
+    palette = [(255, 92, 92), (255, 255, 255), (255, 214, 40)]       # red / white / yellow
+    y = 40 if lang != "en" else 46
+    k = 0
+    for line in lines:
+        lw = d.textlength(" ".join(w for w, _ in line), font=fnt)
+        x = (W - lw) / 2
+        space = d.textlength(" ", font=fnt)
+        for wd, hot in line:
+            col = palette[0] if hot and k % 2 == 0 else palette[2] if hot else WHITE
+            if hot:
+                k += 1
+            d.text((x, y), wd, font=fnt, fill=col, stroke_width=4, stroke_fill=(0, 0, 0))
+            x += d.textlength(wd, font=fnt) + space
+        y += lh
+    has_hindi = any("\u0900" <= ch <= "\u097f" for ch in label)
+    lf = fonts.font(70 if has_hindi else 78, "hi" if has_hindi else "en")
+    tw = d.textlength(label, font=lf)
+    d.text(((W - tw) / 2, H - 112), label, font=lf, fill=(255, 214, 40), stroke_width=6, stroke_fill=(0, 0, 0))
+    return img.convert("RGB")
+
+
+def make(visual, text, out, work, lang="en", template="yellow", label="ODD ANNALS"):
     bg = background_from(visual, work)
-    img = (yellow if template == "yellow" else redstrip)(bg, text, lang)
+    if template == "storybook":
+        img = storybook(bg, text, lang, label)
+    else:
+        img = (yellow if template == "yellow" else redstrip)(bg, text, lang)
     img.filter(ImageFilter.UnsharpMask(radius=2, percent=60)).save(out, quality=92)
     return out

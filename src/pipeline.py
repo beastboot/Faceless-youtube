@@ -31,7 +31,6 @@ def illustrate(cfg, script, art, fmt, res):
     landscape = cfg[fmt]["width"] > cfg[fmt]["height"]
     shots = [sh for sc in script["scenes"] for sh in sc["shots"]]
     chars = script.get("characters") or {}
-    char_note = ("Characters: " + "; ".join(f"{k}: {v}" for k, v in chars.items())) if chars else ""
 
     deadline = time.time() + 60 * (cfg["images"].get("max_minutes") or {}).get(fmt, 30)
 
@@ -43,9 +42,10 @@ def illustrate(cfg, script, art, fmt, res):
         if time.time() > deadline:  # image time budget spent: stock/reuse fills the rest
             return i, None
         prompt = sh["image_prompt"] or sh["line"]
-        # Only add the character sheet when a named character appears in this shot.
-        if char_note and any(name.lower() in prompt.lower() for name in chars):
-            prompt = f"{prompt}. {char_note}"
+        # Same detailed description of every character in the shot, every time -> consistent look.
+        names = [n for n in chars if n in (sh.get("cast") or []) or n.lower() in prompt.lower()]
+        if names:
+            prompt = f"{prompt}. " + "; ".join(f"{n}: {chars[n]}" for n in names)
         try:
             provider = imagegen.generate(prompt, path, cfg, seed=1000 + i, landscape=landscape, fmt=fmt)
             log.debug("shot %d via %s", i, provider)
@@ -103,7 +103,7 @@ def illustrate(cfg, script, art, fmt, res):
         if vis is None or vis.get("kind") == "color":
             vis = last_ok or {"kind": "color", "path": None}
         sh["visual"] = {"kind": vis["kind"], "path": str(vis["path"]) if vis.get("path") else None,
-                        "fill": vis.get("fill", False)}
+                        "fill": vis.get("fill", False), "move": sh.get("move"), "ambient": sh.get("ambient")}
         if vis.get("kind") != "color":
             last_ok = sh["visual"]
     n_ai = sum(1 for i in need if made.get(leaders[min(need.index(i) // group, len(leaders) - 1)]))
@@ -215,7 +215,8 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow"):
         log.warning("Short is %.0fs (>3 min limit); YouTube will treat it as a regular video", total)
     video.write_srt(items, starts, work / "captions.srt")
     caption_track = "hi-Latn" if hinglish else lang  # YouTube's "Hindi (Latin)" subtitle language
-    thumbnail.make(script["thumb_visual"], script["thumbnail_text"], work / "thumbnail.jpg", work, lang, template)
+    thumbnail.make(script["thumb_visual"], script["thumbnail_text"], work / "thumbnail.jpg", work, lang, template,
+                   label=cfg["thumbnails"].get("label") or cfg["channel"]["name"].upper())
 
     scene_starts = {}
     for it, st in zip(items, starts):

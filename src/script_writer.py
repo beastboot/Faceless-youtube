@@ -71,6 +71,8 @@ def _clean_scenes(data):
     for sc in data.get("scenes") or []:
         shots = [{"line": (sh.get("line") or "").strip(),
                   "image_prompt": (sh.get("image_prompt") or "").strip(),
+                  "cast": [c for c in (sh.get("cast") or []) if isinstance(c, str)],
+                  "move": (sh.get("move") or "").strip(), "ambient": (sh.get("ambient") or "").strip(),
                   "stock_query": (sh.get("stock_query") or "").strip()}
                  for sh in (sc.get("shots") or []) if (sh.get("line") or "").strip()]
         if shots:
@@ -115,10 +117,17 @@ Scene and shot rules:
   correct region, ethnicity and age of the real people involved), doing what, where, era-accurate
   clothing, buildings, vehicles and objects, camera framing (wide shot, close-up,
   over-the-shoulder, aerial), mood and lighting. Vary the framing from shot to shot.
+- Every shot also has "cast" (names of the recurring characters visible in it, [] if none),
+  "move" (camera: zoom_in | zoom_out | pan_left | pan_right | rise | push_focus — vary them, push_focus
+  for emotional beats) and "ambient" (a moving light/weather layer matching the mood: fireflies |
+  sparkles | dust | leaves | rain | snow | embers | none — magical/night: fireflies or sparkles,
+  sunlight indoors: dust, autumn/forest: leaves, storms/sorrow: rain, battles/fire: embers).
 - Define each recurring character once in "characters" (region/ethnicity, age, build, hair, clothing,
   distinctive features) and repeat that exact description inside every image_prompt where they appear, so the
   character looks the same in every shot.
 - {broll_rule}
+- Each image_prompt is a complete illustrated SCENE (characters acting in a setting), never a
+  portrait on a blank background.
 - Image prompts must never ask for text, captions, signs with words, logos, brand names, gore or real
   photos, and never depict living or modern public figures (politicians, celebrities). Historical
   figures are fine, described by their era-accurate appearance.
@@ -149,7 +158,7 @@ Return JSON:
 {{"characters": {{"Name": "visual description"}},
  "scenes": [{{"chapter": "optional chapter title",
    "shots": [{{"line": "spoken sentence", "image_prompt": "what the illustration shows",
-              "stock_query": "optional"}}]}}],
+              "cast": ["Name"], "move": "zoom_in", "ambient": "dust", "stock_query": "optional"}}]}}],
  "titles": ["..."], "thumbnail_texts": ["..."], "thumbnail_prompt": "...",
  "description_intro": "...", "description_body": "...", "engagement_question": "...",
  "search_queries": ["..."], "tags": ["..."], "hashtags": ["#..."]}}"""
