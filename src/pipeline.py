@@ -89,9 +89,14 @@ def illustrate(cfg, script, art, fmt, res):
     if group > 1:
         log.info("Image budget: %d shots share %d images", len(need), len(leaders))
 
+    # A failed shot reuses the NEAREST AI picture of this same story (a fresh camera move makes it
+    # feel new). Random stock search is the last resort: it can return unrelated footage.
+    ai = sorted(i for i, v in results.items() if v and v.get("kind") == "image")
     last_ok = None
     for i, sh in enumerate(shots):
         vis = results.get(i)
+        if vis is None and ai:
+            vis = results[min(ai, key=lambda j: abs(j - i))]
         if vis is None and cfg["images"].get("fallback_to_stock"):
             query = sh.get("stock_query") or " ".join((sh["image_prompt"] or sh["line"]).split()[:5])
             vis = picker.for_scene({"stock_query": query}, i)
