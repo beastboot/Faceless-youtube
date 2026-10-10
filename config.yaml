@@ -106,7 +106,7 @@ languages:
   # Regional channels: same stories and pictures, own language + own YouTube channel/Google project.
   # Turn one on after creating its channel and adding its YT_*_XX secrets (README: regional channels).
   ta:
-    enabled: false
+    enabled: true
     channel_name: "Odd Annals Tamil"
     youtube_env: "_TA"                # uses YT_CLIENT_ID_TA / YT_CLIENT_SECRET_TA / YT_REFRESH_TOKEN_TA
     longs_per_run: 1
