@@ -12,6 +12,7 @@ from . import llm, state, youtube
 from .common import ROOT, log
 
 STATS = ROOT / "data" / "stats.json"
+FOLLOWUPS = ROOT / "data" / "followups.json"   # topics queued from our own winners + viewer requests
 REPLIED = ROOT / "data" / "replied.json"
 INSIGHTS = ROOT / "data" / "insights.json"
 REPORT = ROOT / "reports" / "reach-report.md"
@@ -92,6 +93,57 @@ Return {{"titles": ["..."]}}"""
     return new
 
 
+def _load_queue():
+    return json.loads(FOLLOWUPS.read_text()) if FOLLOWUPS.exists() else []
+
+
+def _save_queue(q):
+    FOLLOWUPS.write_text(json.dumps(q[-40:], indent=1, ensure_ascii=False))
+
+
+def double_down(table, actions):
+    """A video far above its peers earns a follow-up: same subject, new angle or 'Part 2'."""
+    q = _load_queue()
+    done = {x.get("source_video") for x in q}
+    for r, x in table:
+        if not x or x["privacy"] != "public" or r.get("followed_up") or r["video_id"] in done \
+                or not (24 <= x["age_h"] <= 120):
+            continue
+        peers = [y["views"] for q2, y in table if y and q2["format"] == r["format"] and q2["video_id"] != r["video_id"]]
+        if len(peers) < 3:
+            continue
+        med = statistics.median(peers) or 1
+        if x["views"] >= 2 * med and x["views"] >= 200:
+            q.append({"kind": "winner", "format": r["format"], "series": r.get("series"),
+                      "topic": f"{r.get('topic') or r['title']} — Part 2",
+                      "angle": f"Follow-up to our hit video '{r['title']}' ({x['views']} views, {x['views'] / med:.1f}x "
+                               f"our typical): a deeper or unseen side of the same story, referencing Part 1",
+                      "source_video": r["video_id"]})
+            actions.append(f"🔥 Winner ({x['views'] / med:.1f}x typical): queued a Part 2 of '{r['title'][:50]}'")
+    _save_queue(q)
+
+
+def collect_requests(cfg, texts, actions):
+    """Topic requests in viewer comments -> the front of the topic queue."""
+    if not texts:
+        return
+    data = llm.ask_json(cfg, "You extract viewer requests from YouTube comments. JSON only.", f"""
+Comments on a Hindi history & mysteries channel:
+{json.dumps(texts[:60], ensure_ascii=False)}
+List the specific video topics viewers ASK for (e.g. "make a video on Bhangarh fort"), merged and counted.
+Ignore praise, spam and vague requests. Return {{"requests": [{{"topic": "English topic name", "count": n}}]}}""",
+                        temperature=0.2)
+    q = _load_queue()
+    have = {x["topic"].lower() for x in q}
+    for req in (data.get("requests") or [])[:5]:
+        t = (req.get("topic") or "").strip()
+        if t and t.lower() not in have:
+            q.append({"kind": "request", "format": "long" if (req.get("count") or 1) >= 3 else "short",
+                      "topic": t, "angle": f"Requested by {req.get('count') or 1} viewer(s) in comments", "series": None})
+            actions.append(f"💬 Viewer request queued: {t} ({req.get('count') or 1}x)")
+    _save_queue(q)
+
+
 def reply_to_comments(cfg, actions):
     """Short, warm English replies to new viewer comments (skips spam/abuse). ~50 quota units each."""
     limit = cfg.get("reach", {}).get("max_replies_per_day", 10)
@@ -103,6 +155,13 @@ def reply_to_comments(cfg, actions):
     threads = yt.commentThreads().list(part="snippet,replies", allThreadsRelatedToChannelId=me,
                                        maxResults=50, order="time", textFormat="plainText").execute()
     todo = []
+    try:
+        collect_requests(cfg, [t["snippet"]["topLevelComment"]["snippet"]["textDisplay"][:300]
+                               for t in threads.get("items", [])
+                               if (t["snippet"]["topLevelComment"]["snippet"].get("authorChannelId") or {}).get("value") != me],
+                         actions)
+    except Exception as e:
+        log.warning("Comment requests failed: %s", e)
     for t in threads.get("items", []):
         top = t["snippet"]["topLevelComment"]["snippet"]
         author = (top.get("authorChannelId") or {}).get("value")
@@ -296,7 +355,8 @@ def run(cfg):
                     x["retention"] = retention(r["video_id"], since)
                 except Exception as e:
                     log.debug("Retention for %s failed: %s", r["video_id"], e)
-    for step in (lambda: reply_to_comments(cfg, actions), lambda: weekly_strategy(cfg, table, actions)):
+    for step in (lambda: double_down(table, actions), lambda: reply_to_comments(cfg, actions),
+                 lambda: weekly_strategy(cfg, table, actions)):
         try:
             step()
         except Exception as e:
@@ -318,8 +378,27 @@ def run(cfg):
     STATS.write_text(json.dumps({r["video_id"]: row for r, row in table if row}, indent=1))
     write_report(table, actions, _traffic_sources(since) if have_analytics else [], have_analytics)
     telegram_summary(table, actions, have_analytics)
+    record_daily(table)
     for a in actions:
         log.info("Reach: %s", a)
+
+
+def record_daily(table):
+    """One row per day for the growth dashboard (docs/dashboard)."""
+    path = ROOT / "data" / "daily.json"
+    rows = json.loads(path.read_text()) if path.exists() else []
+    try:
+        ch = youtube.client().channels().list(part="statistics", mine=True).execute()["items"][0]["statistics"]
+    except Exception:
+        ch = {}
+    vids = [x for _, x in table if x]
+    today = {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+             "subscribers": int(ch.get("subscriberCount", 0) or 0),
+             "views": sum(x["views"] for x in vids),
+             "watch_hours": round(sum((x["watch_min"] or 0) for x in vids) / 60, 2),
+             "public_videos": sum(1 for x in vids if x["privacy"] == "public")}
+    rows = [r for r in rows if r["date"] != today["date"]] + [today]
+    path.write_text(json.dumps(rows[-400:], indent=1))
 
 
 def telegram_summary(table, actions, have_analytics):

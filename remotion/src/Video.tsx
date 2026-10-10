@@ -25,8 +25,9 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
       <Particles kind={shot.ambient} seed={`shot-${index}`} />
       <Vignette />
       {shot.graphic ? (
-        <Sequence from={Math.round(fps * 0.25)} durationInFrames={Math.max(1, narrationFrames - Math.round(fps * 0.25))} layout="none">
-          <GraphicLayer g={shot.graphic} len={Math.max(1, narrationFrames - Math.round(fps * 0.25))} fonts={props.fonts} short={props.short} />
+        <Sequence from={(shot.graphic as any).instant ? 0 : Math.round(fps * 0.25)}
+          durationInFrames={Math.max(1, narrationFrames - ((shot.graphic as any).instant ? 0 : Math.round(fps * 0.25)))} layout="none">
+          <GraphicLayer g={shot.graphic} len={Math.max(1, narrationFrames - ((shot.graphic as any).instant ? 0 : Math.round(fps * 0.25)))} fonts={props.fonts} short={props.short} />
         </Sequence>
       ) : null}
       {props.captionsOn ? (

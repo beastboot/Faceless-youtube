@@ -193,6 +193,18 @@ Return:
 
     longs = ranked([t for t in topics if t.get("format") == "long"], n_long)[:want_long]
     shorts = ranked([t for t in topics if t.get("format") == "short"], n_short)[:want_short]
+    # Our own winners' follow-ups and viewer requests jump the queue (consumed once used).
+    qpath = state.HISTORY.parent / "followups.json"
+    queue = json.loads(qpath.read_text()) if qpath.exists() else []
+    if queue:
+        for fmt, lst, n in (("long", longs, n_long), ("short", shorts, n_short)):
+            picked = [x for x in queue if x.get("format") == fmt][:1] if n else []  # at most 1 per format per run
+            for x in picked:
+                lst.insert(0, {"format": fmt, "topic": x["topic"], "angle": x.get("angle", ""),
+                               "series": x.get("series"), "wikipedia_title": x["topic"].split(" — ")[0]})
+                queue.remove(x)
+                log.info("Queued %s topic first: %s (%s)", fmt, x["topic"], x.get("kind"))
+        qpath.write_text(json.dumps(queue, indent=1, ensure_ascii=False))
     for t in longs + shorts:
         log.info("Picked %-5s: %s — %s", t["format"], t["topic"], t.get("angle", ""))
     return longs, shorts

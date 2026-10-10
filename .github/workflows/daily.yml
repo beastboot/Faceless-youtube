@@ -26,6 +26,7 @@ concurrency:
 
 permissions:
   contents: write                # commit data/history.json back
+  actions: read                  # Sunday compilation downloads the week's Shorts artifacts
 
 jobs:
   produce:
@@ -86,6 +87,7 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           ARGS=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -115,6 +117,19 @@ jobs:
             output/*/*/thumbnail*.jpg
             output/*/*/script.json
           retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Keep this run's Shorts for the Sunday compilation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts-${{ github.run_id }}
+          path: |
+            output/*-short-*/hi/final.mp4
+            output/*-short-*/hi/metadata.json
+            output/*-long-*/hi-clip*/final.mp4
+            output/*-long-*/hi-clip*/metadata.json
+          retention-days: 10
           if-no-files-found: ignore
 
       - name: Keep videos from test runs, or when something failed (re-upload with --upload-dir)

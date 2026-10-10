@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odd Annals Growth</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --bg:#0e0f14; --card:#171922; --ink:#eef0f6; --muted:#9aa1b5; --line:#262a38; --gold:#ffd60a; --red:#e5121b; --ok:#2ec27e; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f6f7fb; --card:#fff; --ink:#151821; --muted:#5d6475; --line:#e3e6ef; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:24px 16px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; } .sub { color:var(--muted); margin:0 0 22px; font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+  .v { font-size:30px; font-weight:800; margin:4px 0 8px; }
+  .bar { height:8px; background:var(--line); border-radius:6px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--red)); }
+  .charts { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; margin-top:14px; }
+  canvas { width:100% !important; height:240px !important; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; }
+  td.n { text-align:right; font-variant-numeric:tabular-nums; }
+  a { color:var(--gold); text-decoration:none; } .tag { font-size:11px; padding:2px 6px; border-radius:6px; background:var(--line); color:var(--muted); }
+  .wrap { overflow-x:auto; } h2 { font-size:16px; margin:26px 0 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>📈 Odd Annals — growth dashboard</h1>
+  <p class="sub" id="updated">Loading…</p>
+  <div class="grid">
+    <div class="card"><div class="k">Subscribers</div><div class="v" id="subs">–</div><div class="bar"><i id="subsBar" style="width:0"></i></div><div class="sub" id="subsNote">goal 1,000</div></div>
+    <div class="card"><div class="k">Watch hours (long videos)</div><div class="v" id="hours">–</div><div class="bar"><i id="hoursBar" style="width:0"></i></div><div class="sub">goal 4,000 in 12 months</div></div>
+    <div class="card"><div class="k">Total views</div><div class="v" id="views">–</div><div class="sub" id="viewsNote"></div></div>
+    <div class="card"><div class="k">Public videos</div><div class="v" id="vids">–</div><div class="sub" id="vidsNote"></div></div>
+  </div>
+  <div class="charts">
+    <div class="card"><div class="k">Subscribers over time</div><canvas id="cSubs"></canvas></div>
+    <div class="card"><div class="k">Views & watch hours over time</div><canvas id="cViews"></canvas></div>
+  </div>
+  <h2>Videos</h2>
+  <div class="card wrap"><table><thead><tr><th>Video</th><th>Type</th><th class="n">Views</th><th class="n">% watched</th><th class="n">Likes</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table></div>
+</main>
+<script>
+const base = '../data/';
+const fmt = n => (n ?? 0).toLocaleString('en-IN');
+async function j(name) { try { const r = await fetch(base + name + '?t=' + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
+(async () => {
+  const [daily, history, stats] = await Promise.all([j('daily.json'), j('history.json'), j('stats.json')]);
+  const d = daily || [], last = d[d.length - 1] || {};
+  document.getElementById('updated').textContent = last.date ? `Last updated ${last.date} (refreshes after every daily run)` : 'No data yet — fills in after the first daily run.';
+  document.getElementById('subs').textContent = fmt(last.subscribers);
+  document.getElementById('subsBar').style.width = Math.min(100, (last.subscribers || 0) / 10) + '%';
+  document.getElementById('hours').textContent = (last.watch_hours ?? 0).toFixed(1);
+  document.getElementById('hoursBar').style.width = Math.min(100, (last.watch_hours || 0) / 40) + '%';
+  document.getElementById('views').textContent = fmt(last.views);
+  document.getElementById('vids').textContent = fmt(last.public_videos);
+  const css = getComputedStyle(document.documentElement);
+  const gold = css.getPropertyValue('--gold').trim(), red = css.getPropertyValue('--red').trim(), muted = css.getPropertyValue('--muted').trim();
+  const opts = { responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:muted}}},
+    scales:{x:{ticks:{color:muted}, grid:{display:false}}, y:{ticks:{color:muted}, grid:{color:'rgba(128,128,128,.15)'}, beginAtZero:true}} };
+  const labels = d.map(r => r.date.slice(5));
+  new Chart(document.getElementById('cSubs'), {type:'line', data:{labels, datasets:[{label:'Subscribers', data:d.map(r=>r.subscribers), borderColor:gold, backgroundColor:gold+'33', fill:true, tension:.3}]}, options:opts});
+  new Chart(document.getElementById('cViews'), {type:'line', data:{labels, datasets:[
+    {label:'Views', data:d.map(r=>r.views), borderColor:gold, tension:.3, yAxisID:'y'},
+    {label:'Watch hours', data:d.map(r=>r.watch_hours), borderColor:red, tension:.3, yAxisID:'y1'}]},
+    options:{...opts, scales:{...opts.scales, y1:{position:'right', ticks:{color:muted}, grid:{display:false}, beginAtZero:true}}}});
+  const st = stats || {};
+  const vids = (history || []).filter(r => r.video_id).map(r => ({...r, ...(st[r.video_id] || {})}))
+    .sort((a, b) => (b.views || 0) - (a.views || 0));
+  document.getElementById('rows').innerHTML = vids.map(v => `<tr>
+    <td><a href="https://youtu.be/${v.video_id}" target="_blank" rel="noopener">${(v.title || '').replace(/</g,'&lt;')}</a>
+      ${v.series ? `<span class="tag">${v.series}</span>` : ''}${v.reserve ? ' <span class="tag">reserve</span>' : ''}</td>
+    <td>${v.format}${v.lang ? '/' + v.lang : ''}</td><td class="n">${fmt(v.views)}</td>
+    <td class="n">${v.avg_pct != null ? v.avg_pct.toFixed(0) + '%' : '–'}</td><td class="n">${fmt(v.likes)}</td><td>${v.privacy || ''}</td></tr>`).join('')
+    || '<tr><td colspan="6">No videos yet.</td></tr>';
+})();
+</script>
+</body>
+</html>

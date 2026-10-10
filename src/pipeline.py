@@ -230,6 +230,14 @@ def build_description(cfg, script, res, chapters, fmt, lang):
         en = script["en"]
         parts.append(f"{t['english']}\n{en['description_intro']} {en['description_body']}".strip())
     parts.append(f"{t['sources']}\n{res['wiki_url']}" + (f"\n{res['hi_wiki_url']}" if res.get("hi_wiki_url") else ""))
+    tag = (cfg.get("affiliate") or {}).get("amazon_tag")
+    if tag:  # books on the topic; Amazon requires the disclosure line
+        from urllib.parse import quote_plus
+        q = quote_plus(f"{res.get('wiki_title', '')} book")
+        parts.append((f"📚 इस विषय पर किताबें: https://www.amazon.in/s?k={q}&tag={tag}\n"
+                      "(Amazon Associate के रूप में हम योग्य खरीद से कमाते हैं।)") if lang == "hi" else
+                     (f"📚 Books on this topic: https://www.amazon.in/s?k={q}&tag={tag}\n"
+                      "(As an Amazon Associate we earn from qualifying purchases.)"))
     parts.append(t["ai"])
     if script.get("credits"):
         parts.append("Image credits:\n" + "\n".join(list(dict.fromkeys(script["credits"]))[:20]))
@@ -366,7 +374,12 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         title = title[:100 - len(suffix)] + suffix
     description = build_description(cfg, script, res, chapters, fmt, lang)
     if series:
+        pl = json.loads((ROOT / "data" / "playlists.json").read_text()).get(f"series-{series['id']}-{lang}") \
+            if (ROOT / "data" / "playlists.json").exists() else None
         head = (f"📚 {series['name']} — एपिसोड {episode}" if lang == "hi" else f"📚 Series: {series['name']} — Episode {episode}")
+        if pl:   # keeps viewers watching (session continuation is a satisfaction signal)
+            head += f"\n▶ पूरी सीरीज़: https://www.youtube.com/playlist?list={pl}" if lang == "hi" else \
+                f"\n▶ Full series: https://www.youtube.com/playlist?list={pl}"
         description = head + "\n\n" + description if fmt == "long" else description + f"\n\n📚 {series['name']}"
     timeline = [[round(st, 2), it.get("line_text", "")] for it, st in zip(items, starts)]
     meta = {"title": title, "lang": lang, "caption_track": caption_track, "timeline": timeline,
@@ -483,10 +496,18 @@ Return {{"clips": [{{"start": i, "end": j, "hook": "...", "hook_hinglish": "..."
                 meta["description"] = (f"▶ पूरी कहानी: https://youtu.be/{long_video_id}\n\n" if lang == "hi"
                                        else f"▶ Full story: https://youtu.be/{long_video_id}\n\n") + meta["description"]
                 (work / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
-            when = youtube.next_publish_time(slots, k) if upload else None
+            # Keep a small reserve: while it's below target, the last clip goes in privately and is only
+            # published if a day's run fails (see main.release_reserve).
+            reserve_now = (k == cc["per_long"] - 1 and upload and
+                           sum(1 for r in state.load() if r.get("reserve") and not r.get("released"))
+                           < (cfg.get("reserve") or {}).get("target", 0))
+            when = None if reserve_now else (youtube.next_publish_time(slots, k) if upload else None)
+            if reserve_now:
+                cfg = {**cfg, "youtube": {**cfg["youtube"], "privacy": "private"}}
             vid = publish(cfg, work, "short", meta, when) if upload else None
             if upload:
                 state.append({"format": "short", "lang": lang, "topic": f"{script['title']} (clip {k + 1})",
+                              "reserve": bool(reserve_now),
                               "title": meta["title"], "video_id": vid, "duration": round(total, 1),
                               "publish_at": when, "clip_of": long_video_id, "dir": f"{base.name}/{work.name}",
                               "series": (series or {}).get("id"),

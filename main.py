@@ -19,6 +19,25 @@ from src import notify, pipeline, reach, state, trends, youtube
 from src.common import load_config, log, setup_logging
 
 
+def release_reserve(cfg, reason):
+    """Publish one private reserve video so the channel never misses a day."""
+    reserve = [r for r in state.load() if r.get("reserve") and r.get("video_id")]
+    if not reserve or not youtube.available():
+        return None
+    yt = youtube.client()
+    st = {v["id"]: v["status"]["privacyStatus"] for v in yt.videos().list(
+        part="status", id=",".join(r["video_id"] for r in reserve)).execute().get("items", [])}
+    for r in reserve:
+        if st.get(r["video_id"]) == "private":
+            yt.videos().update(part="status", body={"id": r["video_id"], "status": {
+                "privacyStatus": "public", "selfDeclaredMadeForKids": False, "embeddable": True,
+                "license": "youtube"}}).execute()
+            notify.send(f"🛟 Reserve video published ({reason}): {r['title']}\nhttps://youtu.be/{r['video_id']}")
+            log.info("Released reserve video %s (%s)", r["video_id"], reason)
+            return r["video_id"]
+    return None
+
+
 def announce_live(cfg, window_minutes=65):
     """Telegram 'now live' for scheduled videos whose publish time passed in the last hour.
     Stateless: run hourly, each video is announced once (its publish time falls in one window)."""
@@ -32,6 +51,15 @@ def announce_live(cfg, window_minutes=65):
         t = datetime.fromisoformat(at.replace("Z", "+00:00"))
         if now - timedelta(minutes=window_minutes) < t <= now:
             due.append(r)
+    # Safety net: no new public video for 30+ hours (failed or late run) -> release a reserve video.
+    rows = [r for r in state.load() if r.get("video_id") and not r.get("reserve")]
+    def went_public(r):
+        return r.get("publish_at") or r.get("created_utc") or ""
+    latest = max((went_public(r) for r in rows), default="")
+    if latest:
+        last = datetime.fromisoformat(latest.replace("Z", "+00:00"))
+        if now - last > timedelta(hours=30):
+            release_reserve(cfg, "no new video for 30+ hours")
     if not due or not youtube.available():
         return
     items = youtube.client().videos().list(part="status,statistics",
@@ -79,6 +107,7 @@ def main():
     ap.add_argument("--format", choices=["long", "short"], default="short")
     ap.add_argument("--reach", action="store_true", help="only run the reach report/actions")
     ap.add_argument("--watch", action="store_true", help="announce videos that went public in the last hour")
+    ap.add_argument("--compilation", action="store_true", help="build the weekly Shorts compilation now")
     ap.add_argument("--upload-dir", help="upload an already-rendered output/<run> folder")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
@@ -112,12 +141,29 @@ def main():
         log.info("DONE %s https://youtu.be/%s", fmt, vid)
         return 0
 
+    from datetime import datetime as _dt
+    comp = cfg.get("compilation") or {}
+    sunday = comp.get("enabled") and _dt.utcnow().strftime("%a").lower() == comp.get("day", "sun")
+    if args.compilation or (sunday and upload and not args.topic):
+        try:
+            from src import compilation
+            from src.common import ROOT
+            vid, work = compilation.build(cfg, ROOT / "output" / f"weekly-{_dt.utcnow():%Y%m%d}", upload=upload)
+            notify.send(f"📼 Weekly compilation done: https://youtu.be/{vid}" if vid else "📼 Weekly compilation rendered (test)")
+        except Exception as e:
+            log.error("Weekly compilation failed: %s", e)
+            notify.send(f"❌ Weekly compilation failed: {str(e)[:300]}")
+        if args.compilation:
+            return 0
+
     if args.topic:
         targets = {args.format: 1}
         queues = {args.format: [{"topic": args.topic, "wikipedia_title": args.topic, "angle": ""}]}
     else:
         targets = {"long": sc["longs_per_run"] if args.longs is None else args.longs,
                    "short": sc["shorts_per_run"] if args.shorts is None else args.shorts}
+        if sunday and upload and args.shorts is None:
+            targets["short"] = max(0, targets["short"] - 1)   # the compilation takes that upload slot
         longs, shorts = trends.pick_topics(cfg, targets["long"], targets["short"])
         queues = {"long": longs, "short": shorts}
 
@@ -173,6 +219,8 @@ def main():
                     quota_hit = True
 
     ok, wanted = sum(done.values()), sum(targets.values())
+    if upload and wanted and not any(vid for _, _, vid, _ in report):
+        release_reserve(cfg, "today's run produced no videos")
     send_report(report, failures, upload)
     log.info("Finished: %d/%d videos", ok, wanted)
     return 0 if ok else 1

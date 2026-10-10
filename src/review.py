@@ -16,13 +16,16 @@ before it is published on a documentary channel. Compare every factual claim wit
 SENSITIVITY: if the script mocks, sexualises or questions the sacred figures or beliefs of any
 religion, or stirs caste/communal controversy, set verdict "reject" (reason: "sensitive").
 
-Score 1-10 for each: hook (does line 1 create real curiosity?), accuracy (claims supported by the
+Score 1-10 for each: hook (does line 1 create real curiosity within the first second?), accuracy (claims supported by the
 notes?), retention (pacing, open loops, no filler), originality (a real story with a point of view,
-not a generic list or a Wikipedia summary).
+not a generic list or a Wikipedia summary), payoff (does the script clearly deliver what its own titles and
+thumbnail promise? Clickbait that isn't paid off makes viewers leave and click "Not interested").
 
 For every line containing a claim NOT supported by the notes (invented numbers, dates, quotes,
 motives, or speculation stated as fact), give a corrected replacement line that keeps the meaning,
 length and tone but only says what the notes support. Do not rewrite lines that are fine.
+
+TITLES / THUMBNAIL PROMISE: {json.dumps(script.get("titles", [])[:3] + [script.get("thumbnail_text", "")], ensure_ascii=False)}
 
 SCRIPT (scene index -> shot index -> line):
 {json.dumps(lines, ensure_ascii=False)}
@@ -31,7 +34,7 @@ RESEARCH NOTES:
 {research['text'][:12000]}
 
 Return JSON:
-{{"scores": {{"hook": n, "accuracy": n, "retention": n, "originality": n}},
+{{"scores": {{"hook": n, "accuracy": n, "retention": n, "originality": n, "payoff": n}},
  "fixes": [{{"scene": i, "shot": j, "problem": "...", "line": "corrected line"}}],
  "verdict": "publish" | "reject", "reason": "one sentence"}}"""
     data = llm.ask_json(cfg, "You are a meticulous editor. JSON only.", prompt, temperature=0.2)

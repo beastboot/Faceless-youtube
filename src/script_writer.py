@@ -100,7 +100,15 @@ def write(cfg, topic, research, fmt):
     long_bits = """- Mark 5-8 scenes with a short "chapter" title where a new section starts (the first scene
   must have one). Chapters must be at least 30 seconds apart.
 - Around the middle, add one soft line teasing what is coming later (open loop) to hold retention.
-- End with one call to action to subscribe for the next story.""" if fmt == "long" else """- No chapters. No intro. Last line should loop back to the first line or end on a punch.
+- Within the first 15 seconds, promise the payoff ("by the end you'll know what really happened that
+  night") and deliver it explicitly near the end: viewers who get what the title promised are satisfied.
+- Re-hook roughly every 60-90 seconds with a new question, twist or "but this is where it gets stranger"
+  so attention never drops; never pad.
+- End with one call to action to subscribe for the next story.""" if fmt == "long" else """- YouTube Shorts are judged in the first second: the very first line must grab instantly (no greeting,
+  no context first) and the first picture must be the most striking image of the story.
+- No chapters. No intro. Keep every line short and punchy; aim for 35-50 seconds in total.
+- The last line must flow naturally back into the first line so the Short loops seamlessly (replays
+  count). End on a surprising fact people want to share.
 - No call to action except optionally "Follow for more" in under 4 words."""
     n_titles = cfg["quality"]["title_candidates"]
     shot_rule = ("A shot is ONE short sentence or clause, 3-5 seconds when read aloud: Shorts need a new "

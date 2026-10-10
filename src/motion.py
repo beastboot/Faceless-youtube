@@ -70,6 +70,10 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
                          for c in sc.get("captions") or []] if fc.get("burn_captions") else [],
             "graphic": sc.get("graphic") or None,
         })
+    if fmt == "short" and shots and not shots[0]["graphic"] and scenes[0].get("line_text"):
+        # The swipe-or-stay decision happens in the first second: put the hook's key words on screen.
+        words = scenes[0]["line_text"].split()
+        shots[0]["graphic"] = {"type": "fact", "text": " ".join(words[: min(7, len(words))]), "instant": True}
     if fmt == "long":  # keep the closing seconds clear for the animated subscribe card
         end_at = sum(durs) - 7
         for sh, sc in zip(shots, scenes):

@@ -28,7 +28,7 @@ long:
   upload_captions: false              # captions are on screen; skipping the track saves 400 quota units
 
 short:
-  target_words: 75                    # English words; Hindi + Gemini narration runs longer => ~55-60 s
+  target_words: 60                    # English words -> ~40-50 s Hindi: higher completion + loop rate
   min_scenes: 5
   width: 1080
   height: 1920
@@ -169,6 +169,19 @@ series:
 clips:
   per_long: 2
   publish_utc: ["09:30", "16:30"]     # 3:00 PM and 10:00 PM IST
+
+# Backup videos kept private on YouTube and published only if a day's run fails or is late.
+reserve:
+  target: 2
+
+# Amazon India affiliate links (books on the video's topic) — off until you add your Associates tag.
+affiliate:
+  amazon_tag: ""                      # e.g. "oddannals-21" from affiliate-program.amazon.in
+
+# Sunday: the week's Shorts stitched into one long video (watch hours from existing footage).
+compilation:
+  enabled: true
+  day: "sun"
 
 # Also post every Short as an Instagram Reel / Facebook Reel when Meta credentials exist.
 social:
