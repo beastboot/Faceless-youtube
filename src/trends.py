@@ -169,7 +169,7 @@ anniversaries you know fall in the next 12 days from {date.today():%d %B %Y}:
 If one fits the niche, make at least one topic about the history or mystery behind it.
 
 SERIES (assign every topic to exactly one, by id):
-{json.dumps([{{"id": x["id"], "about": x["about"]}} for x in cfg.get("series", [])], ensure_ascii=False)}
+{json.dumps([dict(id=x["id"], about=x["about"]) for x in cfg.get("series", [])], ensure_ascii=False)}
 
 Return:
 {{"topics": [{{"format": "long" | "short", "topic": "short topic name", "series": "series id",
