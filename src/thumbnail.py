@@ -30,15 +30,11 @@ def background_from(visual, work):
 
 
 def parse(text):
-    """'a *b c* d' -> [('a', False), ('b', True), ('c', True), ('d', False)]."""
-    words, hot = [], False
-    for tok in (text or "").replace("**", "*").split():
-        start, end = tok.startswith("*"), tok.endswith("*") and len(tok) > 1
-        if start:
-            hot = True
-        words.append((tok.strip("*"), hot))
-        if end or (start and tok.endswith("*")):
-            hot = False
+    """'a *b c*? d' -> [('a', False), ('b', True), ('c?', True), ('d', False)]; markers never shown."""
+    words = []
+    for i, part in enumerate(re.split(r"\*+", text or "")):
+        for wd in part.split():
+            words.append((wd, i % 2 == 1))           # odd segments sat between asterisks
     if words and not any(h for _, h in words):  # no marks: highlight the last word or two
         k = 2 if len(words) > 3 else 1
         words = [(w, i >= len(words) - k) for i, (w, _) in enumerate(words)]

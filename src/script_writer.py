@@ -114,8 +114,9 @@ Scene and shot rules:
 - At least {fc['min_scenes']} scenes. Each scene has 1-5 shots.
 - {shot_rule}
 - Every shot has an image_prompt that shows EXACTLY what that line is talking about: who (with the
-  correct region, ethnicity and age of the real people involved), doing what, where, era-accurate
-  clothing, buildings, vehicles and objects, camera framing (wide shot, close-up,
+  correct region, ethnicity, community/religion and age of the real people involved, e.g. "Paliwal
+  Brahmin villagers in Rajasthani pagdi turbans and white dhotis", never a different community's
+  dress), doing what, where, era-accurate clothing, buildings, vehicles and objects, camera framing (wide shot, close-up,
   over-the-shoulder, aerial), mood and lighting. Vary the framing from shot to shot.
 - Every shot also has "cast" (names of the recurring characters visible in it, [] if none),
   "move" (camera: zoom_in | zoom_out | pan_left | pan_right | rise | push_focus — vary them, push_focus
@@ -213,7 +214,9 @@ most relevant ones word-for-word in the titles, the first description sentence a
 {json.dumps(list(search_phrases)[:30], ensure_ascii=False)}
 
 Also write Hindi YouTube packaging for Indian viewers searching in Hindi and Hinglish:
-- 5 titles (under 70 characters, curiosity + a number, name or date; may mix Hindi with key English words)
+- 5 titles (under 70 characters, curiosity + a number, name or date). Write them in Hindi (Devanagari);
+  only proper nouns or search keywords may stay in English letters (e.g. "Roopkund", "Titanic").
+  Never write Hindi words in Roman letters in titles.
 - 3 thumbnail_texts: 3-6 punchy Hindi words; wrap the 1-3 most emotional/curious words in *asterisks*
   (they are shown in red), e.g. "दुनिया के 7 *सबसे रहस्यमयी* चीज़ें". Must not just repeat the title.
 - description_intro (2 sentences), description_body (1 paragraph), engagement_question
