@@ -220,7 +220,11 @@ def assemble(scenes, work, out_path, cfg, fmt):
     sfx = audio.sfx_track(events, t, work / "sfx.wav") if vc.get("sound_design", True) else None
     # Voice: gentle compression; music ducks under the narration (sidechain) like a documentary
     # mix; SFX on top; final mix normalised to YouTube's -14 LUFS.
-    audio_graph = (f"[1:a]acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2,asplit=2[v][vkey];"
+    # Studio voice chain: rumble cut, less mud, presence for phone speakers, soft de-ess, glue compression.
+    voice_fx = ("highpass=f=75,equalizer=f=250:t=q:w=1.2:g=-2,equalizer=f=3200:t=q:w=1.4:g=2.5,"
+                "equalizer=f=10000:t=q:w=1:g=1.5,deesser=i=0.3,"
+                "acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2")
+    audio_graph = (f"[1:a]{voice_fx},asplit=2[v][vkey];"
                    f"[2:a]volume={vol * (2.2 if is_file else 1)},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m0];"
                    f"[m0][vkey]sidechaincompress=threshold=0.03:ratio=8:attack=30:release=450[m];"
                    + (f"[3:a]anull[fx];[v][m][fx]amix=inputs=3:duration=first:normalize=0," if sfx else
