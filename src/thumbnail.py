@@ -34,6 +34,9 @@ def parse(text):
     words = []
     for i, part in enumerate(re.split(r"\*+", text or "")):
         for wd in part.split():
+            if words and not any(ch.isalnum() for ch in wd):
+                words[-1] = (words[-1][0] + wd, words[-1][1])   # "?" / "!" stick to the word before
+                continue
             words.append((wd, i % 2 == 1))           # odd segments sat between asterisks
     if words and not any(h for _, h in words):  # no marks: highlight the last word or two
         k = 2 if len(words) > 3 else 1
