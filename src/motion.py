@@ -18,6 +18,10 @@ TRANSITIONS = {"slideleft": "slide-left", "smoothleft": "slide-left", "sliderigh
                "fadeblack": "fade", "hblur": "fade", "dissolve": "fade"}
 
 END_CARD = {"hi": {"title": "ऐसी और कहानियों के लिए", "button": "सब्सक्राइब करें"},
+            "mr": {"title": "अशा आणखी कथांसाठी", "button": "सबस्क्राइब करा"},
+            "ta": {"title": "இதுபோன்ற கதைகளுக்கு", "button": "சப்ஸ்கிரைப்"},
+            "te": {"title": "ఇలాంటి కథల కోసం", "button": "సబ్‌స్క్రైబ్"},
+            "bn": {"title": "এমন আরও গল্পের জন্য", "button": "সাবস্ক্রাইব"},
             "en": {"title": "For more stories like this", "button": "Subscribe"}}
 
 
@@ -37,10 +41,14 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
     stage = pub / "run" / run_id
     stage.mkdir(parents=True, exist_ok=True)
     (pub / "fonts").mkdir(parents=True, exist_ok=True)
-    for lang in ("en", "hi"):
+    langs = {"en", "hi"} | {sc.get("caption_lang") or sc.get("lang") or "en" for sc in scenes}
+    regional = None
+    for lang in langs:
         src = Path(fonts.font_path(lang))
         if not (pub / "fonts" / src.name).exists():
             shutil.copy(src, pub / "fonts" / src.name)
+        if lang not in ("en", "hi", "mr"):
+            regional = src.name
 
     copied = {}
 
@@ -92,7 +100,8 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
         "width": fc["width"], "height": fc["height"], "fps": vc["fps"], "total": round(sum(durs), 4),
         "lang": lang, "short": fmt == "short", "shots": shots,
         "transitionSeconds": vc.get("transition_seconds", 0.35), "captionsOn": bool(fc.get("burn_captions")),
-        "fonts": {"display": "Anton", "hindi": "Mukta"},
+        "fonts": {"display": "Anton", "hindi": "Mukta", "regional": "Regional",
+                  "regionalFile": f"fonts/{regional}" if regional else None},
         "logo": stage_file(logo) if logo.exists() else None,
         "grain": "fonts/grain.png",
         "endCard": END_CARD.get(lang, END_CARD["en"]) if fmt == "long" else None,

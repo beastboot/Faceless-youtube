@@ -17,8 +17,11 @@ export const fadeInOut = (frame: number, len: number, inF = 8, outF = 8) =>
 
 export const isDevanagari = (s: string) => /[ऀ-ॿ]/.test(s);
 
-export const fontFor = (text: string, fonts: {display: string; hindi: string}) =>
-  isDevanagari(text) ? fonts.hindi : fonts.display;
+// Tamil, Telugu, Bengali, Gurmukhi, Gujarati, Kannada, Malayalam, Odia ranges
+export const isOtherIndic = (s: string) => /[\u0980-\u0DFF]/.test(s);
+
+export const fontFor = (text: string, fonts: {display: string; hindi: string; regional?: string}) =>
+  isDevanagari(text) ? fonts.hindi : isOtherIndic(text) && fonts.regional ? fonts.regional : fonts.display;
 
 export const YELLOW = '#FFD60A';
 export const RED = '#E5121B';

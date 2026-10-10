@@ -270,6 +270,74 @@ def _merge_graphic(orig, translated):
     return out
 
 
+REGIONAL = {"ta": ("Tamil", "Tamil script"), "te": ("Telugu", "Telugu script"),
+            "bn": ("Bengali", "Bengali script"), "mr": ("Marathi", "Devanagari script")}
+
+
+def translate_regional(cfg, script, fmt, lang, host_name=""):
+    """Same shots, same pictures: the script + packaging in Tamil / Telugu / Bengali / Marathi.
+    Captions are shown in the language's own script."""
+    name, writing = REGIONAL[lang]
+    lines = [[sh["line"] for sh in sc["shots"]] for sc in script["scenes"]]
+    chapters = [sc["chapter"] for sc in script["scenes"]]
+    graphics = {f"{i}.{j}": sh["graphic"] for i, sc in enumerate(script["scenes"])
+                for j, sh in enumerate(sc["shots"]) if sh.get("graphic")}
+    prompt = f"""Translate this {fmt} YouTube documentary script into natural, spoken {name} ({writing}) for
+viewers in India: conversational like a popular {name} YouTube storyteller, not bookish. Keep names,
+places and numbers accurate; write numbers and years as they are spoken in {name}.
+The narrator/host "{(cfg.get("host") or {}).get("name_en", "")}" keeps that name{f' (written as "{host_name}")' if host_name else ''}.
+
+STRICT: exactly {len(lines)} scenes with the same number of lines in each, same order, one {name} line
+per English line.
+
+ENGLISH LINES: {json.dumps(lines, ensure_ascii=False)}
+ON-SCREEN GRAPHICS (translate text, sub, label, name, role, by, prefix, suffix, points[].label; keep numbers,
+years, "type" and map "place"; add a {name} "label" for maps): {json.dumps(graphics, ensure_ascii=False)}
+CHAPTER TITLES (translate non-empty ones): {json.dumps(chapters, ensure_ascii=False)}
+
+Also {name} YouTube packaging for {name} speakers: 5 titles (under 70 characters, curiosity + a number,
+name or date, in {writing}; proper nouns may stay in English; at most one emoji; proofread every word;
+never mention caste/religion/community unless the story is about it), 3 thumbnail_texts (3-6 words,
+1-3 key words wrapped in *asterisks*), description_intro (2 sentences), description_body (1 paragraph),
+engagement_question, 15 tags ({name} + English), 3 hashtags.
+
+Return JSON: {{"scenes": [["line", ...], ...], "graphics": {{"0.1": {{...}}}}, "chapters": ["..."],
+ "titles": ["..."], "thumbnail_texts": ["..."], "description_intro": "...", "description_body": "...",
+ "engagement_question": "...", "tags": ["..."], "hashtags": ["#..."]}}"""
+    for attempt in range(3):
+        data = llm.ask_json(cfg, f"You are an expert {name} documentary translator. Reply with JSON only.",
+                            prompt, temperature=0.4)
+        tr = data.get("scenes") or []
+        if len(tr) == len(lines) and all(len(a) == len(b) for a, b in zip(tr, lines)):
+            break
+        log.warning("%s translation shape mismatch (attempt %d), retrying", name, attempt + 1)
+    else:
+        raise RuntimeError(f"{name} translation did not keep the shot structure")
+    out = {k: v for k, v in script.items() if k not in ("scenes",)}
+    chs = data.get("chapters") or chapters
+    out["scenes"] = [
+        {"chapter": (chs[i] if i < len(chs) else "") or "",
+         "shots": [{"line": str(t).strip(), "caption": str(t).strip(), "image_prompt": sh["image_prompt"],
+                    "visual": sh.get("visual"),
+                    "graphic": _merge_graphic(sh.get("graphic"), (data.get("graphics") or {}).get(f"{i}.{j}"))}
+                   for j, (t, sh) in enumerate(zip(tr[i], sc["shots"]))],
+         "narration": " ".join(str(x).strip() for x in tr[i])}
+        for i, sc in enumerate(script["scenes"])]
+    for k in ("description_intro", "description_body", "engagement_question", "tags", "hashtags"):
+        out[k] = data.get(k) or script.get(k)
+    titles = [t.strip() for t in (data.get("titles") or []) if t and t.strip()]
+    thumbs = [t.strip() for t in (data.get("thumbnail_texts") or []) if t and t.strip()]
+    out["title"] = _cap_latin((titles[0] if titles else script["title"])[:95])
+    if fmt == "short" and "#shorts" not in out["title"].lower():
+        out["title"] = out["title"][:88] + " #shorts"
+    out["thumbnail_text"] = thumbs[0] if thumbs else script["thumbnail_text"]
+    out["lang"] = lang
+    out["en_chapters"] = chapters
+    out["en"] = {"title": script["title"], "description_intro": script.get("description_intro") or "",
+                 "description_body": script.get("description_body") or ""}
+    return out
+
+
 def _cap_latin(text):
     """'jaivana cannon का सच' -> 'Jaivana Cannon का सच' (Roman words inside Hindi titles look sloppy lowercase)."""
     return re.sub(r"\b([a-z])([a-z]{2,})\b", lambda m: m.group(1).upper() + m.group(2)

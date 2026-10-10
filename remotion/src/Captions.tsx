@@ -5,7 +5,7 @@ import {YELLOW, fontFor, pop} from './util';
 
 /** Karaoke captions: the active chunk on screen, each word lighting up yellow as it is spoken,
  *  the current word popping slightly. Word times are spread over the chunk by word length. */
-export const Captions: React.FC<{captions: Caption[]; short: boolean; fonts: {display: string; hindi: string}}> = ({captions, short, fonts}) => {
+export const Captions: React.FC<{captions: Caption[]; short: boolean; fonts: {display: string; hindi: string; regional?: string}}> = ({captions, short, fonts}) => {
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
   const t = frame / fps;

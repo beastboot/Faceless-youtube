@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """One-time: authorize this app to upload to your YouTube channel and print the refresh token.
 
-    python scripts/get_youtube_token.py path/to/client_secret.json
+    python scripts/get_youtube_token.py path/to/client_secret.json            # main (Hindi) channel
+    python scripts/get_youtube_token.py path/to/client_secret.json TA         # regional channel -> YT_*_TA
 
 Prints a link to open in your browser. Sign in with the Google account that OWNS the channel (pick the channel if asked).
 Put the three printed values into .env (local) and GitHub repo secrets.
@@ -16,9 +17,10 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
           "https://www.googleapis.com/auth/youtube.force-ssl",
           "https://www.googleapis.com/auth/yt-analytics.readonly"]
 
-if len(sys.argv) != 2:
+if len(sys.argv) not in (2, 3):
     sys.exit(__doc__)
 secret_file = sys.argv[1]
+sfx = f"_{sys.argv[2].upper()}" if len(sys.argv) == 3 else ""
 flow = InstalledAppFlow.from_client_secrets_file(secret_file, SCOPES)
 # Same link for every attempt (fixed state + one PKCE verifier on this flow), and keep
 # waiting if a stale tab or a denied consent hits the local server first.
@@ -40,6 +42,6 @@ if creds is None:
 client = json.load(open(secret_file))
 client = client.get("installed") or client.get("web")
 print("\nAdd these to .env and to GitHub → Settings → Secrets and variables → Actions:\n")
-print(f"YT_CLIENT_ID={client['client_id']}")
-print(f"YT_CLIENT_SECRET={client['client_secret']}")
-print(f"YT_REFRESH_TOKEN={creds.refresh_token}")
+print(f"YT_CLIENT_ID{sfx}={client['client_id']}")
+print(f"YT_CLIENT_SECRET{sfx}={client['client_secret']}")
+print(f"YT_REFRESH_TOKEN{sfx}={creds.refresh_token}")

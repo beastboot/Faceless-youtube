@@ -33,7 +33,7 @@ export type Props = {
   shots: Shot[];
   transitionSeconds: number;
   captionsOn: boolean;
-  fonts: {display: string; hindi: string};
+  fonts: {display: string; hindi: string; regional?: string; regionalFile?: string | null};
   logo: string | null;
   grain?: string | null;
   endCard: {title: string; button: string} | null;

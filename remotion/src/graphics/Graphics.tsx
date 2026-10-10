@@ -6,7 +6,7 @@ import world from 'world-atlas/countries-50m.json';
 import type {Graphic} from '../types';
 import {INK, RED, YELLOW, clamp, fadeInOut, fontFor, pop} from '../util';
 
-type Fonts = {display: string; hindi: string};
+type Fonts = {display: string; hindi: string; regional?: string};
 type GP<T> = {g: T; len: number; fonts: Fonts; short: boolean};
 
 const stroke = (px: number) => ({WebkitTextStroke: `${px}px #000`, paintOrder: 'stroke fill' as const});

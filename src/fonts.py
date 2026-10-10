@@ -8,6 +8,10 @@ from .common import ROOT, download, log
 FONTS = {  # language -> (file name, download URL); both OFL-licensed Google Fonts
     "en": ("Anton-Regular.ttf", "https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf"),
     "hi": ("Mukta-ExtraBold.ttf", "https://github.com/google/fonts/raw/main/ofl/mukta/Mukta-ExtraBold.ttf"),
+    "mr": ("Mukta-ExtraBold.ttf", "https://github.com/google/fonts/raw/main/ofl/mukta/Mukta-ExtraBold.ttf"),
+    "ta": ("MuktaMalar-ExtraBold.ttf", "https://github.com/google/fonts/raw/main/ofl/muktamalar/MuktaMalar-ExtraBold.ttf"),
+    "bn": ("HindSiliguri-Bold.ttf", "https://github.com/google/fonts/raw/main/ofl/hindsiliguri/HindSiliguri-Bold.ttf"),
+    "te": ("Ramabhadra-Regular.ttf", "https://github.com/google/fonts/raw/main/ofl/ramabhadra/Ramabhadra-Regular.ttf"),
 }
 FALLBACKS = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -38,8 +42,8 @@ def font_path(lang="en"):
 def font(size, lang="en"):
     # RAQM layout shapes Devanagari (vowel signs, conjuncts) correctly when libraqm is installed.
     layout = ImageFont.Layout.RAQM if features.check("raqm") else ImageFont.Layout.BASIC
-    if lang == "hi" and layout != ImageFont.Layout.RAQM:
-        log.warning("libraqm missing: Hindi text will be mis-shaped (brew/apt install libraqm)")
+    if lang != "en" and layout != ImageFont.Layout.RAQM:
+        log.warning("libraqm missing: Indian-script text will be mis-shaped (brew/apt install libraqm)")
     return ImageFont.truetype(font_path(lang), size, layout_engine=layout)
 
 

@@ -79,6 +79,18 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_CLIENT_ID_TA: ${{ secrets.YT_CLIENT_ID_TA }}
+          YT_CLIENT_SECRET_TA: ${{ secrets.YT_CLIENT_SECRET_TA }}
+          YT_REFRESH_TOKEN_TA: ${{ secrets.YT_REFRESH_TOKEN_TA }}
+          YT_CLIENT_ID_TE: ${{ secrets.YT_CLIENT_ID_TE }}
+          YT_CLIENT_SECRET_TE: ${{ secrets.YT_CLIENT_SECRET_TE }}
+          YT_REFRESH_TOKEN_TE: ${{ secrets.YT_REFRESH_TOKEN_TE }}
+          YT_CLIENT_ID_BN: ${{ secrets.YT_CLIENT_ID_BN }}
+          YT_CLIENT_SECRET_BN: ${{ secrets.YT_CLIENT_SECRET_BN }}
+          YT_REFRESH_TOKEN_BN: ${{ secrets.YT_REFRESH_TOKEN_BN }}
+          YT_CLIENT_ID_MR: ${{ secrets.YT_CLIENT_ID_MR }}
+          YT_CLIENT_SECRET_MR: ${{ secrets.YT_CLIENT_SECRET_MR }}
+          YT_REFRESH_TOKEN_MR: ${{ secrets.YT_REFRESH_TOKEN_MR }}
           BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

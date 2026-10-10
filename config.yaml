@@ -103,6 +103,70 @@ languages:
     short_max_seconds: 60             # Shorts longer than this are sped up (max 30%)
     long_publish_utc: ["14:30"]       # 8:00 PM IST
     short_publish_utc: ["06:30", "12:30"]   # 12:00 PM and 6:00 PM IST
+  # Regional channels: same stories and pictures, own language + own YouTube channel/Google project.
+  # Turn one on after creating its channel and adding its YT_*_XX secrets (README: regional channels).
+  ta:
+    enabled: false
+    channel_name: "Odd Annals Tamil"
+    youtube_env: "_TA"                # uses YT_CLIENT_ID_TA / YT_CLIENT_SECRET_TA / YT_REFRESH_TOKEN_TA
+    longs_per_run: 1
+    shorts_per_run: 2
+    voice: "ta-IN-ValluvarNeural"
+    captions: "native"
+    long_rate: "+8%"
+    short_rate: "+15%"
+    short_max_seconds: 60
+    tts: &regional_tts
+      engine: "gemini"
+      voice: "Charon"
+      models: ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-3.8-flash-tts"]
+      style: >-
+        Read the following line as a gripping, warm documentary storyteller in its own language, with
+        natural conversational delivery, clear diction and a brisk pace. Read only the line, nothing else.
+    long_publish_utc: ["14:00"]
+    short_publish_utc: ["07:00", "12:00"]
+  te:
+    enabled: false
+    channel_name: "Odd Annals Telugu"
+    youtube_env: "_TE"
+    longs_per_run: 1
+    shorts_per_run: 2
+    voice: "te-IN-MohanNeural"
+    captions: "native"
+    long_rate: "+8%"
+    short_rate: "+15%"
+    short_max_seconds: 60
+    tts: *regional_tts
+    long_publish_utc: ["14:00"]
+    short_publish_utc: ["07:00", "12:00"]
+  bn:
+    enabled: false
+    channel_name: "Odd Annals Bangla"
+    youtube_env: "_BN"
+    longs_per_run: 1
+    shorts_per_run: 2
+    voice: "bn-IN-BashkarNeural"
+    captions: "native"
+    long_rate: "+8%"
+    short_rate: "+15%"
+    short_max_seconds: 60
+    tts: *regional_tts
+    long_publish_utc: ["13:30"]
+    short_publish_utc: ["06:30", "12:00"]
+  mr:
+    enabled: false
+    channel_name: "Odd Annals Marathi"
+    youtube_env: "_MR"
+    longs_per_run: 1
+    shorts_per_run: 2
+    voice: "mr-IN-ManoharNeural"
+    captions: "native"
+    long_rate: "+8%"
+    short_rate: "+15%"
+    short_max_seconds: 60
+    tts: *regional_tts
+    long_publish_utc: ["14:00"]
+    short_publish_utc: ["07:00", "12:00"]
   en:
     enabled: false                    # set true to ALSO publish English versions
     longs_per_run: 1                  # first N topics get an English version

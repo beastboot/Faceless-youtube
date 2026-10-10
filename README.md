@@ -74,6 +74,16 @@ Without this the daily reach report still shows views, likes, comments and priva
 - Edit `channel/voice.md` to change the narrator's personality, and `config.yaml` to change the
   channel name, voices, counts, publish times and competitor channels.
 
+## Regional channels (Tamil, Telugu, Bengali, Marathi)
+Each language is the same daily story and the same pictures, translated and narrated, uploaded to
+its **own channel** (YouTube recommends one language per channel). Per language, once:
+1. Create the YouTube channel (e.g. *Odd Annals Tamil*) and verify it.
+2. Create a **new Google Cloud project** for it (each project has its own 10,000/day upload quota),
+   enable YouTube Data API v3, set up the OAuth consent screen (publish it), create a Desktop OAuth client.
+3. `python scripts/get_youtube_token.py client_secret_xxx.json TA`, sign in with that channel, and add
+   the three printed `YT_*_TA` values to `.env` and GitHub secrets.
+4. In `config.yaml` set `languages.ta.enabled: true`.
+
 ## Local runs
 ```bash
 cp .env.example .env    # fill in keys

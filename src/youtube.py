@@ -17,31 +17,40 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
           "https://www.googleapis.com/auth/youtube.force-ssl",
           "https://www.googleapis.com/auth/yt-analytics.readonly"]
 
-_client = None
-_creds = None
+_clients = {}
+_creds = {}
+_suffix = ""   # "" = main (Hindi) channel; "_TA", "_TE", ... = regional channels
 
 
-def available():
-    return all(os.environ.get(k) for k in ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"))
+def use_channel(suffix=""):
+    """Route the following API calls to a channel: env YT_*{suffix} credentials (own Google project,
+    so each channel has its own daily quota)."""
+    global _suffix
+    _suffix = suffix or ""
+
+
+def available(suffix=None):
+    sfx = _suffix if suffix is None else suffix
+    return all(os.environ.get(k + sfx) for k in ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"))
 
 
 def credentials():
     client()
-    return _creds
+    return _creds[_suffix]
 
 
 def client():
-    global _client, _creds
-    if _client is None:
-        _creds = creds = Credentials(
+    if _suffix not in _clients:
+        creds = Credentials(
             token=None,
-            refresh_token=os.environ["YT_REFRESH_TOKEN"],
+            refresh_token=os.environ["YT_REFRESH_TOKEN" + _suffix],
             token_uri="https://oauth2.googleapis.com/token",
-            client_id=os.environ["YT_CLIENT_ID"],
-            client_secret=os.environ["YT_CLIENT_SECRET"],
+            client_id=os.environ["YT_CLIENT_ID" + _suffix],
+            client_secret=os.environ["YT_CLIENT_SECRET" + _suffix],
         )
-        _client = build("youtube", "v3", credentials=creds, cache_discovery=False)
-    return _client
+        _creds[_suffix] = creds
+        _clients[_suffix] = build("youtube", "v3", credentials=creds, cache_discovery=False)
+    return _clients[_suffix]
 
 
 def next_publish_time(slots_utc, index):
@@ -155,7 +164,7 @@ def playlist_for(cfg, fmt, lang, series=None):
     from .common import ROOT
     path = ROOT / "data" / "playlists.json"
     known = json.loads(path.read_text()) if path.exists() else {}
-    key = f"series-{series['id']}-{lang}" if series else f"{fmt}-{lang}"
+    key = (f"series-{series['id']}-{lang}" if series else f"{fmt}-{lang}") + _suffix
     if known.get(key):
         return known[key]
     if cfg["youtube"].get(f"{fmt}_playlist_id") and lang == cfg["channel"]["language"]:

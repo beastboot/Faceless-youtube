@@ -17,6 +17,18 @@ TEXT = {
            "ai": "Illustrations: AI-generated. Narration: AI voice.",
            "subscribe": "Subscribe to {name} for a new story every day.",
            "full": "▶ Watch the full documentary: {url}", "intro": "Intro"},
+    "ta": {"chapters": "அத்தியாயங்கள்:", "sources": "ஆதாரங்கள்:", "english": "🇬🇧 In English:",
+           "ai": "படங்கள்: AI உருவாக்கியவை. குரல்: AI.", "subscribe": "இதுபோன்ற கதைகளுக்கு {name} சேனலை சப்ஸ்கிரைப் செய்யுங்கள்.",
+           "full": "▶ முழு ஆவணப்படம்: {url}", "intro": "தொடக்கம்"},
+    "te": {"chapters": "అధ్యాయాలు:", "sources": "ఆధారాలు:", "english": "🇬🇧 In English:",
+           "ai": "చిత్రాలు: AI రూపొందించినవి. గొంతు: AI.", "subscribe": "ఇలాంటి కథల కోసం {name} ను సబ్‌స్క్రైబ్ చేయండి.",
+           "full": "▶ పూర్తి డాక్యుమెంటరీ: {url}", "intro": "ప్రారంభం"},
+    "bn": {"chapters": "অধ্যায়:", "sources": "সূত্র:", "english": "🇬🇧 In English:",
+           "ai": "ছবি: AI দিয়ে তৈরি। কণ্ঠ: AI।", "subscribe": "এমন গল্পের জন্য {name} সাবস্ক্রাইব করুন।",
+           "full": "▶ পুরো ডকুমেন্টারি: {url}", "intro": "শুরু"},
+    "mr": {"chapters": "प्रकरणे:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
+           "ai": "चित्रे: AI ने तयार केली. आवाज: AI.", "subscribe": "अशा कथांसाठी {name} ला सबस्क्राइब करा.",
+           "full": "▶ संपूर्ण माहितीपट: {url}", "intro": "सुरुवात"},
     "hi": {"chapters": "अध्याय:", "sources": "स्रोत:", "english": "🇬🇧 In English:",
            "ai": "चित्र: AI द्वारा बनाए गए। आवाज़: AI वॉइस।",
            "subscribe": "ऐसी ही रोचक कहानियों के लिए {name} को सब्सक्राइब करें।",
@@ -243,7 +255,8 @@ def build_description(cfg, script, res, chapters, fmt, lang):
     if script.get("credits"):
         parts.append("Image credits:\n" + "\n".join(list(dict.fromkeys(script["credits"]))[:20]))
     if fmt == "long":
-        parts.append(t["subscribe"].format(name=cfg["channel"]["name"]))
+        parts.append(t["subscribe"].format(name=(cfg["languages"].get(lang) or {}).get("channel_name")
+                                           or cfg["channel"]["name"]))
     tags = [h if h.startswith("#") else "#" + h.replace(" ", "")
             for h in (script.get("hashtags") or [])][:3]
     if fmt == "short" and "#shorts" not in [x.lower() for x in tags]:
@@ -349,7 +362,9 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         log.warning("Short is %.0fs (>3 min limit); YouTube will treat it as a regular video", total)
     video.write_srt(items, starts, work / "captions.srt")
     caption_track = "hi-Latn" if hinglish else lang  # YouTube's "Hindi (Latin)" subtitle language
-    label = (series or {}).get("label") or cfg["thumbnails"].get("label") or cfg["channel"]["name"].upper()
+    label = ((series or {}).get("label") if lang == "hi" else None) or \
+        (cfg["languages"].get(lang) or {}).get("channel_name") or cfg["thumbnails"].get("label") or \
+        cfg["channel"]["name"].upper()
     thumbnail.make(script["thumb_visual"], script["thumbnail_text"], work / "thumbnail.jpg", work, lang, template,
                    label=label)
     if fmt == "long":  # every template, for YouTube Studio's "Test & Compare" (A/B/C on real viewers)
@@ -436,8 +451,12 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     results = []
     for lang in langs:
         try:
-            script = (script_en if lang == "en"
-                      else script_writer.translate_hindi(cfg, script_en, fmt, phrases))
+            if lang == "en":
+                script = script_en
+            elif lang == "hi":
+                script = script_writer.translate_hindi(cfg, script_en, fmt, phrases)
+            else:
+                script = script_writer.translate_regional(cfg, script_en, fmt, lang)
             work = base / lang
             work.mkdir(exist_ok=True)
             meta, total = render_language(cfg, script, res, fmt, lang, work, template, series, episode)
@@ -574,6 +593,14 @@ Return {{"clips": [{{"start": i, "end": j, "hook": "...", "hook_hinglish": "..."
 # ---- publishing ---------------------------------------------------------------------------
 def publish(cfg, work, fmt, meta, publish_at=None, series=None):
     lang = meta.get("lang", "en")
+    youtube.use_channel((cfg["languages"].get(lang) or {}).get("youtube_env", ""))
+    try:
+        return _publish(cfg, work, fmt, meta, publish_at, series, lang)
+    finally:
+        youtube.use_channel("")
+
+
+def _publish(cfg, work, fmt, meta, publish_at, series, lang):
     video_id = youtube.upload(cfg, work / "final.mp4", meta, publish_at)
     tl = ROOT / "data" / "timelines"
     tl.mkdir(parents=True, exist_ok=True)

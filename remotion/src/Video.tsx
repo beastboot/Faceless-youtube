@@ -10,6 +10,7 @@ const FontFaces: React.FC<{fonts: Props['fonts']}> = ({fonts}) => (
   <style>{`
     @font-face { font-family: '${fonts.display}'; src: url('${staticFile('fonts/Anton-Regular.ttf')}'); }
     @font-face { font-family: '${fonts.hindi}'; src: url('${staticFile('fonts/Mukta-ExtraBold.ttf')}'); }
+    ${fonts.regionalFile ? `@font-face { font-family: '${fonts.regional}'; src: url('${staticFile(fonts.regionalFile)}'); }` : ''}
   `}</style>
 );
 
