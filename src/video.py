@@ -179,12 +179,25 @@ def assemble(scenes, work, out_path, cfg, fmt):
 
     track, is_file = audio.music_for(t, work)
     vol = cfg["video"]["music_volume"] if is_file else cfg["video"].get("bed_volume", 0.35)
+    vc = cfg["video"]
+    # Voice: gentle compression for presence; final mix normalised to YouTube's -14 LUFS.
+    audio_graph = (f"[1:a]acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2[v];"
+                   f"[2:a]volume={vol},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m];"
+                   f"[v][m]amix=inputs=2:duration=first:normalize=0,"
+                   f"loudnorm=I=-14:TP=-1.5:LRA=11[a]")
+    up_h = (vc.get("upload_height") or {}).get(fmt)
+    w, h = cfg[fmt]["width"], cfg[fmt]["height"]
+    if up_h and up_h > h:
+        # Uploading above 1080p makes YouTube use its higher-quality VP9 encode for every viewer.
+        up_w = int(round(w * up_h / h / 2)) * 2
+        video_args = ["-filter_complex", f"[0:v]scale={up_w}:{up_h}:flags=lanczos,setsar=1[vv];" + audio_graph,
+                      "-map", "[vv]", "-map", "[a]", "-c:v", "libx264", "-preset", vc["preset"],
+                      "-crf", str(vc["crf"]), "-pix_fmt", "yuv420p"]
+    else:
+        video_args = ["-filter_complex", audio_graph, "-map", "0:v", "-map", "[a]", "-c:v", "copy"]
     cmd = ["ffmpeg", "-y", "-v", "error", "-i", work / "video.mp4", "-i", work / "narration.wav",
-           *(["-stream_loop", "-1"] if is_file else []), "-i", track, "-filter_complex",
-           f"[2:a]volume={vol},afade=t=out:st={max(t - 3, 0):.2f}:d=3[m];"
-           f"[1:a][m]amix=inputs=2:duration=first:normalize=0[a]",
-           "-map", "0:v", "-map", "[a]"]
-    cmd += ["-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-t", f"{t:.3f}",
+           *(["-stream_loop", "-1"] if is_file else []), "-i", track, *video_args]
+    cmd += ["-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-t", f"{t:.3f}",
             "-movflags", "+faststart", out_path]
     run(cmd)
     log.info("Video ready: %s (%.1fs)", out_path, ffprobe_duration(out_path))

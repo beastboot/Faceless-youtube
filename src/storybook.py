@@ -5,7 +5,7 @@ import math
 import subprocess
 
 import numpy as np
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 from .common import log
 
@@ -32,8 +32,15 @@ class Particles:
             "embers": (rng.normal(0, 20, n) * s, rng.uniform(-120, -60, n) * s),
         }.get(kind, (np.zeros(n), np.zeros(n)))
         self.n = n
-        yy, xx = np.mgrid[-24:25, -24:25]
-        self.blob = np.exp(-(xx ** 2 + yy ** 2) / (2 * 7.0 ** 2)).astype(np.float32)   # soft glow sprite
+        self.sprites = {}   # radius -> round soft glow that fades fully to 0 at its edge
+
+    def sprite(self, r):
+        if r not in self.sprites:
+            yy, xx = np.mgrid[-r:r + 1, -r:r + 1].astype(np.float32)
+            d2 = (xx ** 2 + yy ** 2) / (r * r)
+            core = np.exp(-d2 * 4.5)
+            self.sprites[r] = (core * np.clip(1 - d2, 0, 1)).astype(np.float32)
+        return self.sprites[r]
 
     def step(self, dt, t):
         self.x = (self.x + self.vx * dt + (np.sin(t * 0.9 + self.phase) * 12 * dt if self.kind == "fireflies" else 0)) % self.w
@@ -62,7 +69,7 @@ class Particles:
                 a = 0.55
             scale = 0.5 + self.size[i] * (1.3 if self.kind != "dust" else 0.6)
             r = min(24, max(3, int(16 * scale)))
-            sprite = self.blob[24 - r:25 + r, 24 - r:25 + r] * a * (230 if self.kind != "dust" else 120)
+            sprite = self.sprite(r) * a * (230 if self.kind != "dust" else 120)
             x, y = int(self.x[i]), int(self.y[i])
             y0, y1, x0, x1 = y - r, y + r + 1, x - r, x + r + 1
             sy0, sx0 = max(0, -y0), max(0, -x0)
@@ -105,6 +112,12 @@ def render(src, out, w, h, fps, frames, move="zoom_in", ambient="none", seed=0, 
     over = 1.25
     W, H = int(w * over), int(h * over)
     paint = ImageOps.fit(Image.open(src).convert("RGB"), (W, H), Image.LANCZOS)
+    # Upscaled AI art is soft: restore crispness and give it a gentle cinematic grade.
+    paint = paint.filter(ImageFilter.UnsharpMask(radius=2.2, percent=90, threshold=2))
+    paint = ImageEnhance.Contrast(ImageEnhance.Color(paint).enhance(1.08)).enhance(1.05)
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    d = np.sqrt(((xx - w / 2) / (w / 2)) ** 2 + ((yy - h / 2) / (h / 2)) ** 2)
+    vignette = (1 - 0.22 * np.clip(d - 0.55, 0, 1) ** 1.6)[..., None].astype(np.float32)
     if glow:   # soft bloom layer, breathed in and out
         bloom = np.asarray(paint.filter(ImageFilter.GaussianBlur(18))).astype(np.float32)
     parts = Particles(ambient if ambient in AMBIENTS else "none", w, h, rng)
@@ -120,13 +133,14 @@ def render(src, out, w, h, fps, frames, move="zoom_in", ambient="none", seed=0, 
             sec = f / fps
             x, y, cw, ch = _crop_box(move, t, W, H, w, h)
             box = (x, y, x + cw, y + ch)
-            frame = np.asarray(paint.resize((w, h), Image.BILINEAR, box=box)).astype(np.float32)
+            frame = np.asarray(paint.resize((w, h), Image.BICUBIC, box=box)).astype(np.float32)
             if glow:
                 b = np.asarray(bloom_img.resize((w, h), Image.BILINEAR, box=box)).astype(np.float32)
                 k = 0.10 + 0.05 * math.sin(sec * 1.1 + seed)
                 frame = frame * (1 - k) + np.maximum(frame, b) * k * 1.6       # screen-ish glow
             parts.step(1 / fps, sec)
             parts.draw(frame, sec)
+            frame *= vignette
             proc.stdin.write(np.clip(frame, 0, 255).astype(np.uint8).tobytes())
     finally:
         proc.stdin.close()

@@ -51,8 +51,9 @@ video:
   transitions:
     long: ["slideleft", "slideright", "smoothleft", "smoothright", "fade", "circleopen", "wipeleft"]
     short: ["zoomin", "slideup", "slidedown", "slideleft", "hblur", "fadeblack"]
-  crf: 23
-  preset: "veryfast"
+  crf: 19                             # lower = sharper; 19 keeps watercolour gradients clean
+  preset: "faster"
+  upload_height: {long: 1440}         # upscale long videos to 1440p so YouTube serves its better VP9 encode
 
 # AI illustrations: one per sentence, in a single consistent animated style.
 images:
