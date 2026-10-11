@@ -178,6 +178,10 @@ def main():
         queues = {"long": longs, "short": shorts}
 
     langs_cfg = cfg["languages"]
+    if datetime.now(timezone.utc).strftime("%Y%m%d") == "20261011":
+        # One-off Telegram request: only English goes live today; every other language is skipped
+        # for this run only (auto-expires after today, config.yaml languages: are untouched).
+        langs_cfg = {l: c for l, c in langs_cfg.items() if l == "en"}
     primary = [l for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" not in c]
     extra = {l: c for l, c in langs_cfg.items() if c.get("enabled") and "longs_per_run" in c}
     done = {"long": 0, "short": 0}
