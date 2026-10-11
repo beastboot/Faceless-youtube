@@ -6,7 +6,7 @@ channel:
   handle: "@oddannals"                # used for the subscribe link in descriptions
   niche: "history, little-known facts and unsolved mysteries"
   audience: "curious adults 18-45 who binge documentaries and 'rabbit hole' videos"
-  language: "hi"                      # main language (see languages: below)
+  language: "en"                      # main language (see languages: below)
   category_id: "27"                   # 27 = Education (22 People & Blogs, 24 Entertainment)
   voice_guide: "channel/voice.md"     # style guide every script prompt reads
 
@@ -93,11 +93,11 @@ images:
   stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
 
-# Languages. Hindi is the main channel language. Every topic is researched and scripted once,
-# illustrated once, then narrated per language (English versions reuse the same illustrations).
+# Languages. English is the main channel language. Every topic is researched and scripted once,
+# illustrated once, then narrated per language.
 languages:
   hi:
-    enabled: true                     # main language: makes every video in schedule above
+    enabled: false                    # paused (owner request): English only for now
     voice: "hi-IN-MadhurNeural"       # Edge voice (backup)
     tts:
       engine: "gemini"                # expressive narration; whole video falls back to Edge if unavailable
@@ -179,9 +179,7 @@ languages:
     long_publish_utc: ["14:00"]
     short_publish_utc: ["07:00", "12:00"]
   en:
-    enabled: true                     # focus: English Shorts for every history topic (owner request)
-    longs_per_run: 0                  # Shorts only for now, not English longs
-    shorts_per_run: 2                 # both Shorts picked each run also get an English version
+    enabled: true                     # main language (owner request): English only for now
     long_publish_utc: ["15:00"]
     short_publish_utc: ["13:00", "17:00"]
 
