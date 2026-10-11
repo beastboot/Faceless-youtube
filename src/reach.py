@@ -450,7 +450,7 @@ def write_report(table, actions, sources, have_analytics):
     rows = sorted([(r, x) for r, x in table if x], key=lambda t: -t[1]["views"])
     total_views = sum(x["views"] for _, x in rows)
     total_min = sum((x["watch_min"] or 0) for _, x in rows)
-    lines = [f"# Odd Annals reach report — {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC", "",
+    lines = [f"# 📊 Odd Annals reach report — {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC", "",
              f"**{len(rows)} videos · {total_views:,} views"
              + (f" · {total_min / 60:,.1f} watch hours** (monetization needs 4,000)" if have_analytics else "**"),
              ""]
