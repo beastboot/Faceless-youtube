@@ -193,12 +193,20 @@ def post_comment(video_id, text):
 def add_to_playlist(video_id, playlist_id):
     if not playlist_id:
         return
-    try:
-        client().playlistItems().insert(part="snippet", body={"snippet": {
-            "playlistId": playlist_id,
-            "resourceId": {"kind": "youtube#video", "videoId": video_id}}}).execute()
-    except HttpError as e:
-        log.warning("Playlist add failed: %s", e)
+    # A playlist created seconds ago (or a video just uploaded) is often not ready yet: YouTube answers
+    # 409 SERVICE_UNAVAILABLE / 404, so wait and retry before giving up.
+    for attempt in range(4):
+        try:
+            client().playlistItems().insert(part="snippet", body={"snippet": {
+                "playlistId": playlist_id,
+                "resourceId": {"kind": "youtube#video", "videoId": video_id}}}).execute()
+            return
+        except HttpError as e:
+            if attempt < 3 and e.resp.status in (404, 409, 500, 503):
+                time.sleep(15 * (attempt + 1))
+                continue
+            log.warning("Playlist add failed: %s", e)
+            return
 
 
 def video_stats(video_ids):

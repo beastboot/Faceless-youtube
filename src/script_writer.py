@@ -331,12 +331,55 @@ Return JSON:
         prompt += (f"\n\nYOUR PREVIOUS ATTEMPT WAS TOO SHORT ({n_words} words, {len(scenes)} scenes)."
                    f" Write at least {words} words across at least {fc['min_scenes']} scenes.")
     data = best[0]
+    if fmt == "long" and best[1] < words * 0.75:
+        data = _extend(cfg, data, research, words)
     data["hook"] = hook
     data["structure"] = structure
     data["lang"] = "en"
     data["special"] = topic.get("special")
     data = rehook(cfg, data, research, fmt)
     data.update(package(data, fmt))
+    return data
+
+
+def _extend(cfg, data, research, words, rounds=3):
+    """A long script that came back short (backup models cap how much they write in one reply):
+    write the missing middle in further rounds of new scenes, inserted before the closing scene,
+    so a "long" video doesn't end up 3 minutes long."""
+    scenes = data["scenes"]
+    for r in range(rounds):
+        have = sum(len(s["narration"].split()) for s in scenes)
+        if have >= words * 0.75 or len(scenes) < 2:
+            break
+        need = min(words - have, 900)   # what one reply can safely hold
+        outline = "\n".join(f"{i}. {s.get('chapter') or ''} — {s['narration'][:220]}" for i, s in enumerate(scenes))
+        prompt = f"""This documentary script is too short ({have} of {words} words). Write NEW scenes (about {need}
+words in total, 3-6 scenes) that go between scene {len(scenes) - 2} and the final scene: deeper detail, a
+lesser-known fact, a second perspective, a twist or the investigation from the notes — never repeat what is
+already said, never add facts that aren't in the notes. Same rules and JSON shape as before (each shot:
+line, image_prompt, cast, location, move, ambient, graphic). Give the first new scene a short "chapter" title.
+
+CHARACTERS: {json.dumps(data.get('characters') or {}, ensure_ascii=False)[:1500]}
+LOCATIONS: {json.dumps(data.get('locations') or {}, ensure_ascii=False)[:1500]}
+SCRIPT SO FAR (scene: chapter — narration):
+{outline[:6000]}
+
+RESEARCH NOTES:
+{research['text'][:9000]}
+
+Return {{"scenes": [{{"chapter": "...", "shots": [{{"line": "...", "image_prompt": "...", "cast": [], "location": "",
+"move": "zoom_in", "ambient": "none", "graphic": null}}]}}]}}"""
+        try:
+            new = _clean_scenes(llm.ask_json(cfg, _system(cfg), prompt))
+        except Exception as e:
+            log.warning("Extending the script failed (%s)", e)
+            break
+        if not new:
+            break
+        scenes = scenes[:-1] + new + scenes[-1:]
+        log.info("Script extended (round %d): +%d scenes, now %d words", r + 1, len(new),
+                 sum(len(s["narration"].split()) for s in scenes))
+    data["scenes"] = scenes
     return data
 
 
