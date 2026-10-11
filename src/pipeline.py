@@ -363,7 +363,7 @@ def build_tags(script, lang):
     if script.get("special") == "quiz":
         return ["quiz", "guess the place", "पहचानो", "रहस्य", "quiz in hindi", "history quiz"]
     phrases = script.get("search_phrases") or []
-    if lang not in ("hi", "en"):   # other languages: only the English-letter searches carry over
+    if lang != "hi":   # other languages (English too): only the English-letter searches carry over
         phrases = [p for p in phrases if p.isascii()]
     seen, out = set(), []
     for t in [script.get("primary_keyword") or ""] + phrases[:10] + list(script.get("tags") or []):
