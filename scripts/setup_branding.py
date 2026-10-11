@@ -4,6 +4,7 @@
     python scripts/setup_branding.py                 # Hindi main channel: generate files to review
     python scripts/setup_branding.py --apply         # upload banner + set description/keywords on YouTube
     python scripts/setup_branding.py ta --apply      # a regional channel (Tamil), its own YT_*_TA credentials
+    python scripts/setup_branding.py en --apply      # main channel rebranded to English (files in branding/en/)
 
 YouTube's API cannot set the profile picture: upload branding/logo.png yourself in
 YouTube Studio > Customization > Branding.
@@ -27,6 +28,8 @@ def text_assets(cfg, lang="hi"):
     p = OUT / "branding.json"
     if p.exists():
         return json.loads(p.read_text())
+    if lang == "en":
+        return _english_text(cfg, p)
     if lang != "hi":
         return _regional_text(cfg, lang, p)
     ch = cfg["channel"]
@@ -45,6 +48,24 @@ Return {{"description_hi": "...", "description_en": "...", "keywords": ["..."], 
                         temperature=0.6)
     data["description"] = f"{data['description_hi'].strip()}\n\n— English —\n{data['description_en'].strip()}"
     OUT.mkdir(exist_ok=True)
+    p.write_text(json.dumps(data, indent=1, ensure_ascii=False))
+    return data
+
+
+def _english_text(cfg, p):
+    ch = cfg["channel"]
+    data = llm.ask_json(cfg, "You are a YouTube channel branding expert. JSON only.", f"""
+Channel: {ch['name']}. Niche: {ch['niche']}. Language: English (animated 3D-style documentaries about
+history, ancient India, mythology, lost cities and unsolved mysteries). New videos daily: one long story
++ Shorts. Write:
+- description_en: YouTube "About" text in English, 380-450 characters. The first sentence contains the
+  words people search for ("history", "mysteries", "animated documentaries"). What viewers get, upload
+  schedule, subscribe line. No fake claims, max 2 emojis.
+- keywords: 15 channel keywords in English, multi-word ones in double quotes.
+- tagline: banner tagline, max 6 words, English.
+Return {{"description_en": "...", "keywords": ["..."], "tagline": "..."}}""", temperature=0.6)
+    data["description"] = data["description_en"].strip()
+    OUT.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(data, indent=1, ensure_ascii=False))
     return data
 
@@ -143,12 +164,17 @@ def apply(text, banner_path, lang="hi"):
     bs = ch.get("brandingSettings", {})
     bs.setdefault("channel", {}).update({
         "description": text["description"][:1000],
-        "keywords": " ".join(text["keywords"])[:500],
+        # multi-word keywords must be quoted, or YouTube splits them into single words
+        "keywords": " ".join(f'"{k.strip(chr(34))}"' if " " in k.strip(chr(34)) else k
+                             for k in text["keywords"])[:500],
         "defaultLanguage": lang,
         "country": "IN",
     })
     bs.setdefault("image", {})["bannerExternalUrl"] = up["url"]
     yt.channels().update(part="brandingSettings", body={"id": ch["id"], "brandingSettings": bs}).execute()
+    if lang == "en":   # the channel itself is English now: no separate English translation needed
+        log.info("Channel description, keywords, language and banner updated.")
+        return
     # English translation of the channel: shown to viewers whose YouTube language is English.
     yt.channels().update(part="localizations", body={"id": ch["id"], "localizations": {
         "en": {"title": ch.get("brandingSettings", {}).get("channel", {}).get("title") or load_config()["channel"]["name"],
@@ -163,12 +189,15 @@ def main():
     lang = next((a for a in sys.argv[1:] if not a.startswith("--")), "hi")
     if lang != "hi":
         OUT = ROOT / "branding" / lang
-        youtube.use_channel(cfg["languages"][lang]["youtube_env"])
+        youtube.use_channel(cfg["languages"][lang].get("youtube_env", ""))
     OUT.mkdir(parents=True, exist_ok=True)
     text = text_assets(cfg, lang)
     if lang == "hi":
         b = banner(cfg, text["tagline"])
         lg = logo(cfg)
+    elif lang == "en":
+        b = banner(cfg, text["tagline"], "en")
+        lg = typographic_logo(cfg, "en", "MYSTERY • HISTORY")
     else:
         b = banner(cfg, text["tagline"], lang, cfg["languages"][lang]["channel_name"])
         lg = typographic_logo(cfg, lang, {"ta": "மர்மம் • வரலாறு", "te": "రహస్యం • చరిత్ర",

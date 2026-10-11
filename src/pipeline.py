@@ -511,11 +511,12 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
     if series:
         pl = json.loads((ROOT / "data" / "playlists.json").read_text()).get(f"series-{series['id']}-{lang}") \
             if (ROOT / "data" / "playlists.json").exists() else None
-        head = (f"📚 {series['name']} — एपिसोड {episode}" if lang == "hi" else f"📚 Series: {series['name']} — Episode {episode}")
+        sname = series["name"] if lang == "hi" else series.get("name_en") or series["name"]
+        head = (f"📚 {sname} — एपिसोड {episode}" if lang == "hi" else f"📚 Series: {sname} — Episode {episode}")
         if pl:   # keeps viewers watching (session continuation is a satisfaction signal)
             head += f"\n▶ पूरी सीरीज़: https://www.youtube.com/playlist?list={pl}" if lang == "hi" else \
                 f"\n▶ Full series: https://www.youtube.com/playlist?list={pl}"
-        links.append(head if fmt == "long" else f"📚 {series['name']}")
+        links.append(head if fmt == "long" else f"📚 {sname}")
     description = build_description(cfg, script, res, chapters, fmt, lang, links, series)
     timeline = [[round(st, 2), it.get("line_text", "")] for it, st in zip(items, starts)]
     tags = build_tags(script, lang)

@@ -217,26 +217,31 @@ host:
 series:
   - id: "mandir"
     name: "मंदिरों के रहस्य"
+    name_en: "Temple Mysteries"                # English and other non-Hindi channels
     label: "मंदिर का रहस्य"
     about: >-
       mysteries, legends and history of famous Indian temples and shrines (architecture, miracles
       believed by devotees, origin stories), told respectfully; beliefs presented as beliefs
   - id: "pauranik"
     name: "पौराणिक रहस्य"
+    name_en: "Mythology Mysteries"                # English and other non-Hindi channels
     label: "पौराणिक रहस्य"
     about: >-
       places and stories linked to the Ramayana, Mahabharata and Puranas (Ram Setu, Dwarka, Kurukshetra),
       what history, archaeology and tradition each say; respectful, never mocking
   - id: "bharat"
     name: "भारत के अनसुलझे रहस्य"
+    name_en: "Unsolved Mysteries of India"                # English and other non-Hindi channels
     label: "भारत के रहस्य"
     about: "Indian history, forts, temples, kings, freedom struggle, unsolved Indian cases and places"
   - id: "duniya"
     name: "दुनिया के रहस्य"
+    name_en: "World Mysteries"                # English and other non-Hindi channels
     label: "दुनिया के रहस्य"
     about: "world mysteries, lost civilisations, strange events outside India"
   - id: "kahani"
     name: "इतिहास की सच्ची कहानियाँ"
+    name_en: "True Stories from History"                # English and other non-Hindi channels
     label: "सच्ची कहानी"
     about: "dramatic true stories of real people: survivors, spies, explorers, rulers"
 
@@ -291,7 +296,7 @@ quality:
 thumbnails:
   mode: "ab"                          # ab = rotate templates, then favour the winner (data/thumb_winner.json)
   templates: ["rahasya", "storybook", "yellow"]   # rahasya = the niche's winning look (see README)
-  label: "ODD ANNALS • रहस्य"          # yellow series label at the bottom of storybook thumbnails
+  label: "ODD ANNALS • MYSTERY"        # yellow series label at the bottom of storybook thumbnails
 
 reach:
   auto_publish_private: false         # true = make our private, unscheduled uploads public. Off so a
