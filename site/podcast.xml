@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel><title>Odd Annals — रहस्य और इतिहास</title>
+<link>https://beastboot.github.io/Faceless-youtube/site/index.html</link><language>hi</language>
+<atom:link href="https://beastboot.github.io/Faceless-youtube/site/podcast.xml" rel="self" type="application/rss+xml"/>
+<description>भारत और दुनिया के अनसुने रहस्य और इतिहास की सच्ची कहानियाँ, हिंदी में।</description>
+<itunes:author>Odd Annals</itunes:author><itunes:image href="https://beastboot.github.io/Faceless-youtube/site/cover.jpg"/>
+<itunes:category text="History"/><itunes:explicit>false</itunes:explicit>
+<itunes:owner><itunes:name>Odd Annals</itunes:name><itunes:email></itunes:email></itunes:owner>
+<item><title>1963-ல் சிக்கிய உண்மை: துவாரகா உண்மையிலேயே உள்ளதா? | EP 1</title>
+<description>துவாரகா உண்மையிலேயே கடலுக்கு அடியில் உள்ளதா? மகாபாரத கிருஷ்ணரின் தங்க நகரம் பற்றிய அதிர்ச்சிகரமான உண்மைகளை இந்த வீடியோவில் பார்க்கலாம். — https://youtu.be/k_5cWstyZs4</description>
+<link>https://beastboot.github.io/Faceless-youtube/site/stories/20261011-mahabharata-dwarka-city-found.html</link><guid isPermaLink="false">20261011-mahabharata-dwarka-city-found</guid><pubDate>Sun, 11 Oct 2026 04:30:42 +0000</pubDate>
+<enclosure url="https://github.com/beastboot/Faceless-youtube/releases/download/podcast/20261011-mahabharata-dwarka-city-found.mp3" length="2566562" type="audio/mpeg"/>
+<itunes:duration>213</itunes:duration><itunes:explicit>false</itunes:explicit></item>
+</channel></rss>
