@@ -193,7 +193,8 @@ def main():
         for topic in queues.get(fmt, []):
             if quota_hit or done[fmt] >= targets.get(fmt, 0):
                 break
-            langs = primary + [l for l, c in extra.items() if done[fmt] < c.get(f"{fmt}s_per_run", 0)]
+            langs = topic.get("langs") or \
+                primary + [l for l, c in extra.items() if done[fmt] < c.get(f"{fmt}s_per_run", 0)]
             publish_at = {}
             for lang in langs:
                 n = slots.get((lang, fmt), 0)
