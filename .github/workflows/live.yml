@@ -7,7 +7,7 @@ on:
 
 jobs:
   announce:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # pinned: our ffmpeg/libraqm/Chrome setup is tested on 24.04 (ubuntu-latest moves to 26)
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

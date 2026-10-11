@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   produce:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # pinned: our ffmpeg/libraqm/Chrome setup is tested on 24.04 (ubuntu-latest moves to 26)
     timeout-minutes: 300           # Pollinations fallback is slow if the Cloudflare budget runs out
     steps:
       - name: Telegram — run started
