@@ -215,7 +215,8 @@ def main():
                 for lang, vid, work in results:
                     slots[(lang, fmt)] = slots.get((lang, fmt), 0) + 1
                     log.info("DONE %s/%s %s", fmt, lang, f"https://youtu.be/{vid}" if vid else work)
-                done[fmt] += 1
+                if not topic.get("langs"):   # owner requests for specific languages are extra videos,
+                    done[fmt] += 1           # they don't take the day's regular slot
             except Exception as e:
                 log.error("FAILED %s %r: %s — trying next candidate", fmt, topic.get("topic"), e)
                 failures.append(f"{fmt}: {topic.get('topic')} — {str(e)[:120]}")
