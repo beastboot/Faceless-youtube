@@ -180,7 +180,7 @@ languages:
     short_publish_utc: ["07:00", "12:00"]
   en:
     enabled: true                     # focus: English Shorts for every history topic (owner request)
-    longs_per_run: 0                  # Shorts only for now, not English longs
+    longs_per_run: 1                  # owner request: English longs too (e.g. Mahabharat/Dwarka), not just Shorts
     shorts_per_run: 2                 # both Shorts picked each run also get an English version
     long_publish_utc: ["15:00"]
     short_publish_utc: ["13:00", "17:00"]
