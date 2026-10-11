@@ -173,6 +173,7 @@ def _clean_scenes(data):
         shots = [{"line": (sh.get("line") or "").strip(),
                   "image_prompt": (sh.get("image_prompt") or "").strip(),
                   "cast": [c for c in (sh.get("cast") or []) if isinstance(c, str)],
+                  "location": (sh.get("location") or "").strip() if isinstance(sh.get("location"), str) else "",
                   "move": (sh.get("move") or "").strip(), "ambient": (sh.get("ambient") or "").strip(),
                   "graphic": sh.get("graphic") if isinstance(sh.get("graphic"), dict) else None,
                   "stock_query": (sh.get("stock_query") or "").strip()}
@@ -244,7 +245,10 @@ Scene and shot rules:
   correct region, ethnicity, community/religion and age of the real people involved, e.g. "Paliwal
   Brahmin villagers in Rajasthani pagdi turbans and white dhotis", never a different community's
   dress), doing what, where, era-accurate clothing, buildings, vehicles and objects, camera framing (wide shot, close-up,
-  over-the-shoulder, aerial), mood and lighting. Vary the framing from shot to shot.
+  over-the-shoulder, aerial), mood and lighting. Vary the framing from shot to shot, choosing from this
+  shot library: establishing wide, wide, medium, medium close-up, close-up on the face, extreme close-up
+  on a detail (eyes, hands, an object), over-the-shoulder, low angle (power, awe), high angle
+  (weakness, scale), aerial/bird's-eye, silhouette against the light.
 - The pictures are 3D animated-movie stills (Pixar-like), so direct them like an animation film: one clear
   main character the story follows, faces showing a strong readable emotion (fear, awe, anger, joy),
   a visible action or gesture (pointing, running, whispering, holding up the key object), and a
@@ -265,6 +269,9 @@ Scene and shot rules:
     {{"type": "fact", "text": "4-7 word punchline"}}                             (the big reveal of a scene)
     {{"type": "keyword", "text": "Dewan"}}                                       (1-3 word key term the line hinges on)
     {{"type": "labels", "items": ["Heavy taxes", "Fear", "One night"]}}         (2-4 short causes/parts of the idea)
+- Define each place that appears in more than one shot once in "locations" (architecture, materials,
+  landscape, era details, colours) and give each such shot its "location" name: the picture step repeats
+  the full description, so the place looks the same every time (only the time of day and light change).
 - Define each recurring character once in "characters" (region/ethnicity, age, build, hair, clothing,
   distinctive features) and repeat that exact description inside every image_prompt where they appear, so the
   character looks the same in every shot.
@@ -300,9 +307,10 @@ RESEARCH NOTES (the only allowed source of facts):
 
 Return JSON:
 {{"characters": {{"Name": "visual description"}},
+ "locations": {{"Place name": "visual description"}},
  "scenes": [{{"chapter": "optional chapter title",
    "shots": [{{"line": "spoken sentence", "image_prompt": "what the illustration shows",
-              "cast": ["Name"], "move": "zoom_in", "ambient": "dust", "graphic": null,
+              "cast": ["Name"], "location": "Place name or empty", "move": "zoom_in", "ambient": "dust", "graphic": null,
               "stock_query": "optional"}}]}}],
  "titles": ["..."], "thumbnail_texts": ["..."], "thumbnail_prompt": "...",
  "description_intro": "...", "description_body": "...", "engagement_question": "...", "mood": "mystery",

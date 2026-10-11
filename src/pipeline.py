@@ -122,6 +122,9 @@ def illustrate(cfg, script, art, fmt, res):
         names = [n for n in chars if n in (sh.get("cast") or []) or n.lower() in prompt.lower()]
         if names:
             prompt = f"{prompt}. " + "; ".join(f"{n}: {chars[n]}" for n in names)
+        place = (script.get("locations") or {}).get(sh.get("location") or "")
+        if place:   # same detailed description of a recurring place every time -> consistent setting
+            prompt = f"{prompt}. Setting, {sh['location']}: {place}"
         host = cfg.get("host") or {}
         cast = sh.get("cast") or []
         ref = host_ref if host_ref and host.get("name_en") in cast else next(
