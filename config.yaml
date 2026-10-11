@@ -97,7 +97,7 @@ images:
 # illustrated once, then narrated per language (English versions reuse the same illustrations).
 languages:
   hi:
-    enabled: true                     # main language: makes every video in schedule above
+    enabled: false                    # owner request: Hindi off, only English and Tamil live
     voice: "hi-IN-MadhurNeural"       # Edge voice (backup)
     tts:
       engine: "gemini"                # expressive narration; whole video falls back to Edge if unavailable
