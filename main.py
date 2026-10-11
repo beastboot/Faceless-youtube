@@ -9,8 +9,10 @@
 """
 import argparse
 import json
+import os
 import sys
 import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -121,6 +123,14 @@ def main():
         log.error("YT_CLIENT_ID / YT_CLIENT_SECRET / YT_REFRESH_TOKEN missing. "
                   "Run scripts/get_youtube_token.py or use --no-upload.")
         return 2
+
+    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and not (args.reach or args.watch or args.compilation):
+        # GitHub sometimes fires the daily timer very late; if today's videos were already made by a
+        # manual run in the meantime, don't make a second batch.
+        today = datetime.now(timezone.utc).strftime("%Y%m%d")
+        if any(r.get("video_id") and str(r.get("dir", "")).startswith(today) for r in state.load()):
+            log.info("Today's videos were already made by an earlier run; nothing to do")
+            return 0
 
     if args.watch:
         announce_live(cfg)
