@@ -179,11 +179,11 @@ languages:
     long_publish_utc: ["14:00"]
     short_publish_utc: ["07:00", "12:00"]
   en:
-    enabled: false                    # set true to ALSO publish English versions
-    longs_per_run: 1                  # first N topics get an English version
-    shorts_per_run: 1                 #   (quota: keep total uploads per day <= 5)
+    enabled: true                     # focus on English Shorts for history topics
+    longs_per_run: 0                  # Shorts-only for now (quota: keep total uploads per day <= 5)
+    shorts_per_run: 2                 # first N topics get an English Short version
     long_publish_utc: ["15:00"]
-    short_publish_utc: ["13:00"]
+    short_publish_utc: ["13:00", "17:00"]
 
 llm:
   # Tried in order; the first provider with an API key that succeeds wins.
