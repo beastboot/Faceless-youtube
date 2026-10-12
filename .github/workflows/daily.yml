@@ -19,6 +19,10 @@ on:
         description: "Render only (test run, nothing published)"
         type: boolean
         default: false
+      auto:
+        description: "The daily timer (started by the Telegram bot's Cloudflare cron): behaves like the schedule"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-videos
@@ -100,9 +104,10 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_TOKEN: ${{ github.token }}
+          AUTO_RUN: ${{ inputs.auto }}
         run: |
           ARGS=""
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.auto }}" != "true" ]; then
             ARGS="--longs ${{ inputs.longs }} --shorts ${{ inputs.shorts }}"
             if [ "${{ inputs.no_upload }}" = "true" ]; then ARGS="$ARGS --no-upload"; fi
             if [ "${{ inputs.reach_only }}" = "true" ]; then ARGS="--reach"; fi

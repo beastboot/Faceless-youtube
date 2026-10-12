@@ -24,6 +24,20 @@ Or just type a question: "aaj kaunsi video sabse achhi chal rahi hai?"
 Or a change: "shorts mein captions bade kar do" — I ask before doing anything.`;
 
 export default {
+  // Cloudflare cron (set in scripts/deploy_bot.py): starts the daily video run on time. GitHub's own
+  // schedule is often hours late; it stays as a backup, and main.py skips a run once today's videos exist.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil((async () => {
+      const r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/daily.yml/dispatches`, {
+        method: 'POST', headers: {Authorization: `Bearer ${env.GH_DISPATCH_TOKEN}`, Accept: 'application/vnd.github+json',
+          'User-Agent': 'odd-annals-bot', 'content-type': 'application/json'},
+        body: JSON.stringify({ref: 'main', inputs: {auto: 'true'}})});
+      if (r.status !== 204) {
+        await send(env, env.TELEGRAM_CHAT_ID, `⚠️ Daily run start nahi ho paya (HTTP ${r.status}). GitHub ka backup timer try karega.`);
+      }
+    })());
+  },
+
   async fetch(req, env, ctx) {
     if (req.method !== 'POST') return new Response('ok');
     if (req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.WEBHOOK_SECRET) return new Response('no', {status: 403});

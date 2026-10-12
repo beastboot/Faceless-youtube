@@ -124,7 +124,8 @@ def main():
                   "Run scripts/get_youtube_token.py or use --no-upload.")
         return 2
 
-    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and not (args.reach or args.watch or args.compilation):
+    timer = os.environ.get("GITHUB_EVENT_NAME") == "schedule" or os.environ.get("AUTO_RUN") == "true"
+    if timer and not (args.reach or args.watch or args.compilation):
         # GitHub sometimes fires the daily timer very late; if today's videos were already made by a
         # manual run in the meantime, don't make a second batch.
         today = datetime.now(timezone.utc).strftime("%Y%m%d")
