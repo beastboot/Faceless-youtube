@@ -135,7 +135,7 @@ languages:
         Read the following line as a gripping, warm documentary storyteller in its own language, with
         natural conversational delivery, clear diction and a brisk pace. Read only the line, nothing else.
     long_publish_utc: ["14:00"]
-    short_publish_utc: ["07:00", "12:00"]
+    short_publish_utc: ["09:30", "13:30"]   # 3:00 PM + 7:00 PM IST (best windows); run starts 07:17 UTC
   te:
     enabled: false
     channel_name: "Odd Annals Telugu"

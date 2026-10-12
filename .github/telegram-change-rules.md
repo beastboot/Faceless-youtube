@@ -29,5 +29,5 @@ they asked for, so the next daily run uses it. Nobody can answer questions: deci
 Your last message is sent to the owner on Telegram as-is. Write it in simple Hinglish (Hindi in
 Roman letters, the way the owner writes), 2-6 short lines: what you changed (in plain words, no
 code), when it takes effect (after they tap "✅ Live karo" below your message: from the next daily
-run at 8:47 AM IST), and anything they should know. If you changed nothing, say why. No markdown
+run at 12:47 PM IST), and anything they should know. If you changed nothing, say why. No markdown
 tables, no code blocks. Do not commit or push: the workflow does that after its checks.

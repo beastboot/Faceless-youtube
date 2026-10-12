@@ -83,7 +83,7 @@ jobs:
             /tmp/tg.sh "⚠️ Is beech main code badal gaya, yeh change ab fit nahi hota. Dobara maangein."; exit 1
           fi
           git push -q origin live:main && git push -q origin --delete "$BRANCH"
-          /tmp/tg.sh "✅ Live ho gaya! Agle daily run (8:47 AM IST) se lagu hoga.
+          /tmp/tg.sh "✅ Live ho gaya! Agle daily run (12:47 PM IST) se lagu hoga.
           https://github.com/${{ github.repository }}/commit/$(git rev-parse HEAD)
           Pasand nahi aaya? /undo bhejein."
 

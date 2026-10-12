@@ -63,10 +63,10 @@ def main():
         "metadata": (None, json.dumps(meta), "application/json"),
         "worker.js": ("worker.js", code, "application/javascript+module")})
     print("Worker uploaded")
-    # Daily video run at 03:17 UTC (08:47 IST), on time (GitHub's own schedule runs late)
+    # Daily video run at 07:17 UTC (12:47 IST), just after Gemini's free quota resets (07:00 UTC); on time (GitHub's own schedule runs late)
     if os.environ.get("GITHUB_CHANGE_TOKEN"):
-        cf("PUT", f"/workers/scripts/{NAME}/schedules", json=[{"cron": "17 3 * * *"}])
-        print("Daily timer set: 03:17 UTC")
+        cf("PUT", f"/workers/scripts/{NAME}/schedules", json=[{"cron": "17 7 * * *"}])
+        print("Daily timer set: 07:17 UTC")
     sub = (cf("GET", "/workers/subdomain", ok_fail=True) or {}).get("subdomain")
     if not sub:   # first Worker on this account: claim its free *.workers.dev address
         for name in ("oddannals", f"oddannals-{secrets.token_hex(3)}"):
