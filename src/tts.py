@@ -29,7 +29,12 @@ def speak(text, voice, rate, mp3_path, retries=3):
             return asyncio.run(_speak(text, voice, rate, str(mp3_path)))
         except Exception as e:
             log.warning("TTS attempt %d failed: %s", attempt + 1, e)
+    global edge_down
+    edge_down = True   # the rest of this run skips Edge (and its retries) where Kokoro can stand in
     raise RuntimeError("TTS failed")
+
+
+edge_down = False
 
 
 def caption_chunks(words, max_words, max_chars=32):
@@ -162,3 +167,60 @@ def speak_gemini(text, out_mp3, cfg_tts):
 
 
 _tts_exhausted = set()
+
+
+# Kokoro: open-source English voice that runs on this machine (no service to block or rate-limit us).
+# Used when Edge is unreachable (Microsoft started refusing GitHub's servers in Oct 2026).
+KOKORO_FILES = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/"
+KOKORO_VOICES = {"en-US-AndrewNeural": "am_michael", "en-US-GuyNeural": "am_onyx",
+                 "en-GB-RyanNeural": "bm_george"}
+_kokoro = None
+_kokoro_lock = None
+
+
+def kokoro_supports(voice):
+    return voice.startswith("en-")
+
+
+def _kokoro_model():
+    global _kokoro
+    if _kokoro is None:
+        from kokoro_onnx import Kokoro
+        from .common import ROOT, http
+        paths = []
+        for name in ("kokoro-v1.0.onnx", "voices-v1.0.bin"):
+            p = ROOT / "models" / name
+            if not p.exists():
+                p.parent.mkdir(exist_ok=True)
+                log.info("Downloading Kokoro voice model %s", name)
+                with http().get(KOKORO_FILES + name, stream=True, timeout=300) as r:
+                    r.raise_for_status()
+                    with open(p.with_suffix(".part"), "wb") as f:
+                        for chunk in r.iter_content(1 << 20):
+                            f.write(chunk)
+                p.with_suffix(".part").rename(p)
+            paths.append(str(p))
+        _kokoro = Kokoro(*paths)
+    return _kokoro
+
+
+def speak_kokoro(text, voice, rate, mp3_path):
+    """Narrate one English line with Kokoro; same return shape as speak()."""
+    import subprocess
+    import threading
+    import soundfile as sf
+    global _kokoro_lock
+    if _kokoro_lock is None:
+        _kokoro_lock = threading.Lock()
+    speed = 1 + int((rate or "+0%").strip("%")) / 100
+    lang = "en-gb" if voice.startswith("en-GB") else "en-us"
+    with _kokoro_lock:   # one line at a time; the model already uses every CPU core
+        audio, sr = _kokoro_model().create(text, voice=KOKORO_VOICES.get(voice, "am_michael"),
+                                           speed=speed, lang=lang)
+    wav = str(mp3_path) + ".wav"
+    sf.write(wav, audio, sr)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", wav, "-b:a", "128k", str(mp3_path)], check=True)
+    import os
+    os.remove(wav)
+    s, e = _speech_bounds(mp3_path)
+    return _estimate_words(text, s, e)

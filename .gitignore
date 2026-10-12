@@ -10,3 +10,4 @@ assets/fonts/
 # your own voice recording: never published to the public repo
 voice/
 .venv-voice/
+models/

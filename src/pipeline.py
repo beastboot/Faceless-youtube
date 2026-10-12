@@ -400,10 +400,12 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
     flat = [(si, sh, k == len(sc["shots"]) - 1)
             for si, sc in enumerate(script["scenes"]) for k, sh in enumerate(sc["shots"])]
 
+    narrate = [tts.speak]   # Edge; swapped for Kokoro (local English voice) when Edge is unreachable
+
     def speak(i_item):
         i, (si, sh, last) = i_item
         mp3 = work / f"voice-{i:03d}.mp3"
-        words = tts.speak(sh["line"], voice, rate, mp3)
+        words = narrate[0](sh["line"], voice, rate, mp3)
         max_words = 3 if fmt == "short" else 7
         if hinglish and sh.get("caption"):
             caps = tts.retext_captions(words, sh["caption"], max_words)
@@ -444,9 +446,21 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             log.warning("[%s] Gemini TTS unavailable (%s); narrating this video with Edge", lang, e)
             items = None
     if items is None:
-        with ThreadPoolExecutor(4) as ex:
-            items = list(ex.map(speak, enumerate(flat)))
-        log.info("[%s] narrated %d shots", lang, len(items))
+        if tts.edge_down and tts.kokoro_supports(voice):
+            narrate[0] = tts.speak_kokoro
+        try:
+            with ThreadPoolExecutor(4) as ex:
+                items = list(ex.map(speak, enumerate(flat)))
+        except RuntimeError as e:
+            if narrate[0] is tts.speak_kokoro or not tts.kokoro_supports(voice):
+                raise
+            # Edge refused us: voice the whole video with Kokoro so it never switches voices half-way
+            log.warning("[%s] Edge voice unavailable (%s); narrating this video with Kokoro", lang, e)
+            narrate[0] = tts.speak_kokoro
+            with ThreadPoolExecutor(2) as ex:
+                items = list(ex.map(speak, enumerate(flat)))
+        log.info("[%s] narrated %d shots%s", lang, len(items),
+                 " with Kokoro" if narrate[0] is tts.speak_kokoro else "")
     if fmt == "short" and items:   # big title on frame one: the thumbnail's punchline, not the caption again
         items[0]["hook_text"] = re.sub(r"[*_]", "", script.get("thumbnail_text") or "").strip()
     seen_scene = set()

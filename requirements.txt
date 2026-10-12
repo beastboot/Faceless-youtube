@@ -10,3 +10,5 @@ numpy>=1.26
 onnxruntime>=1.18
 huggingface_hub>=0.23
 opencv-python-headless>=4.9
+kokoro-onnx>=0.4
+soundfile
