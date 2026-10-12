@@ -85,7 +85,7 @@
   "series": "pauranik",
   "episode": 1,
   "hook": "You might dismiss the Mahabharata as pure fiction until you see the underwater stone ruins divers pulled from the sea.",
-  "pending_comment": "आपके अनुसार क्या समुद्र के नीचे मिली यह नगरी सच में भगवान कृष्ण की द्वारका है?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-11T04:30:39+00:00",
@@ -102,7 +102,7 @@
   "series": "pauranik",
   "episode": 1,
   "hook": "You might dismiss the Mahabharata as pure fiction until you see the underwater stone ruins divers pulled from the sea.",
-  "pending_comment": "கடலுக்கு அடியில் இருக்கும் துவாரகா நகரம் உண்மையிலேயே கிருஷ்ணர் வாழ்ந்த இடம்தானா? உங்கள் கருத்தை கமெண்ட்ல சொல்லுங்க!"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-11T04:34:59+00:00",
@@ -136,7 +136,7 @@
   "series": "pauranik",
   "episode": 1,
   "hook": "Long before Ibn Khordadbeh mapped Set Bandhai in 850, Rameshwaram's floating stones formed a natural limestone bridge.",
-  "pending_comment": "ராம் சேது மனிதனால் கட்டப்பட்டதா அல்லது இயற்கையானதா? உங்கள் கருத்தை சொல்லுங்க!"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-11T04:40:52+00:00",
@@ -153,7 +153,7 @@
   "series": "pauranik",
   "episode": 1,
   "hook": "Long before Ibn Khordadbeh mapped Set Bandhai in 850, Rameshwaram's floating stones formed a natural limestone bridge.",
-  "pending_comment": "Did you know this bridge was formed by sea level shifts? Let us know below."
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-11T04:41:09+00:00",
@@ -193,7 +193,7 @@
   "series": "bharat",
   "episode": 2,
   "hook": "You have likely never heard how the ghost lights of West Bengal lure fishermen into deep swamps and trap them forever.",
-  "pending_comment": "உங்களுக்கு பேய் விளக்குகள் மீது நம்பிக்கை இருக்கா அல்லது அறிவியல் காரணங்கள் மீது நம்பிக்கை இருக்கா?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-11T04:55:54+00:00",
@@ -210,6 +210,12 @@
   "series": "bharat",
   "episode": 2,
   "hook": "You have likely never heard how the ghost lights of West Bengal lure fishermen into deep swamps and trap them forever.",
-  "pending_comment": "Would you follow a strange glowing light in a dark swamp?"
+  "pending_comment": ""
+ },
+ {
+  "created_utc": "2026-10-12T06:37:28+00:00",
+  "format": "short-skipped",
+  "topic": "Ladakh's Gravity-Defying Magnetic Hill",
+  "reason": "Not enough research material for Magnetic Hill (India)"
  }
 ]
