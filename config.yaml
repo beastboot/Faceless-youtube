@@ -29,7 +29,7 @@ long:
   upload_captions: false              # captions are on screen; skipping the track saves 400 quota units
 
 short:
-  target_words: 60                    # English words -> ~40-50 s Hindi: higher completion + loop rate
+  target_words: 75                    # English words, ~14 quick shots -> ~40-50 s: higher completion + loop rate
   min_scenes: 5
   width: 1080
   height: 1920

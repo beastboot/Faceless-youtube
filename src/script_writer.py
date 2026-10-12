@@ -93,6 +93,27 @@ def past_hooks(fmt, n=4):
     return rows[:n], rows[-n:]
 
 
+FILLER_OPENER = re.compile(r"\s*(you'?ve probably never|you probably (have )?never|have you ever|did you know|"
+                           r"imagine|in this video|today we|today,? we|let me tell you|what if i told you|ever wondered)",
+                           re.I)
+
+
+def check_graphics(data, research):
+    """Drop on-screen numbers that aren't in the research notes (e.g. an invented "100%"): a wrong
+    fact on screen costs more trust than no graphic."""
+    text = research.get("text", "")
+    digits = set(re.findall(r"\d[\d,.]*", text.replace(",", "")))
+    for sc in data["scenes"]:
+        for sh in sc["shots"]:
+            g = sh.get("graphic") or {}
+            if g.get("type") == "counter":
+                v = str(g.get("value", "")).replace(",", "")
+                if v not in digits and v.rstrip("0").rstrip(".") not in digits:
+                    log.info("Dropped counter %s (%s): number not in the notes", v, g.get("label"))
+                    sh["graphic"] = None
+    return data
+
+
 def rehook(cfg, data, research, fmt):
     """Write the opening line LAST: with the whole story in front of it, the hook can tease the real
     twist and promise exactly what the video pays off. Picks the best of several by hookscore, guided
@@ -134,7 +155,9 @@ Return {{"hooks": ["...", "..."]}}"""
     if not hooks:
         return data
     old = shots[0]["line"]
-    scored = sorted(((hookscore.score(h)[1], h) for h in hooks + [old]), reverse=True)
+    # filler openers waste the one second a Short gets; a hook that starts with one never wins
+    scored = sorted(((hookscore.score(h)[1] - (60 if FILLER_OPENER.match(h) else 0), h) for h in hooks + [old]),
+                    reverse=True)
     top, line = scored[0]
     if line != old:
         shots[0]["line"] = line
@@ -202,10 +225,14 @@ def write(cfg, topic, research, fmt):
 - No chapters. No intro. Keep every line short and punchy; aim for 35-50 seconds in total.
 - The last line must flow naturally back into the first line so the Short loops seamlessly (replays
   count). End on a surprising fact people want to share.
-- No call to action except optionally "Follow for more" in under 4 words."""
+- No call to action at all (no "subscribe", no "follow"): it breaks the loop and viewers swipe at it.
+- Never open with filler like "you've probably never heard", "have you ever wondered", "did you know",
+  "imagine", "in this video", "today we": line 1 IS the most shocking fact or moment itself.
+- Every line must add something new (a fact, a twist, a stake); cut anything a viewer could skip."""
     n_titles = cfg["quality"]["title_candidates"]
-    shot_rule = ("A shot is ONE short sentence or clause, 3-5 seconds when read aloud: Shorts need a new "
-                 "picture every few seconds (aim for 12-16 shots in total)." if fmt == "short" else
+    shot_rule = ("A shot is ONE short clause of 5-9 words, 2-3 seconds when read aloud: Shorts need a new "
+                 "picture every 2-3 seconds (at least 14 shots in total, each a visibly different picture)."
+                 if fmt == "short" else
                  "A shot is ONE spoken sentence (or two very short ones), about 5-9 seconds when read aloud.")
     share = cfg["images"].get("stock_broll_share", 0) if fmt == "long" else 0
     broll_rule = (f"For about {int(share * 100)}% of shots that show GENERIC scenery or atmosphere (ocean, "
@@ -224,7 +251,8 @@ Add him to "characters" with exactly that description.
   today's story, e.g. "I'm {hn}, and tonight's story begins in 1815..." (shot cast: ["{hn}"]).
 - The final shot shows {hn} closing the story with the call to action (cast: ["{hn}"]).
 - Nowhere else: the rest of the video shows the story itself.""" if fmt == "long" else
-          f"""- Only the final shot shows {hn} (cast: ["{hn}"]); no intro, the hook comes first."""))
+          f"""- Only the final shot shows {hn} (cast: ["{hn}"]), saying the loop line (no call to action);
+  no intro, the hook comes first."""))
     special = SPECIALS.get(topic.get("special") or "", "")
     if special:
         special = "\nSPECIAL FORMAT (follow exactly):\n" + special.format(**{k: topic.get(k, "") for k in
@@ -259,7 +287,9 @@ Scene and shot rules:
   sparkles | dust | leaves | rain | snow | embers | none — magical/night: fireflies or sparkles,
   sunlight indoors: dust, autumn/forest: leaves, storms/sorrow: rain, battles/fire: embers).
 - MOTION GRAPHICS: about one shot in three gets an on-screen "graphic" that makes a fact visual.
-  Use the type that fits the line; never two in a row; facts only from the notes:
+  Use the type that fits the line; never two in a row; facts only from the notes. A counter shows a
+  number stated in the notes with a label that makes sense on its own ("84 villages emptied"), never a
+  made-up percentage:
     {{"type": "date", "text": "1815", "sub": "Kuldhara, Rajasthan"}}          (a year/date being introduced)
     {{"type": "counter", "value": 84, "label": "villages emptied", "suffix": ""}} (a striking number)
     {{"type": "map", "place": "Kuldhara, Jaisalmer, Rajasthan, India"}}        (first time a place matters)
@@ -337,6 +367,7 @@ Return JSON:
     data["structure"] = structure
     data["lang"] = "en"
     data["special"] = topic.get("special")
+    data = check_graphics(data, research)
     data = rehook(cfg, data, research, fmt)
     data.update(package(data, fmt))
     return data

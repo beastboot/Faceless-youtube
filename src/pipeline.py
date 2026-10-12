@@ -447,6 +447,8 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         with ThreadPoolExecutor(4) as ex:
             items = list(ex.map(speak, enumerate(flat)))
         log.info("[%s] narrated %d shots", lang, len(items))
+    if fmt == "short" and items:   # big title on frame one: the thumbnail's punchline, not the caption again
+        items[0]["hook_text"] = re.sub(r"[*_]", "", script.get("thumbnail_text") or "").strip()
     seen_scene = set()
     n_chapter = 0
     for it in items:  # sound design + music need the mood and where chapters begin

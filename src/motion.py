@@ -60,8 +60,40 @@ def camera_clips(scenes, durs, stage, run_id, cfg, fmt):
     return {i: {"dir": f"run/{run_id}/{Path(p).name}", "count": counts[i]} for i, p in done.items()}
 
 
+CUTAWAYS = ["detail_left", "detail_right", "detail_top"]   # clearly different close-ups of the painting
+
+
+def split_long_shots(scenes, starts, durs, max_len=3.2):
+    """Shorts need a new view every 2-3 seconds. A picture held longer is cut into parts, each with a
+    different framing of the same painting (close-up left/right/top, push-in, pull-out), with the
+    captions moved to the part where they are spoken."""
+    out_sc, out_st, out_d = [], [], []
+    for i, (sc, st, d) in enumerate(zip(scenes, starts, durs)):
+        vis = sc.get("visual") or {}
+        k = int(d // max_len) + 1 if vis.get("kind") == "image" and d > max_len + 0.6 else 1
+        part = d / k
+        for j in range(k):
+            sub = dict(sc)
+            lo, hi = j * part, (j + 1) * part
+            if j:
+                sub.update(visual={**vis, "move": CUTAWAYS[(i + j) % len(CUTAWAYS)]}, graphic=None,
+                           whoosh=True, chapter_card=None, cut="zoom")   # punch-in, never a slide on the same picture
+            if k > 1:
+                sub["captions"] = [{**c, "start": max(0.0, c["start"] - lo), "end": min(part, c["end"] - lo)}
+                                   for c in sc.get("captions") or [] if lo - 0.05 <= c["start"] < hi]
+            out_sc.append(sub)
+            out_st.append(st + lo)
+            out_d.append(part)
+    return out_sc, out_st, out_d
+
+
 def render(scenes, starts, durs, work, out, cfg, fmt):
     vc, fc = cfg["video"], cfg[fmt]
+    if fmt == "short":
+        n = len(scenes)
+        scenes, starts, durs = split_long_shots(scenes, starts, durs)
+        if len(scenes) > n:
+            log.info("Short: %d long shots split -> %d views (a new view every ~3 s)", n, len(scenes))
     ensure_node()
     run_id = hashlib.sha1(str(work).encode()).hexdigest()[:12]
     pub = RDIR / "public"
@@ -103,14 +135,15 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
             "move": vis.get("move") or ["zoom_in", "pan_left", "zoom_out", "pan_right", "rise"][i % 5],
             "ambient": vis.get("ambient") or "none",
             # a new picture arrives with a styled move; the same picture continuing just dissolves
-            "transition": styles[i % len(styles)] if sc.get("whoosh", True) else "fade",
+            "transition": sc.get("cut") or (styles[i % len(styles)] if sc.get("whoosh", True) else "fade"),
             "captions": [{"text": c["text"], "s": round(c["start"], 3), "e": round(c["end"], 3)}
                          for c in sc.get("captions") or []] if fc.get("burn_captions") else [],
             "graphic": sc.get("graphic") or None,
         })
-    if fmt == "short" and shots and not shots[0]["graphic"] and scenes[0].get("line_text"):
-        # The swipe-or-stay decision happens in the first second: put the hook's key words on screen.
-        words = scenes[0]["line_text"].split()
+    if fmt == "short" and shots and not shots[0]["graphic"] and (scenes[0].get("hook_text") or scenes[0].get("line_text")):
+        # The swipe-or-stay decision happens in the first second: a punchy title on screen. The thumbnail
+        # punchline, so it adds to the spoken hook instead of repeating the captions word for word.
+        words = (scenes[0].get("hook_text") or scenes[0]["line_text"]).split()
         shots[0]["graphic"] = {"type": "fact", "text": " ".join(words[: min(7, len(words))]), "instant": True}
     if fmt == "long":  # keep the closing seconds clear for the animated subscribe card
         end_at = sum(durs) - 7
