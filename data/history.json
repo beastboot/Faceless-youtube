@@ -245,7 +245,7 @@
   "series": "mandir",
   "episode": 1,
   "hook": "You might think you know the value of the Padmanabhaswamy Temple, but you have never heard of the thirty crore undeciphered records.",
-  "pending_comment": "Do you think Vault B should ever be opened, or left to tradition?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-13T05:04:39+00:00",
@@ -262,7 +262,7 @@
   "series": "mandir",
   "episode": 1,
   "hook": "You have thirty seconds to see why the Windscale Pile 1 chimney is still standing after the 1957 fire.",
-  "pending_comment": "What other nuclear myths would you like to see busted?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-13T05:17:37+00:00",
@@ -279,6 +279,108 @@
   "series": "mandir",
   "episode": 2,
   "hook": "What happens when you drop a 13th-century temple brick into a pool of water and watch it float instead of sinking?",
-  "pending_comment": "Would you trust an 800-year-old sandbox foundation during an earthquake?"
+  "pending_comment": ""
+ },
+ {
+  "created_utc": "2026-10-14T05:29:51+00:00",
+  "format": "long",
+  "lang": "ta",
+  "topic": "The Impossible Top-Down Architecture of Kailasa — Part 1",
+  "wiki_title": "Kailasa Temple, Ellora",
+  "title": "Kailasa Temple: 4 லட்சம் டன் பாறையை செதுக்கிய ரகசியம்! | EP 2",
+  "video_id": "1MZ6uiS2TGE",
+  "duration": 870.8,
+  "publish_at": "2026-10-14T14:00:00Z",
+  "dir": "20261014-0323-long-the-impossible-top-down-architecture-of-kailasa-pa/ta",
+  "thumb_template": "storybook",
+  "series": "mandir",
+  "episode": 2,
+  "hook": "You are looking at the Kailasa temple in Maharashtra, an entire multi-story megalith carved downward from a single cliff.",
+  "pending_comment": "கைலாசா கோவில் வெறும் 17 ஆண்டுகளில் மனிதர்களால் கட்டப்பட்டதா அல்லது இதில் வேறு ஏதேனும் மர்மம் உள்ளதா? உங்கள் கருத்தை கமெண்ட் பண்ணுங்க!"
+ },
+ {
+  "created_utc": "2026-10-14T06:45:50+00:00",
+  "format": "long",
+  "lang": "en",
+  "topic": "The Impossible Top-Down Architecture of Kailasa — Part 1",
+  "wiki_title": "Kailasa Temple, Ellora",
+  "title": "The Truth About Kailasa's Kokasa Blueprint | Part 1 | EP 2",
+  "video_id": "ENSUW6iCfW4",
+  "duration": 723.5,
+  "publish_at": "2026-10-14T15:00:00Z",
+  "dir": "20261014-0323-long-the-impossible-top-down-architecture-of-kailasa-pa/en",
+  "thumb_template": "storybook",
+  "series": "mandir",
+  "episode": 2,
+  "hook": "You are looking at the Kailasa temple in Maharashtra, an entire multi-story megalith carved downward from a single cliff.",
+  "pending_comment": "Do you think King Krishna the First finished the core of Kailasa in his 17-year reign, or did it require multiple generations?"
+ },
+ {
+  "created_utc": "2026-10-14T07:01:00+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "the mocked nuclear chimneys that saved britain — Part 2",
+  "wiki_title": "Windscale Piles",
+  "title": "Windscale Piles: யாரும் சொல்லாத 1957 அணு உலை விபத்தின் உண்மை! #shorts",
+  "video_id": "n92aErCrF-4",
+  "duration": 79.4,
+  "publish_at": "2026-10-14T09:30:00Z",
+  "dir": "20261014-0646-short-the-mocked-nuclear-chimneys-that-saved-britain-par/ta",
+  "thumb_template": "rahasya",
+  "series": "mandir",
+  "episode": 3,
+  "hook": "You might think the 1957 Windscale fire ended completely, but a 2023 study found hidden uranium traces proving it never truly burned out.",
+  "pending_comment": "இந்த அணு உலை சிம்னிகளை அப்படியே மூடி நினைவுச் சின்னமாக மாற்றுவது சரியா?"
+ },
+ {
+  "created_utc": "2026-10-14T07:07:36+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "the mocked nuclear chimneys that saved britain — Part 2",
+  "wiki_title": "Windscale Piles",
+  "title": "Windscale’s Lingering Chimneys: 66 Years Later #shorts",
+  "video_id": "66RS-mtIA6U",
+  "duration": 73.5,
+  "publish_at": "2026-10-14T13:00:00Z",
+  "dir": "20261014-0646-short-the-mocked-nuclear-chimneys-that-saved-britain-par/en",
+  "thumb_template": "rahasya",
+  "series": "mandir",
+  "episode": 3,
+  "hook": "You might think the 1957 Windscale fire ended completely, but a 2023 study found hidden uranium traces proving it never truly burned out.",
+  "pending_comment": "What should Britain do with the remaining Windscale chimneys?"
+ },
+ {
+  "created_utc": "2026-10-14T07:13:58+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The Floating Pillar of Lepakshi",
+  "wiki_title": "Veerabhadra Temple, Lepakshi",
+  "title": "Veerabhadra Temple Lepakshi Andhra Pradesh ரகசியங்கள்! #shorts",
+  "video_id": "8p24lfq5_mA",
+  "duration": 59.6,
+  "publish_at": "2026-10-14T13:30:00Z",
+  "dir": "20261014-0707-short-the-floating-pillar-of-lepakshi/ta",
+  "thumb_template": "rahasya",
+  "series": "mandir",
+  "episode": 5,
+  "hook": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies that engineering entirely.",
+  "pending_comment": "இந்தத் தூண் திட்டமிடப்பட்ட வடிவமைப்பா அல்லது தவறுதலாக நிகழ்ந்ததா?"
+ },
+ {
+  "created_utc": "2026-10-14T07:19:16+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The Floating Pillar of Lepakshi",
+  "wiki_title": "Veerabhadra Temple, Lepakshi",
+  "title": "Why This 16th-Century Stone Pillar Floats #shorts",
+  "video_id": "CXSFT766vjc",
+  "duration": 58.4,
+  "publish_at": "2026-10-14T17:00:00Z",
+  "dir": "20261014-0707-short-the-floating-pillar-of-lepakshi/en",
+  "thumb_template": "rahasya",
+  "series": "mandir",
+  "episode": 5,
+  "hook": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies that engineering entirely.",
+  "pending_comment": "Do you think the pillar was deliberately built to hang, or did it shift over centuries?"
  }
 ]
