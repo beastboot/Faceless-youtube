@@ -296,7 +296,7 @@
   "series": "mandir",
   "episode": 2,
   "hook": "You are looking at the Kailasa temple in Maharashtra, an entire multi-story megalith carved downward from a single cliff.",
-  "pending_comment": "கைலாசா கோவில் வெறும் 17 ஆண்டுகளில் மனிதர்களால் கட்டப்பட்டதா அல்லது இதில் வேறு ஏதேனும் மர்மம் உள்ளதா? உங்கள் கருத்தை கமெண்ட் பண்ணுங்க!"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-14T06:45:50+00:00",
@@ -313,7 +313,7 @@
   "series": "mandir",
   "episode": 2,
   "hook": "You are looking at the Kailasa temple in Maharashtra, an entire multi-story megalith carved downward from a single cliff.",
-  "pending_comment": "Do you think King Krishna the First finished the core of Kailasa in his 17-year reign, or did it require multiple generations?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-14T07:01:00+00:00",
@@ -330,7 +330,7 @@
   "series": "mandir",
   "episode": 3,
   "hook": "You might think the 1957 Windscale fire ended completely, but a 2023 study found hidden uranium traces proving it never truly burned out.",
-  "pending_comment": "இந்த அணு உலை சிம்னிகளை அப்படியே மூடி நினைவுச் சின்னமாக மாற்றுவது சரியா?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-14T07:07:36+00:00",
@@ -347,7 +347,7 @@
   "series": "mandir",
   "episode": 3,
   "hook": "You might think the 1957 Windscale fire ended completely, but a 2023 study found hidden uranium traces proving it never truly burned out.",
-  "pending_comment": "What should Britain do with the remaining Windscale chimneys?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-14T07:13:58+00:00",
@@ -364,7 +364,7 @@
   "series": "mandir",
   "episode": 5,
   "hook": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies that engineering entirely.",
-  "pending_comment": "இந்தத் தூண் திட்டமிடப்பட்ட வடிவமைப்பா அல்லது தவறுதலாக நிகழ்ந்ததா?"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-14T07:19:16+00:00",
@@ -381,6 +381,23 @@
   "series": "mandir",
   "episode": 5,
   "hook": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies that engineering entirely.",
-  "pending_comment": "Do you think the pillar was deliberately built to hang, or did it shift over centuries?"
+  "pending_comment": ""
+ },
+ {
+  "created_utc": "2026-10-15T07:36:36+00:00",
+  "format": "long",
+  "lang": "ta",
+  "topic": "The Disappearance of Netaji Subhas Chandra Bose",
+  "wiki_title": "Death of Subhas Chandra Bose",
+  "title": "The Disappearance of Netaji Bose: 1945 Plane Mystery | EP 1",
+  "video_id": "PAyiuX-kdfk",
+  "duration": 812.4,
+  "publish_at": "2026-10-15T14:00:00Z",
+  "dir": "20261015-0527-long-the-disappearance-of-netaji-subhas-chandra-bose/ta",
+  "thumb_template": "rahasya",
+  "series": "bharat",
+  "episode": 1,
+  "hook": "You probably think the 1945 disappearance of Netaji Subhas Chandra Bose left no medical trail, but three doctors treated him for hours.",
+  "pending_comment": "Do the hospital records of Dr. Yoshimi and the physical burns of Colonel Habib ur Rahman convince you of the crash, or do you believe Netaji reached Manchuria?"
  }
 ]
