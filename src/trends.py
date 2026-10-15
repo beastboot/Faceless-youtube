@@ -104,6 +104,17 @@ def channel_feedback():
     return sorted(perf, key=lambda r: -r["views"])
 
 
+def _base(topic):
+    """'X — Part 2' and 'x' are the same story."""
+    return re.sub(r"\s*[—-]+\s*part\s*\d+\s*$", "", (topic or "").strip().lower()).strip(" —-")
+
+
+def recent_topics(days=7):
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    return {_base(r.get("topic")) for r in state.load()
+            if r.get("video_id") and (r.get("created_utc") or "") >= since} - {""}
+
+
 def pick_topics(cfg, n_long, n_short, spares=2):
     """Returns ranked candidates: n + spares per format, best first, so a topic whose
     Wikipedia article turns out too thin can be replaced without a second LLM call."""
@@ -146,11 +157,16 @@ Rules:
 - Learn from the competitor outliers (videos that beat their own channel's median views by the multiple
   shown): borrow the angle and framing patterns, never copy the title.
 - Learn from our own channel performance: do more of what got views AND high average % watched.
-- The audience is mainly Hindi-speaking Indians. At least THREE QUARTERS of the topics must be Indian
-  (series mandir, pauranik or bharat), as our competitor data shows: forts,
-  temples, kings and empires, freedom struggle, unsolved Indian cases and places (Bhangarh, Roopkund,
-  Kuldhara, Netaji, Indus script...). The rest: world mysteries that Indians search for.
-- Use the youtube_searches_hindi candidates as evidence of what Indians search for right now.
+- The channel is in ENGLISH for a worldwide English-speaking audience (India, US, UK). Mix about half
+  Indian stories (temples, forts, kings, unsolved Indian places) and half world stories.
+- WHAT WORKS ON OUR CHANNEL (our Shorts data): our best Short by far (219 views, 79% watched) was
+  "Windscale 1957: The Mocked Filters That Saved Britain" - a dramatic REAL event with a year, and a
+  "nobody believed them / they were mocked, then it saved everyone" twist. Next best: impossible-seeming
+  objects and places ("a bridge 7000 years old", "a pillar that floats", "bricks that float").
+  Prefer: real disasters and near-disasters, cover-ups and ignored warnings, lone people proven right,
+  things that "shouldn't exist", survival against the odds - each with a specific year, number or place.
+  Avoid: vague legends with no checkable facts, slow biographies, topics that need a lot of background.
+- Use the youtube_searches candidates as evidence of what people search for right now.
 
 TRENDING CANDIDATES:
 {json.dumps({k: v[:40] for k, v in cands.items()}, ensure_ascii=False, indent=0)}
@@ -184,14 +200,21 @@ Return:
     # Some fallback models return the list itself instead of {"topics": [...]}.
     topics = data if isinstance(data, list) else data.get("topics", [])
     topics = [t for t in topics if isinstance(t, dict) and t.get("topic")]
-    # Enforce the data, not just ask for it: Indian series first, and at most ~1 in 4 slots for
-    # world topics (the niche's outliers are overwhelmingly Indian temple/mythology/history stories).
     indian = {x["id"] for x in cfg.get("series", []) if x["id"] in ("mandir", "pauranik", "bharat")}
 
+    recent = recent_topics(days=7)
+
     def ranked(items, n):
-        """Indian-series topics first; world topics only after them (so at most ~1 in 4 slots)."""
+        """Indian and world topics alternate (the English channel's audience is worldwide); anything
+        covered in the last 7 days is dropped (follow-ups of our own hits come from the queue below)."""
+        items = [t for t in items if _base(t.get("topic")) not in recent
+                 and _base(t.get("wikipedia_title")) not in recent]
         ind = [t for t in items if t.get("series") in indian]
-        return ind + [t for t in items if t.get("series") not in indian]
+        world = [t for t in items if t.get("series") not in indian]
+        out = []
+        for k in range(max(len(ind), len(world))):
+            out += ind[k:k + 1] + world[k:k + 1]
+        return out
 
     longs = ranked([t for t in topics if t.get("format") == "long"], n_long)[:want_long]
     shorts = ranked([t for t in topics if t.get("format") == "short"], n_short)[:want_short]

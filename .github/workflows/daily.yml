@@ -142,10 +142,10 @@ jobs:
         with:
           name: shorts-${{ github.run_id }}
           path: |
-            output/*-short-*/hi/final.mp4
-            output/*-short-*/hi/metadata.json
-            output/*-long-*/hi-clip*/final.mp4
-            output/*-long-*/hi-clip*/metadata.json
+            output/*-short-*/*/final.mp4
+            output/*-short-*/*/metadata.json
+            output/*-long-*/*-clip*/final.mp4
+            output/*-long-*/*-clip*/metadata.json
           retention-days: 10
           if-no-files-found: ignore
 

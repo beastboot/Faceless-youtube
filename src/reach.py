@@ -105,6 +105,7 @@ def double_down(table, actions):
     """A video far above its peers earns a follow-up: same subject, new angle or 'Part 2'."""
     q = _load_queue()
     done = {x.get("source_video") for x in q}
+    queued = False
     for r, x in table:
         if not x or x["privacy"] != "public" or r.get("followed_up") or r["video_id"] in done \
                 or not (24 <= x["age_h"] <= 120):
@@ -114,13 +115,18 @@ def double_down(table, actions):
             continue
         med = statistics.median(peers) or 1
         if x["views"] >= 2 * med and x["views"] >= 200:
-            q.append({"kind": "winner", "format": r["format"], "series": r.get("series"),
+            q.append({"kind": "winner", "format": "short", "series": r.get("series"),
                       "topic": f"{r.get('topic') or r['title']} — Part 2",
                       "angle": f"Follow-up to our hit video '{r['title']}' ({x['views']} views, {x['views'] / med:.1f}x "
                                f"our typical): a deeper or unseen side of the same story, referencing Part 1",
                       "source_video": r["video_id"]})
             actions.append(f"🔥 Winner ({x['views'] / med:.1f}x typical): queued a Part 2 of '{r['title'][:50]}'")
+            # Remember it on the video itself: the queue entry is gone once used, and without this the
+            # same hit was queued again every day (Windscale got three "Part 2"s).
+            r["followed_up"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            queued = True
     _save_queue(q)
+    return queued
 
 
 def collect_requests(cfg, texts, actions):
@@ -242,7 +248,10 @@ def retention(video_id, since):
 
 def weekly_strategy(cfg, table, actions):
     """Once a week: what worked, what didn't, and concrete changes. Insights feed the topic picker."""
-    if STRATEGY.exists() and (datetime.now().timestamp() - STRATEGY.stat().st_mtime) < 6.5 * 86400:
+    # The date inside the file, not its mtime: a fresh GitHub checkout makes every file look new.
+    import re
+    m = re.search(r"Weekly strategy — (\d{4}-\d{2}-\d{2})", STRATEGY.read_text()) if STRATEGY.exists() else None
+    if m and (datetime.now(timezone.utc) - datetime.fromisoformat(m.group(1)).replace(tzinfo=timezone.utc)).days < 7:
         return
     rows = [{"title": r["title"], "lang": r.get("lang", "en"), "format": r["format"],
              "topic": r.get("topic"), "thumbnail": r.get("thumb_template"),
@@ -252,22 +261,29 @@ def weekly_strategy(cfg, table, actions):
              "retention": x.get("retention")} for r, x in table if x]
     if len(rows) < 5:
         return
-    prompt = f"""You are the growth strategist for a faceless Hindi YouTube channel (animated history
-and mysteries) aiming for monetization (1,000 subscribers + 4,000 watch hours). Here is every video
-with its performance:
+    prompt = f"""You are the growth strategist for a faceless YouTube channel (animated history and mysteries)
+that now makes SHORTS ONLY (English main channel + a Tamil channel), aiming for monetization
+(1,000 subscribers + 10 million Shorts views in 90 days). Older long videos and Hindi videos are listed
+for context only. Here is every video with its performance:
 {json.dumps(rows, ensure_ascii=False)}
 
-Write a short weekly review: which topics, title styles and formats worked (cite numbers), which
-didn't, and 3-5 concrete changes for next week. Where "retention" exists, use it: held_at_30s is the
+Write a short weekly review: which topics, title styles and hooks worked (cite numbers), which
+didn't, and 3-5 concrete changes for next week. Also write "telegram": the same review for the owner
+on their phone, in simple Hinglish, under 900 characters, no markdown: top 3 Shorts with views and %
+watched, what they had in common, what flopped and why, and what the channel will do differently. Where "retention" exists, use it: held_at_30s is the
 share still watching at 0:30 (hook strength); biggest_drops show the exact line where viewers left —
 say what about those lines made people leave and how scripts should change. Then give 3-6 one-line "insights" for the AI topic
 picker (e.g. "Indian fort mysteries get 3x the views of European history").
-Return {{"review_markdown": "...", "insights": ["..."]}}"""
+Return {{"review_markdown": "...", "telegram": "...", "insights": ["..."]}}"""
     data = llm.ask_json(cfg, "You are a data-driven YouTube strategist. JSON only.", prompt, temperature=0.4)
     STRATEGY.write_text(f"# Weekly strategy — {datetime.now(timezone.utc):%Y-%m-%d}\n\n"
                         + (data.get("review_markdown") or "") + "\n")
     INSIGHTS.write_text(json.dumps(data.get("insights") or [], indent=1, ensure_ascii=False))
     actions.append("Wrote weekly strategy review (reports/strategy.md)")
+    if data.get("telegram"):
+        from . import notify
+        notify.send("📈 Is hafte kya chala:\n\n" + data["telegram"].strip()[:1500]
+                    + "\n\n(Topic picker ab yahi seekh kar agle hafte ke topics chunega.)")
 
 
 def run(cfg):
@@ -304,7 +320,8 @@ def run(cfg):
         published = _parse(v["snippet"].get("publishedAt"))
         publish_at = _parse(st.get("publishAt"))
         # 1) Keep videos reachable: anything private with no future schedule gets made public.
-        if (rc.get("auto_publish_private", True) and st["privacyStatus"] == "private"
+        # (Not videos the owner chose to hide, e.g. the old Hindi uploads on the English channel.)
+        if (rc.get("auto_publish_private", True) and st["privacyStatus"] == "private" and not r.get("hidden")
                 and not (publish_at and publish_at > now) and st.get("uploadStatus") == "processed"):
             try:
                 yt.videos().update(part="status", body={"id": r["video_id"], "status": {
@@ -368,7 +385,8 @@ def run(cfg):
                     log.debug("Retention for %s failed: %s", r["video_id"], e)
     from . import extras
     today = datetime.now(timezone.utc)
-    steps = [lambda: double_down(table, actions), lambda: reply_to_comments(cfg, actions),
+    dirty = []
+    steps = [lambda: dirty.append(double_down(table, actions)), lambda: reply_to_comments(cfg, actions),
              lambda: weekly_strategy(cfg, table, actions)]
     if today.strftime("%a") == "Mon":
         steps.append(lambda: extras.community_post(cfg))
@@ -391,7 +409,7 @@ def run(cfg):
         (ROOT / "data" / "thumb_winner.json").write_text(json.dumps({"winner": winner, "median_views": med}))
         actions.append(f"Thumbnail A/B: '{winner}' leads ({', '.join(f'{k} {v:.0f}' for k, v in med.items())} median views)")
 
-    if changed:
+    if changed or any(dirty):
         state.HISTORY.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
     STATS.write_text(json.dumps({r["video_id"]: row for r, row in table if row}, indent=1))
     write_report(table, actions, _traffic_sources(since) if have_analytics else [], have_analytics)

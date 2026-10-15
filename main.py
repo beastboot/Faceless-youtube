@@ -156,14 +156,22 @@ def main():
     comp = cfg.get("compilation") or {}
     sunday = comp.get("enabled") and _dt.utcnow().strftime("%a").lower() == comp.get("day", "sun")
     if args.compilation or (sunday and upload and not args.topic):
-        try:
-            from src import compilation
-            from src.common import ROOT
-            vid, work = compilation.build(cfg, ROOT / "output" / f"weekly-{_dt.utcnow():%Y%m%d}", upload=upload)
-            notify.send(f"📼 Weekly compilation done: https://youtu.be/{vid}" if vid else "📼 Weekly compilation rendered (test)")
-        except Exception as e:
-            log.error("Weekly compilation failed: %s", e)
-            notify.send(f"❌ Weekly compilation failed: {str(e)[:300]}")
+        from src import compilation
+        from src.common import ROOT
+        for lang, lc in cfg["languages"].items():   # one compilation per live channel, in its language
+            if not lc.get("enabled"):
+                continue
+            try:
+                youtube.use_channel(lc.get("youtube_env", ""))
+                vid, work = compilation.build(cfg, ROOT / "output" / f"weekly-{_dt.utcnow():%Y%m%d}-{lang}",
+                                              upload=upload, lang=lang)
+                notify.send(f"📼 Weekly compilation ({lang}) done: https://youtu.be/{vid}" if vid
+                            else f"📼 Weekly compilation ({lang}) rendered (test)")
+            except Exception as e:
+                log.error("Weekly compilation (%s) failed: %s", lang, e)
+                notify.send(f"❌ Weekly compilation ({lang}) failed: {str(e)[:300]}")
+            finally:
+                youtube.use_channel("")
         if args.compilation:
             return 0
 

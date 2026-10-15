@@ -14,12 +14,12 @@ from .common import ROOT, ffprobe_duration, fmt_ts, log, run, slugify
 from .media import MediaPicker
 
 TEXT = {
-    "en": {"learn": "In this video:", "more": "📺 More stories:", "ask": "💬 {q}",
+    "en": {"learn": "In this video:", "more": "📺 More stories:", "ask": "💬 {q}", "next": "Watch next:",
            "chapters": "Chapters:", "sources": "Sources:",
            "ai": "Illustrations: AI-generated. Narration: AI voice.",
            "subscribe": "Subscribe to {name} for a new story every day.",
            "full": "▶ Watch the full documentary: {url}", "intro": "Intro"},
-    "ta": {"learn": "இந்த வீடியோவில்:", "more": "📺 மேலும் கதைகள்:", "ask": "💬 {q}",
+    "ta": {"learn": "இந்த வீடியோவில்:", "more": "📺 மேலும் கதைகள்:", "ask": "💬 {q}", "next": "அடுத்து பாருங்கள்:",
            "chapters": "அத்தியாயங்கள்:", "sources": "ஆதாரங்கள்:", "english": "🇬🇧 In English:",
            "ai": "படங்கள்: AI உருவாக்கியவை. குரல்: AI.", "subscribe": "இதுபோன்ற கதைகளுக்கு {name} சேனலை சப்ஸ்கிரைப் செய்யுங்கள்.",
            "full": "▶ முழு ஆவணப்படம்: {url}", "intro": "தொடக்கம்"},
@@ -291,8 +291,22 @@ def latest_long_url(lang):
     return None
 
 
+def best_shorts(lang, n=2):
+    """Our most-viewed Shorts in this language (owner-hidden ones left out): "watch next" links."""
+    stats_path = ROOT / "data" / "stats.json"
+    stats = json.loads(stats_path.read_text()) if stats_path.exists() else {}
+    rows = {r["video_id"]: r for r in state.load() if r.get("format") == "short" and r.get("video_id")
+            and (r.get("lang") or "en") == lang and r.get("title") and not r.get("hidden")}
+    ranked = sorted(rows.values(), key=lambda r: -(stats.get(r["video_id"]) or {}).get("views", 0))
+    return [(r["title"].replace("#shorts", "").strip()[:70], f"https://youtube.com/shorts/{r['video_id']}")
+            for r in ranked[:n]]
+
+
 def related_videos(lang, fmt, series=None, n=3):
-    """Recent long videos of this language (same series first): links that keep viewers watching."""
+    """Recent long videos of this language (same series first): links that keep viewers watching.
+    Shorts link to our best other Shorts instead (no long videos are made any more)."""
+    if fmt == "short":
+        return [f"▶ {title}: {url}" for title, url in best_shorts(lang, n)]
     rows = [r for r in state.load() if r.get("format") == "long" and r.get("video_id") and r.get("lang") == lang
             and r.get("title")]
     rows.sort(key=lambda r: (bool(series) and r.get("series") == (series or {}).get("id")), reverse=True)
@@ -306,6 +320,13 @@ def related_videos(lang, fmt, series=None, n=3):
     return out
 
 
+def first_comment(question, fmt, lang):
+    """The channel's own first comment: the question, and on Shorts a tap-through to our best Short."""
+    if fmt != "short" or not (top := best_shorts(lang, 1)):
+        return question
+    return f"{question}\n\n▶ {TEXT[lang].get('next', TEXT[lang]['more'])} {top[0][1]}"
+
+
 def subscribe_link(cfg, lang):
     handle = (cfg["languages"].get(lang) or {}).get("handle") or cfg["channel"].get("handle")
     return f"https://www.youtube.com/{handle}?sub_confirmation=1" if handle else ""
@@ -316,8 +337,8 @@ def build_description(cfg, script, res, chapters, fmt, lang, links=(), series=No
     keyword-led hook comes first and everything else follows in order of what helps watch time."""
     t = TEXT[lang]
     parts = [(script.get("description_intro") or "").strip()]
-    if fmt == "short" and (url := latest_long_url(lang)):
-        parts.append(t["full"].format(url=url))  # route Shorts viewers to watch hours
+    if fmt == "short" and (top := best_shorts(lang, 1)):   # first link above the fold: our best Short
+        parts.append(f"▶ {t.get('next', t['more'])} {top[0][0]}: {top[0][1]}")
     parts += [x for x in links if x]
     if script.get("key_points") and script.get("special") != "quiz":
         parts.append(t["learn"] + "\n" + "\n".join(script["key_points"]))
@@ -606,7 +627,8 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                               "dir": f"{base.name}/{lang}", "thumb_template": template,
                               "series": (series or {}).get("id"), "episode": episode,
                               "hook": script_en.get("hook") or "",   # learned from in rehook()
-                              "pending_comment": meta["engagement_question"] if video_id else ""})
+                              "pending_comment": first_comment(meta["engagement_question"], fmt, lang)
+                                                 if video_id else ""})
             if video_id and fmt == "long":
                 try:
                     from . import extras
