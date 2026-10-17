@@ -144,6 +144,9 @@ def main():
             log.warning("Reach step failed: %s", e)
         if args.reach:
             return 0
+        if upload:
+            from src import social
+            social.refresh_instagram_token()
 
     if args.upload_dir:
         work = Path(args.upload_dir)

@@ -301,7 +301,7 @@ compilation:
 # Also post every Short as an Instagram Reel / Facebook Reel when Meta credentials exist.
 social:
   instagram: true
-  facebook: true
+  facebook: false                     # owner decision Oct 17: Instagram only
 
 keywords:
   # YouTube autocomplete is queried with these to see what Indian viewers search for right now.

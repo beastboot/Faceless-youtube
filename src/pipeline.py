@@ -796,7 +796,7 @@ def _publish(cfg, work, fmt, meta, publish_at, series, lang):
         youtube.upload_captions(video_id, work / "captions.srt", meta.get("caption_track", lang))
     show = series if fmt == "long" or is_short_series(cfg, series) else None   # Shorts: their named show
     youtube.add_to_playlist(video_id, youtube.playlist_for(cfg, fmt, lang, show))
-    if fmt == "short":
+    if fmt == "short" and lang in ((cfg.get("social") or {}).get("langs") or ["en"]):   # the Instagram is English
         social.cross_post(cfg, work / "final.mp4", meta, video_id)
     return video_id
 

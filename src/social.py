@@ -1,5 +1,9 @@
-"""Cross-post Shorts as Instagram Reels and Facebook Reels via Meta's Graph API (resumable upload,
-so no public video hosting is needed). Inactive until META_ACCESS_TOKEN + IG_USER_ID / FB_PAGE_ID exist.
+"""Cross-post Shorts as Instagram Reels (and optionally Facebook Reels) via Meta's APIs (resumable upload,
+so no public video hosting is needed).
+
+Instagram only (no Facebook Page needed): IG_ACCESS_TOKEN + IG_USER_ID from the "Instagram API with
+Instagram Login" (graph.instagram.com) - scripts/setup_meta.py. The older Facebook-Page route uses
+META_ACCESS_TOKEN + IG_USER_ID / FB_PAGE_ID. Inactive until one of them exists.
 
 Setup (once): Instagram professional account linked to a Facebook Page, a Meta app with
 instagram_content_publish + pages_manage_posts, and a long-lived Page access token. See README."""
@@ -9,10 +13,37 @@ import time
 from .common import http, log
 
 GRAPH = "https://graph.facebook.com/v21.0"
+IG_GRAPH = "https://graph.instagram.com/v21.0"
 
 
 def _token():
-    return os.environ.get("META_ACCESS_TOKEN")
+    return os.environ.get("IG_ACCESS_TOKEN") or os.environ.get("META_ACCESS_TOKEN")
+
+
+def _ig_host():
+    return IG_GRAPH if os.environ.get("IG_ACCESS_TOKEN") else GRAPH
+
+
+def refresh_instagram_token():
+    """Instagram Login tokens last 60 days; refreshing (allowed once a day, after the first 24 h)
+    extends them. Called once per run. If Meta ever hands back a different token, the owner is told
+    to update the IG_ACCESS_TOKEN secret (a workflow can't rewrite its own secrets)."""
+    token = os.environ.get("IG_ACCESS_TOKEN")
+    if not token:
+        return
+    try:
+        r = http().get("https://graph.instagram.com/refresh_access_token",
+                       params={"grant_type": "ig_refresh_token", "access_token": token}, timeout=30).json()
+    except Exception as e:
+        log.warning("Instagram token refresh failed: %s", e)
+        return
+    if r.get("access_token") and r["access_token"] != token:
+        from . import notify
+        notify.send("⚠️ Instagram gave us a new login token. Ask Claude to 'update instagram token' "
+                    "(otherwise Instagram posting stops within 60 days).")
+        log.warning("Instagram returned a new token; IG_ACCESS_TOKEN secret needs updating")
+    elif r.get("expires_in"):
+        log.info("Instagram token valid for %d more days", r["expires_in"] // 86400)
 
 
 def instagram_reel(video_path, caption):
@@ -20,7 +51,8 @@ def instagram_reel(video_path, caption):
     if not (ig and token):
         return None
     s = http()
-    r = s.post(f"{GRAPH}/{ig}/media", params={"media_type": "REELS", "upload_type": "resumable",
+    host = _ig_host()
+    r = s.post(f"{host}/{ig}/media", params={"media_type": "REELS", "upload_type": "resumable",
                                               "caption": caption[:2200], "share_to_feed": "true",
                                               "access_token": token}, timeout=60)
     r.raise_for_status()
@@ -30,21 +62,21 @@ def instagram_reel(video_path, caption):
                                      "file_size": str(len(data))}, data=data, timeout=600)
     up.raise_for_status()
     for _ in range(60):  # Instagram processes the video before it can be published
-        st = s.get(f"{GRAPH}/{container}", params={"fields": "status_code", "access_token": token},
+        st = s.get(f"{host}/{container}", params={"fields": "status_code", "access_token": token},
                    timeout=30).json().get("status_code")
         if st == "FINISHED":
             break
         if st == "ERROR":
             raise RuntimeError("Instagram rejected the video")
         time.sleep(10)
-    pub = s.post(f"{GRAPH}/{ig}/media_publish", params={"creation_id": container, "access_token": token},
+    pub = s.post(f"{host}/{ig}/media_publish", params={"creation_id": container, "access_token": token},
                  timeout=60)
     pub.raise_for_status()
     return pub.json().get("id")
 
 
 def facebook_reel(video_path, description):
-    page, token = os.environ.get("FB_PAGE_ID"), _token()
+    page, token = os.environ.get("FB_PAGE_ID"), os.environ.get("META_ACCESS_TOKEN")
     if not (page and token):
         return None
     s = http()
