@@ -489,6 +489,38 @@ def best_title(titles, keyword="", names=(), fmt="long"):
 SCRIPT_RANGES = {"ta": r"[\u0B80-\u0BFF]", "te": r"[\u0C00-\u0C7F]", "bn": r"[\u0980-\u09FF]",
                  "mr": r"[\u0900-\u097F]"}
 
+INDIC = r"[\u0900-\u0DFF]"   # every Indian script block (Devanagari ... Sinhala)
+
+
+def title_ok(title, lang):
+    """A regional title must be in its own script: no letters from another Indian script (a Bengali
+    word slipped into a Tamil title), no "Hindi" label, and mostly that script, not an English title."""
+    if lang not in SCRIPT_RANGES:
+        return True
+    t = re.sub(r"#\w+", "", title or "")
+    if re.search(r"\bhindi\b|हिंदी|हिन्दी", t, re.I):
+        return False
+    own = len(re.findall(SCRIPT_RANGES[lang], t))
+    other = len(re.findall(INDIC, t)) - own
+    latin = len(re.findall(r"[A-Za-z]", t))
+    return other == 0 and own >= 0.4 * max(1, own + latin)
+
+
+def regional_titles(cfg, lang, en_title, topic, n=6):
+    """Fresh titles in the language's own script (when the translation's titles all fail title_ok)."""
+    name, writing = REGIONAL[lang]
+    for _ in range(2):
+        data = llm.ask_json(cfg, f"You write YouTube titles for {name} viewers. JSON only.", f"""Write {n}
+YouTube Shorts titles in {name} ({writing}) for this story. English original: "{en_title}". Topic: {topic}.
+Rules: mostly {writing}; only proper nouns (names, places) may stay in English letters; never use any other
+Indian script; never write the word "Hindi"; 35-60 characters; a number, name or year; curiosity.
+Return {{"titles": ["..."]}}""", temperature=0.7)
+        ok = [t.strip() for t in (data.get("titles") or []) if isinstance(t, str) and title_ok(t, lang)]
+        if ok:
+            return ok
+    return []
+
+
 REGIONAL = {"ta": ("Tamil", "Tamil script"), "te": ("Telugu", "Telugu script"),
             "bn": ("Bengali", "Bengali script"), "mr": ("Marathi", "Devanagari script")}
 
@@ -558,9 +590,17 @@ Return JSON: {{"scenes": [["line", ...], ...], "graphics": {{"0.1": {{...}}}}, "
     for k in ("description_intro", "description_body", "engagement_question", "tags", "hashtags"):
         out[k] = data.get(k) or script.get(k)
     titles = [t.strip() for t in (data.get("titles") or []) if t and t.strip()]
+    bad = [t for t in titles if not title_ok(t, lang)]
+    titles = [t for t in titles if title_ok(t, lang)]
+    if bad:
+        log.info("%s titles dropped (wrong script/language): %s", name, bad[:3])
+    if not titles:   # never fall back to the English title on a regional channel
+        titles = regional_titles(cfg, lang, script["title"], script.get("topic") or script["title"])
     thumbs = [t.strip() for t in (data.get("thumbnail_texts") or []) if t and t.strip()]
     titles = best_title(titles, "", [n for n in (script.get("research_names") or []) if n], fmt)
-    out["title"] = _cap_latin((titles[0] if titles else script["title"])[:95])
+    if not titles:
+        raise RuntimeError(f"no {name} title in {writing}")
+    out["title"] = _cap_latin(titles[0][:95])
     if fmt == "short" and "#shorts" not in out["title"].lower():
         out["title"] = out["title"][:88] + " #shorts"
     out["key_points"] = [str(x).strip() for x in (data.get("key_points") or []) if str(x).strip()][:4]

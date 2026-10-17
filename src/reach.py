@@ -68,15 +68,18 @@ def _repackage(cfg, row, stats_row):
     """New title for a video far below its peers. Title-only: works in CI where art is gone."""
     lang = row.get("lang", "en")
     fmt = row["format"]
-    prompt = f"""This {'Hindi' if lang == 'hi' else 'English'} YouTube {fmt} is underperforming:
+    from .script_writer import REGIONAL, title_ok
+    lang_name, writing = REGIONAL.get(lang, ("Hindi", "Devanagari") if lang == "hi" else ("English", "English"))
+    prompt = f"""This {lang_name} YouTube {fmt} is underperforming:
 title "{row['title']}", {stats_row['views']} views after {stats_row['age_h']:.0f} hours, while similar videos
 on the channel get a median of {stats_row['peer_median']:.0f}. The topic is: {row.get('topic')}.
-Write 5 alternative titles {'in Hindi (Devanagari, key English words allowed)' if lang == 'hi' else 'in English'}
+Write 5 alternative titles {'in Hindi (Devanagari, key English words allowed)' if lang == 'hi' else
+'in English' if lang == 'en' else f'in {lang_name} ({writing}; only proper nouns in English letters; no other Indian script)'}
 that are more specific and curiosity-driven: a concrete number, name or date; under 60 characters;
 no clickbait lies; max two ALL-CAPS words.{' End with #shorts.' if fmt == 'short' else ''}
 Return {{"titles": ["..."]}}"""
     titles = [t for t in llm.ask_json(cfg, "You are a YouTube packaging expert. JSON only.", prompt)
-              .get("titles", []) if t and t.strip() and t.strip() != row["title"]]
+              .get("titles", []) if t and t.strip() and t.strip() != row["title"] and title_ok(t, lang)]
     if not titles:
         return None
     if lang == "en":
