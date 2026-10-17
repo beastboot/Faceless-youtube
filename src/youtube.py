@@ -170,7 +170,8 @@ def playlist_for(cfg, fmt, lang, series=None):
     if cfg["youtube"].get(f"{fmt}_playlist_id") and lang == cfg["channel"]["language"]:
         return cfg["youtube"][f"{fmt}_playlist_id"]
     try:
-        name = series.get("name") if series and lang == "hi" else (series or {}).get("name_en") or (series or {}).get("name")
+        name = series.get("name") if series and lang == "hi" else (series or {}).get(f"name_{lang}") or \
+            (series or {}).get("name_en") or (series or {}).get("name")
         title = (f"{name} | {cfg['channel']['name']}" if series
                  else PLAYLISTS.get((fmt, lang), f"{cfg['channel']['name']} — {fmt} ({lang})"))
         pl = client().playlists().insert(part="snippet,status", body={

@@ -104,6 +104,30 @@ def _save_queue(q):
     FOLLOWUPS.write_text(json.dumps(q[-40:], indent=1, ensure_ascii=False))
 
 
+def record_winners(table, actions):
+    """Shorts at 2x our usual views (and 50+) go to data/winners.json: the topic picker makes more
+    Shorts in the same pattern the very next day (doubling down while the pattern is hot)."""
+    path = ROOT / "data" / "winners.json"
+    wins = json.loads(path.read_text()) if path.exists() else []
+    known = {w["video_id"] for w in wins}
+    for r, x in table:
+        if not x or r["format"] != "short" or r["video_id"] in known or r.get("hidden") \
+                or x["privacy"] != "public" or not (12 <= x["age_h"] <= 96):
+            continue
+        peers = [y["views"] for q2, y in table if y and q2["format"] == "short" and q2["video_id"] != r["video_id"]
+                 and (q2.get("lang") or "en") == (r.get("lang") or "en") and not q2.get("hidden")]
+        if len(peers) < 3:
+            continue
+        med = statistics.median(peers) or 1
+        if x["views"] >= 2 * med and x["views"] >= 50:
+            wins.append({"video_id": r["video_id"], "title": r["title"], "topic": r.get("topic"),
+                         "short_series": r.get("series"), "views": x["views"], "times_usual": round(x["views"] / med, 1),
+                         "avg_percent_watched": x.get("avg_pct"), "at": datetime.now(timezone.utc).date().isoformat()})
+            actions.append(f"🏆 Winner pattern noted ({x['views'] / med:.1f}x usual): {r['title'][:60]}"
+                           " — more Shorts like it tomorrow")
+    path.write_text(json.dumps(wins[-20:], indent=1, ensure_ascii=False))
+
+
 def double_down(table, actions):
     """A video far above its peers earns a follow-up: same subject, new angle or 'Part 2'."""
     q = _load_queue()
@@ -389,7 +413,8 @@ def run(cfg):
     from . import extras
     today = datetime.now(timezone.utc)
     dirty = []
-    steps = [lambda: dirty.append(double_down(table, actions)), lambda: reply_to_comments(cfg, actions),
+    steps = [lambda: dirty.append(double_down(table, actions)), lambda: record_winners(table, actions),
+             lambda: reply_to_comments(cfg, actions),
              lambda: weekly_strategy(cfg, table, actions)]
     if today.strftime("%a") == "Mon":
         steps.append(lambda: extras.community_post(cfg))

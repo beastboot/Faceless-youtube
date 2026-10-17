@@ -140,11 +140,13 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
                          for c in sc.get("captions") or []] if fc.get("burn_captions") else [],
             "graphic": sc.get("graphic") or None,
         })
-    if fmt == "short" and shots and not shots[0]["graphic"] and (scenes[0].get("hook_text") or scenes[0].get("line_text")):
-        # The swipe-or-stay decision happens in the first second: a punchy title on screen. The thumbnail
+    if fmt == "short" and shots and (scenes[0].get("hook_text") or scenes[0].get("line_text")):
+        # The swipe-or-stay decision happens in the first second: a punchy title on screen (it replaces any
+        # script graphic on shot 1, and carries the series badge). The thumbnail
         # punchline, so it adds to the spoken hook instead of repeating the captions word for word.
         words = (scenes[0].get("hook_text") or scenes[0]["line_text"]).split()
-        shots[0]["graphic"] = {"type": "fact", "text": " ".join(words[: min(7, len(words))]), "instant": True}
+        shots[0]["graphic"] = {"type": "fact", "text": " ".join(words[: min(7, len(words))]), "instant": True,
+                               "badge": scenes[0].get("badge")}
     if fmt == "long":  # keep the closing seconds clear for the animated subscribe card
         end_at = sum(durs) - 7
         for sh, sc in zip(shots, scenes):
@@ -168,6 +170,7 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
         "logo": stage_file(logo) if logo.exists() else None,
         "grain": "fonts/grain.png",
         "endCard": END_CARD.get(lang, END_CARD["en"]) if fmt == "long" else None,
+        "followText": (scenes[0].get("follow_text") if scenes else None) if fmt == "short" else None,
     }
     props_path = work / "motion-props.json"
     props_path.write_text(json.dumps(props, ensure_ascii=False))

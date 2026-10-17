@@ -24,6 +24,10 @@ STRUCTURES = {
         "Pose a question, give two wrong answers people assume, then the real one.",
         "Tell it as a 3-beat micro story: setup, twist, punchline fact.",
         "Start with 'In <year>, ...' and end on a line that makes viewers rewatch.",
+        "Open on the ending (the outcome), then show the one decision that led to it.",
+        "Myth vs fact: the version everyone believes in one line, then the real story beat by beat.",
+        "Two clocks: what people thought was happening vs what was really happening, cut between them.",
+        "Follow one object or person through the event in 4-5 quick beats, ending on a reveal.",
     ],
 }
 
@@ -93,7 +97,8 @@ def past_hooks(fmt, n=4):
     return rows[:n], rows[-n:]
 
 
-FILLER_OPENER = re.compile(r"\s*(you'?ve probably never|you probably (have )?never|have you ever|did you know|"
+FILLER_OPENER = re.compile(r"\s*(you'?ve probably never|you probably (have )?never|you probably think|you might think|"
+                           r"have you ever|did you know|"
                            r"imagine|in this video|today we|today,? we|let me tell you|what if i told you|ever wondered)",
                            re.I)
 
@@ -222,7 +227,9 @@ def write(cfg, topic, research, fmt):
   so attention never drops; never pad.
 - End with one call to action to subscribe for the next story.""" if fmt == "long" else """- YouTube Shorts are judged in the first second: the very first line must grab instantly (no greeting,
   no context first) and the first picture must be the most striking image of the story.
-- No chapters. No intro. Keep every line short and punchy; aim for 35-50 seconds in total.
+- No chapters. No intro. Keep every line short and punchy; aim for 25-40 seconds in total (a Short
+  watched to the end and replayed beats a longer one that loses half its viewers).
+- Line 1 is at most 9 words and contains the shock itself (a number, a year or an impossible fact).
 - The last line must flow naturally back into the first line so the Short loops seamlessly (replays
   count). End on a surprising fact people want to share.
 - No call to action at all (no "subscribe", no "follow"): it breaks the loop and viewers swipe at it.
@@ -231,7 +238,7 @@ def write(cfg, topic, research, fmt):
 - Every line must add something new (a fact, a twist, a stake); cut anything a viewer could skip."""
     n_titles = cfg["quality"]["title_candidates"]
     shot_rule = ("A shot is ONE short clause of 5-9 words, 2-3 seconds when read aloud: Shorts need a new "
-                 "picture every 2-3 seconds (at least 14 shots in total, each a visibly different picture)."
+                 "picture every 2-3 seconds (at least 10 shots in total, each a visibly different picture)."
                  if fmt == "short" else
                  "A shot is ONE spoken sentence (or two very short ones), about 5-9 seconds when read aloud.")
     share = cfg["images"].get("stock_broll_share", 0) if fmt == "long" else 0
@@ -253,6 +260,12 @@ Add him to "characters" with exactly that description.
 - Nowhere else: the rest of the video shows the story itself.""" if fmt == "long" else
           f"""- Only the final shot shows {hn} (cast: ["{hn}"]), saying the loop line (no call to action);
   no intro, the hook comes first."""))
+    ss = topic.get("short_series_info") or {}
+    if fmt == "short" and ss:
+        special_series = (f"\nSERIES: this Short is an episode of our series \"{ss.get('name_en')}\" "
+                          f"({ss.get('about', '').strip()}). Tell the story in that frame.")
+    else:
+        special_series = ""
     special = SPECIALS.get(topic.get("special") or "", "")
     if special:
         special = "\nSPECIAL FORMAT (follow exactly):\n" + special.format(**{k: topic.get(k, "") for k in
@@ -316,7 +329,7 @@ Scene and shot rules:
   Depict violence and death only indirectly (aftermath, shadows, empty rooms).
 - Write numbers and years as they should be spoken. No stage directions, emojis or markdown in lines.
 {long_bits}
-{host_rule}{special}
+{host_rule}{special}{special_series}
 Packaging (YouTube SEO):
 - {n_titles} title candidates: under 60 characters, front-load the subject, include a number, name
   or date, curiosity without clickbait lies. Max two ALL-CAPS words.
@@ -354,10 +367,16 @@ Return JSON:
         n_shots = sum(len(s["shots"]) for s in scenes)
         log.info("Script attempt %d: %d scenes, %d shots, %d words (target %d)",
                  attempt + 1, len(scenes), n_shots, n_words, words)
-        if best is None or n_words > best[1]:
-            best = (data | {"scenes": scenes}, n_words)
-        if n_words >= words * 0.75 and len(scenes) >= fc["min_scenes"] * 0.7:
+        # Shorts need many quick shots (a new picture every 2-3 s); backup models write a few long ones
+        quick = fmt != "short" or (n_shots >= 9 and n_words / max(1, n_shots) <= 11)
+        if best is None or (quick, n_words) > (best[2], best[1]):
+            best = (data | {"scenes": scenes}, n_words, quick)
+        if quick and n_words >= words * 0.75 and len(scenes) >= fc["min_scenes"] * 0.7:
             break
+        if not quick:
+            prompt += (f"\n\nYOUR PREVIOUS ATTEMPT HAD {n_shots} SHOTS OF ~{n_words // max(1, n_shots)} WORDS. A Short needs "
+                       f"at least 10 shots of 5-9 words each (one short clause per shot).")
+            continue
         prompt += (f"\n\nYOUR PREVIOUS ATTEMPT WAS TOO SHORT ({n_words} words, {len(scenes)} scenes)."
                    f" Write at least {words} words across at least {fc['min_scenes']} scenes.")
     data = best[0]

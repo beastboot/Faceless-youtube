@@ -109,6 +109,14 @@ def _base(topic):
     return re.sub(r"\s*[—-]+\s*part\s*\d+\s*$", "", (topic or "").strip().lower()).strip(" —-")
 
 
+def recent_winners(n=5):
+    path = state.HISTORY.parent / "winners.json"
+    try:
+        return json.loads(path.read_text())[-n:] if path.exists() else []
+    except ValueError:
+        return []
+
+
 def recent_topics(days=7):
     since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     return {_base(r.get("topic")) for r in state.load()
@@ -119,7 +127,7 @@ def pick_topics(cfg, n_long, n_short, spares=2):
     """Returns ranked candidates: n + spares per format, best first, so a topic whose
     Wikipedia article turns out too thin can be replaced without a second LLM call."""
     want_long = n_long + spares if n_long else 0
-    want_short = n_short + spares if n_short else 0
+    want_short = n_short + max(spares, n_short // 2 + 2) if n_short else 0   # the quality gate rejects some
     cands = gather_candidates(cfg)
     for k in cands:
         random.shuffle(cands[k])
@@ -189,11 +197,20 @@ anniversaries you know fall in the next 12 days from {date.today():%d %B %Y}:
 {json.dumps(occasions.upcoming(), ensure_ascii=False)}
 If one fits the niche, make at least one topic about the history or mystery behind it.
 
+SHORTS SERIES (our named shows; file every SHORT under exactly one, by id, and prefer topics that fit one
+clearly - a recognisable show is what turns viewers into subscribers):
+{json.dumps([dict(id=x["id"], name=x["name_en"], about=x["about"]) for x in cfg.get("short_series", [])], ensure_ascii=False)}
+
+RECENT WINNERS (our Shorts that beat our usual views 2x+; make at least 2 of today's Short topics follow
+the SAME PATTERN as the newest one - same kind of story and twist - but a DIFFERENT real story):
+{json.dumps(recent_winners(), ensure_ascii=False) if recent_winners() else "none yet"}
+
 SERIES (assign every topic to exactly one, by id):
 {json.dumps([dict(id=x["id"], about=x["about"]) for x in cfg.get("series", [])], ensure_ascii=False)}
 
 Return:
 {{"topics": [{{"format": "long" | "short", "topic": "short topic name", "series": "series id",
+  "short_series": "shorts series id (shorts only)",
   "wikipedia_title": "Exact Wikipedia article title", "angle": "the specific hook/angle for this video",
   "why": "one line: why this will get views"}}]}}"""
     data = llm.ask_json(cfg, system, prompt)

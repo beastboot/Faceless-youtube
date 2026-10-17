@@ -9,7 +9,7 @@ export type Graphic =
   | {type: 'name'; name: string; role?: string}
   | {type: 'quote'; text: string; by?: string}
   | {type: 'timeline'; points: {year: string; label: string}[]}
-  | {type: 'fact'; text: string}
+  | {type: 'fact'; text: string; instant?: boolean; badge?: string}
   | {type: 'keyword'; text: string}
   | {type: 'labels'; items: string[]};
 
@@ -41,4 +41,5 @@ export type Props = {
   logo: string | null;
   grain?: string | null;
   endCard: {title: string; button: string} | null;
+  followText?: string | null;
 };

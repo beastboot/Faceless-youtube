@@ -7,10 +7,10 @@ on:
     inputs:
       longs:
         description: "Long videos to make"
-        default: "1"
+        default: "0"
       shorts:
         description: "Shorts to make"
-        default: "2"
+        default: "5"
       reach_only:
         description: "Only run the reach report (no new videos)"
         type: boolean

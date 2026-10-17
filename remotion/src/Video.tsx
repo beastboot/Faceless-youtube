@@ -4,7 +4,7 @@ import {Captions} from './Captions';
 import {GraphicLayer} from './graphics/Graphics';
 import {ClipVideo, FilmLook, FrameSeq, KenBurns, Particles, Vignette, entrance} from './Scene';
 import type {Props, Shot} from './types';
-import {RED, YELLOW, clamp, fontFor, pop} from './util';
+import {INK, RED, YELLOW, clamp, fontFor, pop} from './util';
 
 const FontFaces: React.FC<{fonts: Props['fonts']}> = ({fonts}) => (
   <style>{`
@@ -90,6 +90,21 @@ const EndCard: React.FC<{title: string; button: string; fonts: Props['fonts']}> 
   );
 };
 
+// Shorts: a silent "follow" tag in the last ~1.6 s (no voice, so the loop back to line 1 stays intact)
+const FollowTag: React.FC<{text: string; fonts: Props['fonts']}> = ({text, fonts}) => {
+  const frame = useCurrentFrame();
+  const {fps, width} = useVideoConfig();
+  const size = width * 0.052;
+  const s = Math.min(1, frame / (0.25 * fps));
+  return (
+    <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center', paddingTop: '13%', pointerEvents: 'none'}}>
+      <div style={{fontFamily: fontFor(text, fonts), fontSize: size, color: INK, background: YELLOW, opacity: s,
+        transform: `translateY(${(1 - s) * -40}px)`, padding: `${size * 0.25}px ${size * 0.6}px`, borderRadius: size * 0.4,
+        textAlign: 'center', maxWidth: '86%'}}>➕ {text}</div>
+    </AbsoluteFill>
+  );
+};
+
 export const Main: React.FC<Props> = (props) => {
   const {fps} = useVideoConfig();
   const xf = Math.round(props.transitionSeconds * fps);
@@ -111,6 +126,11 @@ export const Main: React.FC<Props> = (props) => {
         <AbsoluteFill style={{alignItems: 'flex-end', padding: props.short ? '4% 5%' : '2.2% 2.4%', pointerEvents: 'none'}}>
           <Img src={staticFile(props.logo)} style={{width: props.short ? 120 : 92, height: props.short ? 120 : 92, opacity: 0.85, borderRadius: '50%'}} />
         </AbsoluteFill>
+      ) : null}
+      {props.followText && props.short ? (
+        <Sequence from={Math.max(0, Math.round((props.total - 1.6) * fps))}>
+          <FollowTag text={props.followText} fonts={props.fonts} />
+        </Sequence>
       ) : null}
       {props.endCard && !props.short ? (
         <Sequence from={Math.max(0, Math.round((props.total - 6) * fps))}>

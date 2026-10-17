@@ -409,6 +409,10 @@ def voice_for(cfg, fmt, lang):
     return cfg[fmt]["voice"], cfg[fmt]["rate"]
 
 
+def is_short_series(cfg, series):
+    return bool(series) and series.get("id") in {x["id"] for x in cfg.get("short_series") or []}
+
+
 def series_for(cfg, topic):
     all_series = cfg.get("series") or []
     return next((x for x in all_series if x["id"] == topic.get("series")), all_series[0] if all_series else None)
@@ -484,6 +488,15 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
                  " with Kokoro" if narrate[0] is tts.speak_kokoro else "")
     if fmt == "short" and items:   # big title on frame one: the thumbnail's punchline, not the caption again
         items[0]["hook_text"] = re.sub(r"[*_]", "", script.get("thumbnail_text") or "").strip()
+        if episode and is_short_series(cfg, series):
+            name = series.get(f"name_{lang}") or series["name_en"]
+            items[0]["badge"] = f"{name.upper() if lang == 'en' else name} #{episode}"
+        # silent follow tag in the last second (the spoken loop stays intact)
+        if lang == "en":
+            items[0]["follow_text"] = (f"Follow for #{episode + 1} of {series['name_en']}"
+                                       if episode and is_short_series(cfg, series) else "Follow for a true mystery every day")
+        elif lang == "ta":
+            items[0]["follow_text"] = "தினமும் ஒரு மர்மக் கதைக்கு Follow செய்யுங்கள்"
     seen_scene = set()
     n_chapter = 0
     for it in items:  # sound design + music need the mood and where chapters begin
@@ -546,14 +559,17 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
         if script.get(key):
             links.append(f"{hi_txt if lang == 'hi' else en_txt}: https://youtu.be/{script[key]}")
     if series:
-        pl = json.loads((ROOT / "data" / "playlists.json").read_text()).get(f"series-{series['id']}-{lang}") \
+        pl = json.loads((ROOT / "data" / "playlists.json").read_text()).get(f"series-{series['id']}-{lang}" + (cfg["languages"].get(lang) or {}).get("youtube_env", "")) \
             if (ROOT / "data" / "playlists.json").exists() else None
         sname = series["name"] if lang == "hi" else series.get("name_en") or series["name"]
         head = (f"📚 {sname} — एपिसोड {episode}" if lang == "hi" else f"📚 Series: {sname} — Episode {episode}")
         if pl:   # keeps viewers watching (session continuation is a satisfaction signal)
             head += f"\n▶ पूरी सीरीज़: https://www.youtube.com/playlist?list={pl}" if lang == "hi" else \
                 f"\n▶ Full series: https://www.youtube.com/playlist?list={pl}"
-        links.append(head if fmt == "long" else f"📚 {sname}")
+        if fmt == "short" and series.get(f"name_{lang}"):
+            sname = series[f"name_{lang}"]
+        links.append(head if fmt == "long" else f"📚 {sname} #{episode}" + (
+            f"\n▶ https://www.youtube.com/playlist?list={pl}" if pl else ""))
     description = build_description(cfg, script, res, chapters, fmt, lang, links, series)
     timeline = [[round(st, 2), it.get("line_text", "")] for it, st in zip(items, starts)]
     tags = build_tags(script, lang)
@@ -578,6 +594,9 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     base.mkdir(parents=True, exist_ok=True)
     log.info("=== %s %s: %s -> %s", fmt.upper(), "+".join(langs), topic["topic"], base.name)
 
+    if fmt == "short":   # Shorts are episodes of a named show (identity is what earns subscribers)
+        topic["short_series_info"] = next((x for x in cfg.get("short_series") or []
+                                           if x["id"] == topic.get("short_series")), None)
     res = research_mod.research(topic)
     if len(res["text"]) < (3000 if fmt == "long" else 600):
         raise RuntimeError(f"Not enough research material for {res['wiki_title']}")
@@ -604,6 +623,9 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
 
     template = thumbnail.choose_template(cfg)  # same A/B arm for every language of this topic
     series = series_for(cfg, topic)
+    if fmt == "short" and topic.get("short_series_info"):
+        ss = topic["short_series_info"]
+        series = {**ss, "name": ss["name_en"]}
     episode = 1 + sum(1 for r in state.load() if r.get("series") == (series or {}).get("id")
                       and r.get("format") == fmt and r.get("video_id"))
     results = []
@@ -772,7 +794,8 @@ def _publish(cfg, work, fmt, meta, publish_at, series, lang):
         youtube.set_thumbnail(video_id, work / "thumbnail.jpg")
     if cfg[fmt].get("upload_captions"):
         youtube.upload_captions(video_id, work / "captions.srt", meta.get("caption_track", lang))
-    youtube.add_to_playlist(video_id, youtube.playlist_for(cfg, fmt, lang, series if fmt == "long" else None))
+    show = series if fmt == "long" or is_short_series(cfg, series) else None   # Shorts: their named show
+    youtube.add_to_playlist(video_id, youtube.playlist_for(cfg, fmt, lang, show))
     if fmt == "short":
         social.cross_post(cfg, work / "final.mp4", meta, video_id)
     return video_id

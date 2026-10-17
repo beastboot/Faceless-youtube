@@ -14,7 +14,7 @@ channel:
 # YouTube API quota: ~1,600 units per upload, 10,000/day default => keep total <= 5.
 schedule:
   longs_per_run: 0                    # Shorts-first (owner decision, Oct 15): long videos get ~0 views on a new
-  shorts_per_run: 3                   # channel. Owner decision Oct 15: Shorts only, no long videos (compilation off too)
+  shorts_per_run: 5                   # channel. Owner decision Oct 15: Shorts only, no long videos (compilation off too)
   # Publish times per language are under languages: below (UTC). Videos upload as private and
   # YouTube flips them public at that time; a time already passed today => published immediately.
 
@@ -29,7 +29,7 @@ long:
   upload_captions: false              # captions are on screen; skipping the track saves 400 quota units
 
 short:
-  target_words: 75                    # English words, ~14 quick shots -> ~40-50 s: higher completion + loop rate
+  target_words: 60                    # ~30-40 s: a fully watched short Short beats a half-watched long one
   min_scenes: 5
   width: 1080
   height: 1920
@@ -121,7 +121,7 @@ languages:
     handle: "@oddannalstamil"
     youtube_env: "_TA"                # uses YT_CLIENT_ID_TA / YT_CLIENT_SECRET_TA / YT_REFRESH_TOKEN_TA
     longs_per_run: 0
-    shorts_per_run: 3
+    shorts_per_run: 1                 # owner decision Oct 17: focus on English (Tamil Shorts got 0-10 views)
     voice: "ta-IN-ValluvarNeural"
     captions: "native"
     long_rate: "+8%"
@@ -135,7 +135,7 @@ languages:
         Read the following line as a gripping, warm documentary storyteller in its own language, with
         natural conversational delivery, clear diction and a brisk pace. Read only the line, nothing else.
     long_publish_utc: ["14:00"]
-    short_publish_utc: ["07:30", "09:30", "13:30"]   # 1:00, 3:00 and 7:00 PM IST (best windows for India)
+    short_publish_utc: ["13:30"]      # 7:00 PM IST
   te:
     enabled: false
     channel_name: "Odd Annals Telugu"
@@ -181,9 +181,9 @@ languages:
   en:
     enabled: true                     # focus: English Shorts for every history topic (owner request)
     longs_per_run: 0                  # Shorts only (owner decision Oct 15)
-    shorts_per_run: 3
+    shorts_per_run: 5                 # owner goal Oct 17: 1,000 subscribers in a month -> more chances (5 x 1,750 quota units fits the 10k/day)
     long_publish_utc: ["15:00"]
-    short_publish_utc: ["13:00", "16:00", "20:00"]   # 6:30 PM, 9:30 PM, 1:30 AM IST = UK evening, US afternoon/evening
+    short_publish_utc: ["12:00", "14:00", "16:00", "18:00", "21:00"]   # 5:30-11:30 PM + 2:30 AM IST: UK afternoon/evening, US day
 
 llm:
   # Tried in order; the first provider with an API key that succeeds wins.
@@ -214,6 +214,28 @@ host:
     a warm, wise Indian grandfather storyteller in his seventies, white beard and moustache,
     round brass spectacles, saffron shawl over a white kurta, holding a glowing brass lantern
   # He opens each video right after the hook and closes it with the call to action.
+# Shorts series: a recognisable named show (with an episode number on frame one) is what turns
+# viewers into subscribers. The topic picker files every Short under one of these.
+short_series:
+  - id: "proven"
+    name_en: "Mocked, Then Proven Right"
+    name_ta: "கேலி செய்தார்கள், பின் நிரூபணமானது"
+    about: >-
+      people, warnings or ideas that were laughed at or ignored, then turned out right (often saving
+      lives): a real event with a year, the mockery, the moment they were proven right
+  - id: "impossible"
+    name_en: "Things That Shouldn't Exist"
+    name_ta: "இருக்கவே கூடாத அதிசயங்கள்"
+    about: >-
+      real objects, buildings, places or phenomena that seem impossible (floating pillar, 1600-year
+      rust-free iron pillar, a fire burning since 1962), and the real explanation or open question
+  - id: "survived"
+    name_en: "How Did They Survive?"
+    name_ta: "எப்படி உயிர் பிழைத்தார்கள்?"
+    about: >-
+      disasters, near-disasters and impossible survivals (people, cities, ships), with the exact moment
+      it almost ended and what saved them
+
 series:
   - id: "mandir"
     name: "मंदिरों के रहस्य"

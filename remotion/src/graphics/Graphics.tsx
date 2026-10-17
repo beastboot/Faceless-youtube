@@ -232,12 +232,18 @@ const Fact: React.FC<GP<Extract<Graphic, {type: 'fact'}>>> = ({g, len, fonts, sh
   const {fps, width} = useVideoConfig();
   const words = g.text.split(/\s+/).filter(Boolean).slice(0, 8);
   const size = width * (short ? 0.085 : 0.045);
+  // Frame-one hook of a Short: fully readable at once (viewers decide to stay or swipe in ~1 second)
+  const instant = !!g.instant;
   return (
-    <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center', padding: short ? '15% 5% 0' : '6% 6% 0', opacity: fadeInOut(frame, len)}}>
+    <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center', padding: short ? '15% 5% 0' : '6% 6% 0',
+      opacity: fadeInOut(frame, len, instant ? 1 : 8)}}>
+      {g.badge ? <div style={{fontFamily: fontFor(g.badge, fonts), fontSize: size * 0.44, color: INK, background: YELLOW,
+        padding: `${size * 0.06}px ${size * 0.22}px`, borderRadius: size * 0.1, marginBottom: size * 0.18,
+        letterSpacing: size * 0.01}}>{g.badge}</div> : null}
       <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: `${size * 0.1}px ${size * 0.25}px`,
         background: 'rgba(11,11,16,0.55)', padding: `${size * 0.15}px ${size * 0.4}px`, borderRadius: size * 0.25}}>
         {words.map((w, i) => {
-          const s = pop(frame, fps, 3 + i * 4, 11);
+          const s = instant ? 1 : pop(frame, fps, 3 + i * 4, 11);
           return <span key={i} style={{fontFamily: fontFor(w, fonts), fontSize: size, color: i % 3 === 1 ? YELLOW : '#fff',
             display: 'inline-block', transform: `scale(${s}) translateY(${(1 - s) * 30}px)`, ...stroke(size * 0.05)}}>{w}</span>;
         })}
