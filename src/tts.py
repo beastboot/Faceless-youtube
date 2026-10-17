@@ -24,13 +24,32 @@ async def _speak(text, voice, rate, mp3_path):
 
 def speak(text, voice, rate, mp3_path, retries=3):
     """Write mp3 and return [{'word', 'start', 'end'}] in seconds."""
+    import re
+    blocked = False
     for attempt in range(retries):
         try:
             return asyncio.run(_speak(text, voice, rate, str(mp3_path)))
         except Exception as e:
             log.warning("TTS attempt %d failed: %s", attempt + 1, e)
+            blocked = blocked or "403" in str(e)
+            if "No audio was received" in str(e):
+                # One odd line (symbols, emoji, a stray quote) - not an outage. Retry once with plain
+                # text; a line with nothing speakable becomes a short pause instead of failing the video.
+                clean = re.sub(r"[^\w\s.,!?'\-:;%]", " ", text, flags=re.UNICODE)
+                clean = re.sub(r"\s+", " ", clean).strip()
+                if clean and clean != text:
+                    try:
+                        return asyncio.run(_speak(clean, voice, rate, str(mp3_path)))
+                    except Exception as e2:
+                        log.warning("TTS retry with plain text failed: %s", e2)
+                if not re.search(r"\w", clean or ""):
+                    import subprocess
+                    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono",
+                                    "-t", "0.4", "-b:a", "64k", str(mp3_path)], check=True)
+                    return []
     global edge_down
-    edge_down = True   # the rest of this run skips Edge (and its retries) where Kokoro can stand in
+    if blocked:   # Microsoft refusing us (not one bad line): the rest of this run uses Kokoro where it can
+        edge_down = True
     raise RuntimeError("TTS failed")
 
 

@@ -310,7 +310,37 @@ Return {{"review_markdown": "...", "telegram": "...", "insights": ["..."]}}"""
     if data.get("telegram"):
         from . import notify
         notify.send("📈 Is hafte kya chala:\n\n" + data["telegram"].strip()[:1500]
-                    + "\n\n(Topic picker ab yahi seekh kar agle hafte ke topics chunega.)")
+                    + "\n\n(Topic picker ab yahi seekh kar agle hafte ke topics chunega.)"
+                    + goal_progress(cfg, table))
+
+
+def goal_progress(cfg, table):
+    """'312 / 1,000 subscribers, 21 days left: need 33/day (this week: 9/day)'."""
+    g = cfg.get("goal") or {}
+    if not g.get("subscribers"):
+        return ""
+    try:
+        st = youtube.client().channels().list(part="statistics", mine=True).execute()["items"][0]["statistics"]
+        subs, views = int(st.get("subscriberCount", 0)), int(st.get("viewCount", 0))
+    except Exception as e:
+        log.warning("Goal check failed: %s", e)
+        return ""
+    hist = ROOT / "data" / "goal.json"
+    prev = json.loads(hist.read_text()) if hist.exists() else []
+    today = datetime.now(timezone.utc).date()
+    week_ago = next((x for x in reversed(prev) if (today - datetime.fromisoformat(x["date"]).date()).days >= 6), None)
+    prev.append({"date": today.isoformat(), "subs": subs, "views": views})
+    hist.write_text(json.dumps(prev[-60:], indent=1))
+    left = max(1, (datetime.fromisoformat(g["by"]).date() - today).days)
+    need = max(0, g["subscribers"] - subs) / left
+    pace = ((subs - week_ago["subs"]) / 7) if week_ago else None
+    vpace = ((views - week_ago["views"]) / 7) if week_ago else None
+    line = (f"\n\n🎯 Goal: {subs:,} / {g['subscribers']:,} subscribers, {left} din baaki. "
+            f"Chahiye: {need:.0f}/din")
+    if pace is not None:
+        line += f" | Is hafte: {pace:.1f}/din, {vpace:,.0f} views/din"
+        line += " ✅ on track" if pace >= need else " ⚠️ peeche"
+    return line
 
 
 def run(cfg):

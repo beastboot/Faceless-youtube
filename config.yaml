@@ -1,6 +1,10 @@
 # Faceless YouTube automation — channel configuration.
 # Secrets (API keys, OAuth tokens) live in environment variables / .env, never here.
 
+goal:                                 # owner target (set Oct 17): weekly Telegram progress check against it
+  subscribers: 1000
+  by: "2026-11-17"
+
 channel:
   name: "Odd Annals"                  # youtube.com/@OddAnnals
   handle: "@oddannals"                # used for the subscribe link in descriptions

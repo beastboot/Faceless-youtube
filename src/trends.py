@@ -175,6 +175,10 @@ Rules:
   things that "shouldn't exist", survival against the odds - each with a specific year, number or place.
   Avoid: vague legends with no checkable facts, slow biographies, topics that need a lot of background.
 - Use the youtube_searches candidates as evidence of what people search for right now.
+- RIDE THE NEWS: at least ONE Short must hook onto something people are searching for THIS WEEK (a
+  trending candidate below, today's news, an anniversary in the next days) through a real historical
+  story it connects to (e.g. a new archaeological find -> the mystery it reopens; a storm in the news ->
+  the deadliest storm in history). Say the connection in "why".
 
 TRENDING CANDIDATES:
 {json.dumps({k: v[:40] for k, v in cands.items()}, ensure_ascii=False, indent=0)}
