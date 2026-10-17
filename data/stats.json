@@ -4,11 +4,12 @@
   "likes": 5,
   "comments": 3,
   "privacy": "public",
-  "age_h": 146.9031036275,
+  "age_h": 184.58888590944446,
   "watch_min": 55,
   "avg_pct": 84.53,
   "subs": 1,
   "shares": 1,
+  "peer_median": 68.5,
   "retention": null
  },
  "m3ByU0Psto4": {
@@ -16,7 +17,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 133.36143696083334,
+  "age_h": 171.0472192427778,
   "watch_min": 3,
   "avg_pct": 55.04,
   "subs": 0,
@@ -27,7 +28,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 133.20615918305555,
+  "age_h": 170.891941465,
   "watch_min": 0,
   "avg_pct": 27,
   "subs": 0,
@@ -38,7 +39,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 119.7281036275,
+  "age_h": 157.41388590944445,
   "watch_min": 0,
   "avg_pct": 4.49,
   "subs": 0,
@@ -49,7 +50,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 108.81504807194445,
+  "age_h": 146.50083035388892,
   "watch_min": 1,
   "avg_pct": 20.44,
   "subs": 0,
@@ -60,7 +61,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 109.31171473861112,
+  "age_h": 146.99749702055556,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -71,22 +72,24 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 116.30893696083334,
+  "age_h": 153.9947192427778,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 4.0
  },
  "yqmWs5NFOSI": {
-  "views": 96,
+  "views": 97,
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 110.31032584972222,
+  "age_h": 147.9961081316667,
   "watch_min": 9,
-  "avg_pct": 71.55,
+  "avg_pct": 70.08,
   "subs": 0,
   "shares": 0,
+  "peer_median": 68.5,
   "retention": {
    "held_at_30s": 0.41,
    "biggest_drops": [
@@ -113,29 +116,31 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 111.30615918305556,
+  "age_h": 148.99194146500002,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 4.0
  },
  "4hQ2kSYTk3o": {
   "views": 1,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 106.31643696083333,
+  "age_h": 144.00221924277778,
   "watch_min": 0,
   "avg_pct": 11.94,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 68.5
  },
  "rptO8jIgcck": {
   "views": 0,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 60.314214738611106,
+  "age_h": 97.99999702055555,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -146,95 +151,240 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 62.31393696083333,
+  "age_h": 99.99971924277777,
   "watch_min": 0,
-  "avg_pct": 0,
+  "avg_pct": 11.07,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 68.5
  },
  "AqkuWbq3Dmk": {
   "views": 86,
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 58.315603627499996,
-  "watch_min": 2,
-  "avg_pct": 55.46,
+  "age_h": 96.00138590944444,
+  "watch_min": 31,
+  "avg_pct": 49.35,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 68.5,
+  "retention": {
+   "held_at_30s": 0.52,
+   "biggest_drops": [
+    {
+     "at": "0:07",
+     "drop": 0.096,
+     "line": "Built in 1213 by the Kakatiya general Recherla Rudra, the shrine uses porous bricks made from clay, resinous gum, jute fiber, and rice husks"
+    },
+    {
+     "at": "0:02",
+     "drop": 0.058,
+     "line": "What happens when you drop a 13th-century temple brick into a pool of water and watch it float instead of sinking?"
+    },
+    {
+     "at": "0:40",
+     "drop": 0.058,
+     "line": "Beneath the stone floors, a massive sandbox foundation absorbed seismic shockwaves across eight centuries."
+    }
+   ]
+  }
  },
  "1MZ6uiS2TGE": {
-  "views": 0,
-  "likes": 0,
+  "views": 112,
+  "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 37.311992516388884,
+  "age_h": 74.99777479833332,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "retention": null
  },
  "ENSUW6iCfW4": {
-  "views": 0,
+  "views": 1,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 36.31171473861111,
+  "age_h": 73.99749702055556,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "n92aErCrF-4": {
-  "views": 3,
+  "views": 5,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 41.81643696083333,
+  "age_h": 79.50221924277777,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 4.0
  },
  "66RS-mtIA6U": {
-  "views": 42,
+  "views": 51,
   "likes": 1,
-  "comments": 1,
+  "comments": 2,
   "privacy": "public",
-  "age_h": 38.31032584972222,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 75.99610813166666,
+  "watch_min": 13,
+  "avg_pct": 74.9,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 68.5,
+  "retention": {
+   "held_at_30s": 0.79,
+   "biggest_drops": [
+    {
+     "at": "0:08",
+     "drop": 0.072,
+     "line": "Instead, the concrete stacks lingered, silent over Cumbria."
+    },
+    {
+     "at": "0:41",
+     "drop": 0.072,
+     "line": "The extensive contamination from the 1957 fire made the work exceptionally difficult."
+    },
+    {
+     "at": "0:25",
+     "drop": 0.072,
+     "line": "Only half remained, matching the nearby factory roofs."
+    }
+   ]
+  }
  },
  "8p24lfq5_mA": {
-  "views": 3,
+  "views": 4,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 37.81254807194444,
+  "age_h": 75.49833035388889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 4.0
  },
  "CXSFT766vjc": {
-  "views": 116,
-  "likes": 3,
+  "views": 163,
+  "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 34.306159183055556,
+  "age_h": 71.991941465,
+  "watch_min": 29,
+  "avg_pct": 49.96,
+  "subs": 0,
+  "shares": 0
+ },
+ "PAyiuX-kdfk": {
+  "views": 41,
+  "likes": 0,
+  "comments": 1,
+  "privacy": "public",
+  "age_h": 50.993885909444444,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "PAyiuX-kdfk": {
+ "HO6LmB_UIy0": {
+  "views": 1,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 33.49249702055556,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "Lrnwr3Yg67A": {
+  "views": 5,
+  "likes": 1,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 27.997497020555556,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "SsoboW6_A7I": {
+  "views": 3,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 31.50055257611111,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "p42kwBgsIxk": {
+  "views": 21,
+  "likes": 1,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 24.997774798333335,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "qN_awL5en_8": {
+  "views": 4,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 27.492774798333336,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "aKe9ddn-zsM": {
   "views": 0,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 13.3081036275,
+  "age_h": 20.99471924277778,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "Y0xfXwwYK4k": {
+  "views": 0,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 9.43555257611111,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "GlJhZKM6Opk": {
+  "views": 0,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 7.493885909444444,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "VBsirTaxPOw": {
+  "views": 0,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 3.492774798333333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
