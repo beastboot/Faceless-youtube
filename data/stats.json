@@ -4,12 +4,12 @@
   "likes": 5,
   "comments": 3,
   "privacy": "public",
-  "age_h": 184.58888590944446,
+  "age_h": 198.89035445027778,
   "watch_min": 55,
   "avg_pct": 84.53,
   "subs": 1,
   "shares": 1,
-  "peer_median": 68.5,
+  "peer_median": 86,
   "retention": null
  },
  "m3ByU0Psto4": {
@@ -17,7 +17,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 171.0472192427778,
+  "age_h": 185.3486877836111,
   "watch_min": 3,
   "avg_pct": 55.04,
   "subs": 0,
@@ -28,7 +28,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 170.891941465,
+  "age_h": 185.19341000583333,
   "watch_min": 0,
   "avg_pct": 27,
   "subs": 0,
@@ -39,7 +39,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 157.41388590944445,
+  "age_h": 171.71535445027777,
   "watch_min": 0,
   "avg_pct": 4.49,
   "subs": 0,
@@ -50,7 +50,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 146.50083035388892,
+  "age_h": 160.8022988947222,
   "watch_min": 1,
   "avg_pct": 20.44,
   "subs": 0,
@@ -61,7 +61,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 146.99749702055556,
+  "age_h": 161.29896556138888,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -72,7 +72,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 153.9947192427778,
+  "age_h": 168.29618778361112,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -84,28 +84,28 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 147.9961081316667,
+  "age_h": 162.29757667249999,
   "watch_min": 9,
-  "avg_pct": 70.08,
+  "avg_pct": 67.18,
   "subs": 0,
   "shares": 0,
-  "peer_median": 68.5,
+  "peer_median": 86,
   "retention": {
-   "held_at_30s": 0.41,
+   "held_at_30s": 0.39,
    "biggest_drops": [
     {
      "at": "0:05",
-     "drop": 0.136,
+     "drop": 0.13,
      "line": "Long before Ibn Khordadbeh mapped Set Bandhai in 850, Rameshwaram's floating stones formed a natural limestone bridge."
     },
     {
-     "at": "0:05",
-     "drop": 0.091,
+     "at": "0:01",
+     "drop": 0.087,
      "line": "Long before Ibn Khordadbeh mapped Set Bandhai in 850, Rameshwaram's floating stones formed a natural limestone bridge."
     },
     {
-     "at": "0:05",
-     "drop": 0.091,
+     "at": "0:01",
+     "drop": 0.087,
      "line": "Long before Ibn Khordadbeh mapped Set Bandhai in 850, Rameshwaram's floating stones formed a natural limestone bridge."
     }
    ]
@@ -116,31 +116,29 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 148.99194146500002,
+  "age_h": 163.29341000583332,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null,
-  "peer_median": 4.0
+  "shares": null
  },
  "4hQ2kSYTk3o": {
   "views": 1,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 144.00221924277778,
+  "age_h": 158.3036877836111,
   "watch_min": 0,
   "avg_pct": 11.94,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 68.5
+  "shares": 0
  },
  "rptO8jIgcck": {
   "views": 0,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 97.99999702055555,
+  "age_h": 112.3014655613889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -151,51 +149,50 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 99.99971924277777,
+  "age_h": 114.30118778361111,
   "watch_min": 0,
   "avg_pct": 11.07,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 68.5
+  "shares": 0
  },
  "AqkuWbq3Dmk": {
   "views": 86,
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 96.00138590944444,
+  "age_h": 110.30285445027778,
   "watch_min": 31,
-  "avg_pct": 49.35,
+  "avg_pct": 48.6,
   "subs": 0,
   "shares": 0,
-  "peer_median": 68.5,
+  "peer_median": 86,
   "retention": {
-   "held_at_30s": 0.52,
+   "held_at_30s": 0.51,
    "biggest_drops": [
     {
      "at": "0:07",
-     "drop": 0.096,
+     "drop": 0.094,
      "line": "Built in 1213 by the Kakatiya general Recherla Rudra, the shrine uses porous bricks made from clay, resinous gum, jute fiber, and rice husks"
     },
     {
      "at": "0:02",
-     "drop": 0.058,
+     "drop": 0.057,
      "line": "What happens when you drop a 13th-century temple brick into a pool of water and watch it float instead of sinking?"
     },
     {
      "at": "0:40",
-     "drop": 0.058,
+     "drop": 0.057,
      "line": "Beneath the stone floors, a massive sandbox foundation absorbed seismic shockwaves across eight centuries."
     }
    ]
   }
  },
  "1MZ6uiS2TGE": {
-  "views": 112,
-  "likes": 1,
+  "views": 148,
+  "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 74.99777479833332,
+  "age_h": 89.29924333916667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -207,18 +204,18 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 73.99749702055556,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 88.29896556138888,
+  "watch_min": 0,
+  "avg_pct": 0,
+  "subs": 0,
+  "shares": 0
  },
  "n92aErCrF-4": {
   "views": 5,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 79.50221924277777,
+  "age_h": 93.80368778361111,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -230,29 +227,29 @@
   "likes": 1,
   "comments": 2,
   "privacy": "public",
-  "age_h": 75.99610813166666,
-  "watch_min": 13,
-  "avg_pct": 74.9,
+  "age_h": 90.2975766725,
+  "watch_min": 16,
+  "avg_pct": 63.190000000000005,
   "subs": 0,
   "shares": 0,
-  "peer_median": 68.5,
+  "peer_median": 86,
   "retention": {
-   "held_at_30s": 0.79,
+   "held_at_30s": 0.67,
    "biggest_drops": [
     {
-     "at": "0:08",
-     "drop": 0.072,
-     "line": "Instead, the concrete stacks lingered, silent over Cumbria."
+     "at": "0:07",
+     "drop": 0.095,
+     "line": "You might think the 1957 Windscale fire ended completely, but the severe contamination left behind meant demolition took decades."
     },
     {
-     "at": "0:41",
-     "drop": 0.072,
-     "line": "The extensive contamination from the 1957 fire made the work exceptionally difficult."
+     "at": "0:35",
+     "drop": 0.048,
+     "line": "Decommissioners now plan to dismantle it piece by piece."
     },
     {
-     "at": "0:25",
-     "drop": 0.072,
-     "line": "Only half remained, matching the nearby factory roofs."
+     "at": "0:15",
+     "drop": 0.048,
+     "line": "Special care had to be taken as workers began dismantling the contaminated structures."
     }
    ]
   }
@@ -262,7 +259,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 75.49833035388889,
+  "age_h": 89.79979889472222,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -274,29 +271,50 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 71.991941465,
-  "watch_min": 29,
-  "avg_pct": 49.96,
+  "age_h": 86.29341000583334,
+  "watch_min": 34,
+  "avg_pct": 49.85,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 86,
+  "retention": {
+   "held_at_30s": 0.49,
+   "biggest_drops": [
+    {
+     "at": "0:05",
+     "drop": 0.074,
+     "line": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies"
+    },
+    {
+     "at": "0:06",
+     "drop": 0.059,
+     "line": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies"
+    },
+    {
+     "at": "0:08",
+     "drop": 0.059,
+     "line": "You probably think every stone pillar in a 16th-century Indian temple provides structural support, but the hanging pillar at Lepakshi defies"
+    }
+   ]
+  }
  },
  "PAyiuX-kdfk": {
-  "views": 41,
+  "views": 45,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 50.993885909444444,
+  "age_h": 65.29535445027777,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "HO6LmB_UIy0": {
-  "views": 1,
-  "likes": 0,
-  "comments": 0,
+  "views": 382,
+  "likes": 4,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 33.49249702055556,
+  "age_h": 47.79396556138889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -305,42 +323,42 @@
  "Lrnwr3Yg67A": {
   "views": 5,
   "likes": 1,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 27.997497020555556,
+  "age_h": 42.29896556138889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "SsoboW6_A7I": {
-  "views": 3,
-  "likes": 0,
+  "views": 509,
+  "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 31.50055257611111,
+  "age_h": 45.802021116944445,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "p42kwBgsIxk": {
-  "views": 21,
+  "views": 27,
   "likes": 1,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 24.997774798333335,
+  "age_h": 39.299243339166665,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "qN_awL5en_8": {
-  "views": 4,
-  "likes": 0,
+  "views": 377,
+  "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 27.492774798333336,
+  "age_h": 41.79424333916666,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -349,42 +367,97 @@
  "aKe9ddn-zsM": {
   "views": 0,
   "likes": 0,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 20.99471924277778,
+  "age_h": 35.29618778361111,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "Y0xfXwwYK4k": {
-  "views": 0,
-  "likes": 0,
+  "views": 318,
+  "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 9.43555257611111,
+  "age_h": 23.737021116944444,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "GlJhZKM6Opk": {
-  "views": 0,
-  "likes": 0,
+  "views": 2,
+  "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 7.493885909444444,
+  "age_h": 21.795354450277777,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "VBsirTaxPOw": {
-  "views": 0,
+  "views": 414,
+  "likes": 2,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 17.794243339166666,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "6WTHSxdhA1M": {
+  "views": 387,
+  "likes": 6,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 14.007854450277778,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "Ge6pEKEENcQ": {
+  "views": 26,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 3.492774798333333,
+  "age_h": 13.916465561388888,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "U90uqgIJYSI": {
+  "views": 258,
+  "likes": 5,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 13.750632228055554,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "Q70sz0wEFX8": {
+  "views": 345,
+  "likes": 3,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 13.373132228055555,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "_wcXrGojGmE": {
+  "views": 144,
+  "likes": 1,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 11.298410005833333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
