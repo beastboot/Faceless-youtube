@@ -290,7 +290,7 @@ Scene and shot rules:
   shot library: establishing wide, wide, medium, medium close-up, close-up on the face, extreme close-up
   on a detail (eyes, hands, an object), over-the-shoulder, low angle (power, awe), high angle
   (weakness, scale), aerial/bird's-eye, silhouette against the light.
-- The pictures are 3D animated-movie stills (Pixar-like), so direct them like an animation film: one clear
+- {" ".join(cfg["images"].get("look", "The pictures are 3D animated-movie stills (Pixar-like), so direct them like an animation film").split())}: one clear
   main character the story follows, faces showing a strong readable emotion (fear, awe, anger, joy),
   a visible action or gesture (pointing, running, whispering, holding up the key object), and a
   cinematic camera (low angle for power, close-up for emotion, wide establishing shots for places).

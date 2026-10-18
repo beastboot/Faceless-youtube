@@ -63,7 +63,7 @@ video:
   preset: "faster"
   upload_height: {long: 1440}         # upscale long videos to 1440p so YouTube serves its better VP9 encode
 
-# AI illustrations: one per sentence, in a single consistent animated style.
+# AI pictures: one per sentence, in a single consistent style (Shorts: photoreal).
 images:
   providers: ["cloudflare", "pollinations"]
   # flux-1-schnell at 4 steps costs ~58 of the free 10,000 daily neurons (~170 images/day).
@@ -80,15 +80,26 @@ images:
       expressive eyes and soft rounded features, detailed realistic environment and props, cinematic
       volumetric lighting, soft depth of field, warm filmic color grade, highly detailed render,
       no text, no letters, no watermark, no signature
+    # Shorts: photoreal film-still look (owner chose it 2026-10-18 after the drama test).
     short: >-
-      3D animated movie still, Pixar and Disney style, stylized expressive characters with big
-      expressive eyes, strong emotion on the face, detailed realistic environment, dramatic cinematic
-      lighting, close framing, soft depth of field, vivid filmic colors, highly detailed render,
-      no text, no letters, no watermark, no signature
+      photorealistic cinematic film still, shot on 35mm, real people with natural skin texture and a
+      strong readable emotion, period-accurate clothes and props, detailed real location, moody
+      cinematic lighting, shallow depth of field, subtle film grain, high detail, close framing,
+      no text, no letters, no watermark, no cartoon, no 3D render, no illustration
+    # Master pictures (host + recurring characters) are drawn in this look so every shot matches.
+    master: >-
+      photorealistic portrait photograph, real person, natural skin texture, soft studio light,
+      sharp focus, high detail, no text, no watermark, no cartoon, no 3D render, no illustration
   thumbnail_style: >-
-    3D animated movie poster still, Pixar style, one expressive character with a strong emotion (shock,
-    awe, fear), saturated vivid colors, dramatic rim light, high contrast, cinematic, main subject large
-    on the right half, no text, no watermark
+    photorealistic cinematic movie still, one real person with a strong emotion (shock, awe, fear),
+    dramatic rim light, high contrast, rich filmic colors, main subject large on the right half,
+    no text, no watermark, no cartoon, no 3D render
+  # How the script writer directs the pictures (must match styles.short).
+  look: >-
+    The pictures are PHOTOREALISTIC cinematic film stills of real-looking people (never cartoon, never
+    Pixar, never a 3D render), so direct them like a live-action historical movie
+  # Words stripped from every picture prompt so nothing pulls the image model back to cartoon.
+  strip_words: ["pixar", "disney", "cartoon", "3d animated", "animated", "animation", "3d render", "illustration"]
   # Same face all video long: a master picture per main character, then FLUX.2 Klein draws the
   # character's shots from it (~125 neurons per shot vs ~58 for schnell, so it is budgeted).
   character_refs: 2                   # main characters per story that get a master picture
@@ -214,6 +225,7 @@ research:
 host:
   name: "इतिहास दादा"
   name_en: "Itihaas Dada"
+  reference: "assets/host/host-photoreal.jpg"   # master picture in the current look (old cartoon one: host.jpg)
   look: >-
     a warm, wise Indian grandfather storyteller in his seventies, white beard and moustache,
     round brass spectacles, saffron shawl over a white kurta, holding a glowing brass lantern
@@ -337,6 +349,6 @@ youtube:
   made_for_kids: false
   # Set true if a video contains realistic AI-generated people/events viewers could mistake for real.
   # Stock footage + narration does not need it.
-  contains_synthetic_media: false
+  contains_synthetic_media: true      # photoreal AI scenes of real events: YouTube requires the label
   long_playlist_id: ""                # optional: auto-add long videos to this playlist
   short_playlist_id: ""

@@ -44,22 +44,36 @@ TEXT = {
 
 
 # ---- illustrations (shared by every language) ---------------------------------------------
+def master_style(cfg):
+    styles = cfg["images"]["styles"]
+    return styles.get("master") or styles["long"]
+
+
+def strip_style_words(cfg, text):
+    """Drop words that would pull the image model away from the configured look (e.g. 'Pixar')."""
+    words = cfg["images"].get("strip_words") or []
+    if not words or not text:
+        return text
+    bad = re.compile(r",?\s*\b(" + "|".join(re.escape(w) for w in words) + r")\b[^,.;]*", re.I)
+    return bad.sub("", text)
+
+
 def ensure_host_reference(cfg):
     """Master picture of the recurring host, made once and kept in the repo (assets/host/), so
     every video draws the same face. Only a FLUX-quality image is accepted as the master."""
     host = cfg.get("host") or {}
     if not host:
         return None
-    path = ROOT / "assets" / "host" / "host.jpg"
+    path = ROOT / (host.get("reference") or "assets/host/host.jpg")
     if path.exists():
         return str(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    prompt = (f"character design portrait of {host['look'].strip()}, waist-up, facing the viewer with a kind "
+    prompt = (f"portrait of {host['look'].strip()}, waist-up, facing the viewer with a kind "
               f"knowing smile, simple warm background")
     try:
         if imagegen._cf_exhausted:
             return None
-        im = imagegen._cloudflare(f"{prompt}. {cfg['images']['styles']['long']}", cfg, 4242, True)
+        im = imagegen._cloudflare(f"{prompt}. {master_style(cfg)}", cfg, 4242, True)
         im.save(path, quality=95)
         log.info("Created the host's master reference picture: %s", path)
         return str(path)
@@ -83,10 +97,10 @@ def character_references(cfg, script, shots, art, landscape):
     for k, name in enumerate(main):
         path = art / f"character-{slugify(name)[:30] or k}.jpg"
         if not path.exists():
-            prompt = (f"character design sheet, single character standing, full body, front view, neutral "
-                      f"expression, plain light studio background: {chars[name]}")
+            prompt = (f"reference picture of a single person, waist-up, front view, neutral expression, "
+                      f"plain light background: {chars[name]}")
             try:
-                im = imagegen._cloudflare(f"{prompt}. {cfg['images']['styles']['long']}", cfg, 300 + k, landscape)
+                im = imagegen._cloudflare(f"{prompt}. {master_style(cfg)}", cfg, 300 + k, landscape)
                 im.save(path, quality=95)
             except Exception as e:
                 log.warning("Reference picture for %s failed (%s); described in words instead", name, e)
@@ -103,7 +117,8 @@ def illustrate(cfg, script, art, fmt, res):
     landscape = cfg[fmt]["width"] > cfg[fmt]["height"]
     host_ref = ensure_host_reference(cfg)
     shots = [sh for sc in script["scenes"] for sh in sc["shots"]]
-    chars = script.get("characters") or {}
+    chars = {n: strip_style_words(cfg, d) for n, d in (script.get("characters") or {}).items()}
+    script["characters"] = chars
     refs = character_references(cfg, script, shots, art, landscape)
     ref_left = [(cfg["images"].get("reference_shots") or {}).get(fmt, 0)]   # reference shots cost ~2x
     ref_lock = threading.Lock()
@@ -117,7 +132,7 @@ def illustrate(cfg, script, art, fmt, res):
             return i, {"kind": "image", "path": path, "fill": True}
         if time.time() > deadline:  # image time budget spent: stock/reuse fills the rest
             return i, None
-        prompt = sh["image_prompt"] or sh["line"]
+        prompt = strip_style_words(cfg, sh["image_prompt"] or sh["line"])
         # Same detailed description of every character in the shot, every time -> consistent look.
         names = [n for n in chars if n in (sh.get("cast") or []) or n.lower() in prompt.lower()]
         if names:
