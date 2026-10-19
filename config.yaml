@@ -346,6 +346,7 @@ reach:
 
 youtube:
   privacy: "public"                   # public | unlisted | private
+  token_days: 7                       # Google "Testing" apps: logins die 7 days after sign-in (0 = app published)
   made_for_kids: false
   # Set true if a video contains realistic AI-generated people/events viewers could mistake for real.
   # Stock footage + narration does not need it.

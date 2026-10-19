@@ -147,6 +147,8 @@ def main():
         if upload:
             from src import social
             social.refresh_instagram_token()
+            for msg in youtube.login_warnings(cfg):
+                notify.send(msg)
 
     if args.upload_dir:
         work = Path(args.upload_dir)

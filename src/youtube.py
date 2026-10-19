@@ -39,6 +39,51 @@ def credentials():
     return _creds[_suffix]
 
 
+def login_warnings(cfg, now=None):
+    """Telegram reminders for YouTube logins. Google apps in "Testing" mode kill the refresh token 7 days
+    after sign-in (youtube.token_days; 0 once the app is published). YT_TOKEN_DATE{suffix} (a repo
+    variable set by scripts/get_youtube_token.py) says when each channel last signed in."""
+    from google.auth.exceptions import RefreshError
+    from google.auth.transport.requests import Request
+    days = (cfg.get("youtube") or {}).get("token_days", 7)
+    now = now or datetime.now(timezone.utc)
+    chans = [("", cfg["channel"]["name"])] + [
+        (lc["youtube_env"], lc.get("channel_name", lang)) for lang, lc in cfg["languages"].items()
+        if lc.get("enabled") and lc.get("youtube_env")]
+    out = []
+    for sfx, name in chans:
+        if not available(sfx):
+            continue
+        renew = (f"Renew: on your Mac open Claude Code in the project and say \"renew {name} login\" "
+                 f"(or run python scripts/get_youtube_token.py <client_secret.json>{' ' + sfx[1:] if sfx else ''}). "
+                 "Permanent fix: Google Cloud → OAuth consent screen → Publish app.")
+        try:
+            Credentials(token=None, refresh_token=os.environ["YT_REFRESH_TOKEN" + sfx],
+                        token_uri="https://oauth2.googleapis.com/token",
+                        client_id=os.environ["YT_CLIENT_ID" + sfx],
+                        client_secret=os.environ["YT_CLIENT_SECRET" + sfx]).refresh(Request())
+        except RefreshError as e:
+            if "invalid_grant" in str(e):
+                out.append(f"🔴 {name}: YouTube login has EXPIRED — no uploads to this channel until it is "
+                           f"renewed.\n{renew}")
+            continue
+        except Exception as e:   # network blip: say nothing
+            log.debug("Login check for %s skipped: %s", name, e)
+            continue
+        signed = os.environ.get("YT_TOKEN_DATE" + sfx)
+        if not days or not signed:
+            continue
+        try:
+            expires = datetime.fromisoformat(signed.replace("Z", "+00:00")) + timedelta(days=days)
+        except ValueError:
+            continue
+        left = (expires - now).total_seconds() / 3600
+        if 0 < left < 48:   # past expiry yet the login still works = the app was published
+            out.append(f"⏰ {name}: YouTube login expires in about {max(left, 0):.0f} h "
+                       f"({expires:%a %d %b %H:%M} UTC). Renew it before then so uploads don't stop.\n{renew}")
+    return out
+
+
 def client():
     if _suffix not in _clients:
         creds = Credentials(

@@ -86,6 +86,8 @@ jobs:
           YT_CLIENT_ID_TA: ${{ secrets.YT_CLIENT_ID_TA }}
           YT_CLIENT_SECRET_TA: ${{ secrets.YT_CLIENT_SECRET_TA }}
           YT_REFRESH_TOKEN_TA: ${{ secrets.YT_REFRESH_TOKEN_TA }}
+          YT_TOKEN_DATE: ${{ vars.YT_TOKEN_DATE }}
+          YT_TOKEN_DATE_TA: ${{ vars.YT_TOKEN_DATE_TA }}
           YT_CLIENT_ID_TE: ${{ secrets.YT_CLIENT_ID_TE }}
           YT_CLIENT_SECRET_TE: ${{ secrets.YT_CLIENT_SECRET_TE }}
           YT_REFRESH_TOKEN_TE: ${{ secrets.YT_REFRESH_TOKEN_TE }}
