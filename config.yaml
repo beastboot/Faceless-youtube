@@ -136,7 +136,7 @@ languages:
     handle: "@oddannalstamil"
     youtube_env: "_TA"                # uses YT_CLIENT_ID_TA / YT_CLIENT_SECRET_TA / YT_REFRESH_TOKEN_TA
     longs_per_run: 0
-    shorts_per_run: 1                 # owner decision Oct 17: focus on English (Tamil Shorts got 0-10 views)
+    shorts_per_run: 3                 # owner decision Oct 20: Tamil Shorts now outperform English (400-880 views each)
     voice: "ta-IN-ValluvarNeural"
     captions: "native"
     long_rate: "+8%"
@@ -150,7 +150,7 @@ languages:
         Read the following line as a gripping, warm documentary storyteller in its own language, with
         natural conversational delivery, clear diction and a brisk pace. Read only the line, nothing else.
     long_publish_utc: ["14:00"]
-    short_publish_utc: ["13:30"]      # 7:00 PM IST
+    short_publish_utc: ["10:30", "13:30", "15:30"]   # 4:00 PM, 7:00 PM, 9:00 PM IST
   te:
     enabled: false
     channel_name: "Odd Annals Telugu"
