@@ -459,7 +459,10 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
 
     lc = cfg["languages"].get(lang, {})
     engine = (lc.get("tts") or {}).get("engine", "edge")
+    if engine == "gemini" and lc["tts"].get("test_only") and not script.get("voice_test"):
+        engine = "edge"   # expressive voice on trial: only the run's test video uses it
     items = None
+    voice_used = "edge"
     if engine == "gemini":
         # Expressive Gemini narration; if it can't voice EVERY line, the whole video falls back to
         # Edge so a video never switches voices half-way.
@@ -482,6 +485,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             with ThreadPoolExecutor(3) as ex:
                 items = list(ex.map(speak_g, enumerate(flat)))
             log.info("[%s] narrated %d shots with Gemini (%s)", lang, len(items), lc["tts"].get("voice"))
+            voice_used = "gemini"
         except Exception as e:
             log.warning("[%s] Gemini TTS unavailable (%s); narrating this video with Edge", lang, e)
             items = None
@@ -501,6 +505,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
                 items = list(ex.map(speak, enumerate(flat)))
         log.info("[%s] narrated %d shots%s", lang, len(items),
                  " with Kokoro" if narrate[0] is tts.speak_kokoro else "")
+        voice_used = "kokoro" if narrate[0] is tts.speak_kokoro else "edge"
     if fmt == "short" and items:   # big title on frame one: the thumbnail's punchline, not the caption again
         items[0]["hook_text"] = re.sub(r"[*_]", "", script.get("thumbnail_text") or "").strip()
         if episode and is_short_series(cfg, series):
@@ -593,7 +598,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             "localizations": localizations,
             "description": description,
             "tags": tags,
-            "engagement_question": script.get("engagement_question") or ""}
+            "engagement_question": script.get("engagement_question") or "", "voice": voice_used}
     (work / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
     (work / "script.json").write_text(json.dumps(script, indent=1, ensure_ascii=False, default=str))
     log.info("[%s] %s", lang, meta["title"])
@@ -644,6 +649,7 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     episode = 1 + sum(1 for r in state.load() if r.get("series") == (series or {}).get("id")
                       and r.get("format") == fmt and r.get("video_id"))
     results = []
+    script_en["voice_test"] = topic.get("voice_test")
     for lang in langs:
         try:
             if lang == "en":
@@ -663,6 +669,7 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
                               "video_id": video_id, "duration": round(total, 1), "publish_at": when,
                               "dir": f"{base.name}/{lang}", "thumb_template": template,
                               "series": (series or {}).get("id"), "episode": episode,
+                              "voice": meta.get("voice"),   # which narrator (voice A/B test)
                               "hook": script_en.get("hook") or "",   # learned from in rehook()
                               "pending_comment": first_comment(meta["engagement_question"], fmt, lang)
                                                  if video_id else ""})

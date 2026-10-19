@@ -207,6 +207,9 @@ def main():
         for topic in queues.get(fmt, []):
             if quota_hit or done[fmt] >= targets.get(fmt, 0):
                 break
+            if fmt == "short" and done[fmt] == targets[fmt] - 1 and \
+                    (langs_cfg.get("en", {}).get("tts") or {}).get("test_only"):
+                topic["voice_test"] = True   # last Short of the day (English only): expressive-voice trial
             langs = topic.get("langs") or \
                 primary + [l for l, c in extra.items() if done[fmt] < c.get(f"{fmt}s_per_run", 0)]
             publish_at = {}

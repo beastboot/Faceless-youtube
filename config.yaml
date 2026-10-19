@@ -199,6 +199,17 @@ languages:
     shorts_per_run: 5                 # owner goal Oct 17: 1,000 subscribers in a month -> more chances (5 x 1,750 quota units fits the 10k/day)
     long_publish_utc: ["15:00"]
     short_publish_utc: ["12:00", "14:00", "16:00", "18:00", "21:00"]   # 5:30-11:30 PM + 2:30 AM IST: UK afternoon/evening, US day
+    # Trial from Oct 20: the day's LAST English Short (no Tamil twin, so Tamil keeps its free Gemini
+    # quota) is narrated by Gemini's expressive voice; the others stay on Edge. Compare swipe-away.
+    tts:
+      engine: "gemini"
+      test_only: true
+      voice: "Charon"
+      models: ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-3.8-flash-tts"]
+      style: >-
+        Read the following line as a gripping documentary storyteller for a YouTube mystery channel:
+        natural American English, confident and intriguing, rising tension on the twist, clear diction.
+        Read only the line, nothing else.
 
 llm:
   # Tried in order; the first provider with an API key that succeeds wins.
