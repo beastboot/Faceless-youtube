@@ -551,7 +551,8 @@
   "series": "duniya",
   "episode": 5,
   "hook": "If you stood in London on October 17, 1091, giant timber roof beams were driven twenty-two feet beside you.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-19T07:18:14+00:00"
  },
  {
   "created_utc": "2026-10-17T07:38:59+00:00",
@@ -591,7 +592,8 @@
   "series": "bharat",
   "episode": 7,
   "hook": "You might assume Lonar Meteor Lake is an extinct volcano, but shattered underground breccia proved a hypervelocity cosmic impact.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-19T07:18:14+00:00"
  },
  {
   "created_utc": "2026-10-17T17:08:57+00:00",
@@ -614,7 +616,8 @@
   "series": "duniya",
   "episode": 6,
   "hook": "You might think earthquakes only shake the ground, but the 1950 Assam shock physically moved entire Himalayan mountains out of their former positions.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-19T07:18:14+00:00"
  },
  {
   "created_utc": "2026-10-17T17:22:42+00:00",
@@ -648,7 +651,8 @@
   "series": "mandir",
   "episode": 7,
   "hook": "You probably assume every stone pillar in the 1530 AD Veerabhadra temple carries weight, but one hangs entirely in the air.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-19T07:18:14+00:00"
  },
  {
   "created_utc": "2026-10-17T17:55:26+00:00",
@@ -665,7 +669,8 @@
   "series": "duniya",
   "episode": 8,
   "hook": "You probably assume a modern military can easily stop twenty thousand flightless birds, but the 1932 Emu War proved you wrong.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-19T07:18:14+00:00"
  },
  {
   "created_utc": "2026-10-17T18:01:45+00:00",
@@ -705,7 +710,7 @@
   "series": "impossible",
   "episode": 1,
   "hook": "Soft sandstone inscriptions faded, but Delhi's 1,600-year-old iron pillar preserved its Sanskrit letters perfectly. What protected this ancient metal?",
-  "pending_comment": "Did you learn about the Delhi Iron Pillar's phosphorus shield in school, or is this the first time you've heard the science behind it?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-18T08:10:39+00:00",
@@ -722,7 +727,7 @@
   "series": "proven",
   "episode": 1,
   "hook": "Vienna's maternity clinic lost eighteen percent of mothers before Ignaz Semmelweis enforced handwashing, but his peers rewarded him with an asylum.",
-  "pending_comment": "Why do you think the medical establishment refused to believe something as simple as clean hands could save lives?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-18T08:25:21+00:00",
@@ -739,7 +744,7 @@
   "series": "impossible",
   "episode": 2,
   "hook": "You might assume cranes were needed to lift an 80-ton stone capstone 216 feet, but how did Chola builders succeed in 1010 AD?",
-  "pending_comment": "Do you think modern builders could move an 80-ton stone using only wood, earth, and rope?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-18T08:42:01+00:00",
@@ -756,7 +761,7 @@
   "series": "survived",
   "episode": 1,
   "hook": "You are standing yards away from the President when a rogue torpedo heads straight for your hull on November 14, 1943.",
-  "pending_comment": "Would you have laughed or panicked if you were aboard the USS Iowa?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-18T08:56:30+00:00",
@@ -773,6 +778,103 @@
   "series": "survived",
   "episode": 2,
   "hook": "You rely on safety protocols today, but in 1944 Bombay, firefighters poured water onto boiling explosives without knowing the ship was about to vanish.",
-  "pending_comment": "Would you have searched for the fallen gold bars after the blast?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
+ },
+ {
+  "created_utc": "2026-10-19T07:23:03+00:00",
+  "format": "short-skipped",
+  "topic": "The Fort That Was Never Conquered: Golconda's Acoustic Secret — Part 2",
+  "reason": "No Wikipedia article for \"The Fort That Was Never Conquered: Golconda's Acoustic Secret\""
+ },
+ {
+  "created_utc": "2026-10-19T07:24:50+00:00",
+  "format": "short-skipped",
+  "topic": "The 1950 Warning About China That Was Ignored",
+  "reason": "Quality gate rejected the script (avg 4.2): The central premise of the script regarding a 1950 letter about China and the 1962 war is completely unsupported by the provided research notes."
+ },
+ {
+  "created_utc": "2026-10-19T07:34:50+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The Silent Lake That Suffocated 1,700 People in One Night",
+  "wiki_title": "Lake Nyos disaster",
+  "title": "The Silent Eruption of Lake Nyos 1986 #shorts",
+  "video_id": "f90cu_vTobk",
+  "duration": 33.7,
+  "publish_at": "2026-10-19T12:00:00Z",
+  "dir": "20261019-0724-short-the-silent-lake-that-suffocated-1-700-people-in-on/en",
+  "thumb_template": "storybook",
+  "series": "survived",
+  "episode": 3,
+  "hook": "If you walked through these four Cameroonian villages in 1986, you would find 1,746 people dead in intact homes.",
+  "pending_comment": "Did you know lakes could release silent gas clouds like this? Let us know your thoughts below!\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+ },
+ {
+  "created_utc": "2026-10-19T07:40:20+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1,300-Year-Old Temple That Disappears Twice a Day",
+  "wiki_title": "Stambheshwar Mahadev",
+  "title": "Why This Sacred Shrine Sinks at 3 PM #shorts",
+  "video_id": "XijJJ-jgEtI",
+  "duration": 30.0,
+  "publish_at": "2026-10-19T14:00:00Z",
+  "dir": "20261019-0734-short-the-1-300-year-old-temple-that-disappears-twice-a/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 3,
+  "hook": "If you reach Kavi Kamboi after three in the afternoon, the temple you came to see is already submerged underwater.",
+  "pending_comment": "Would you dare to step inside a temple that the ocean swallows twice every day?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+ },
+ {
+  "created_utc": "2026-10-19T07:49:15+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The Amazonian River That Boils Animals Alive",
+  "wiki_title": "Shanay-timpishka",
+  "title": "The Boiling River: Amazon's 99°C Mystery #shorts",
+  "video_id": "0PwOoNAqMSw",
+  "duration": 29.5,
+  "publish_at": "2026-10-19T16:00:00Z",
+  "dir": "20261019-0740-short-the-amazonian-river-that-boils-animals-alive/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 4,
+  "hook": "If you lose your footing on this Peruvian bank, ninety-nine-degree water will cook you alive within seconds.",
+  "pending_comment": "Would you ever dare step foot into the Amazon's boiling river?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+ },
+ {
+  "created_utc": "2026-10-19T08:10:52+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1979 Dam Collapse That Wiped Out an Entire City",
+  "wiki_title": "1979 Machchhu dam failure",
+  "title": "Why Morbi Dam Collapsed in 1979 #shorts",
+  "video_id": "aCJUm_5RJWM",
+  "duration": 33.9,
+  "publish_at": "2026-10-19T18:00:00Z",
+  "dir": "20261019-0749-short-the-1979-dam-collapse-that-wiped-out-an-entire-cit/en",
+  "thumb_template": "storybook",
+  "series": "proven",
+  "episode": 2,
+  "hook": "If you stood on a Morbi rooftop on August 11, 1979, thirty feet of dam water was already rushing in.",
+  "pending_comment": "Should disasters caused by flawed engineering limits ever be officially declared acts of God?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+ },
+ {
+  "created_utc": "2026-10-19T08:31:46+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The Prisoner Saved From a Volcano by His Solitary Cell",
+  "wiki_title": "Ludger Sylbaris",
+  "title": "Mount Pelée: The 1 Man Saved by His Cell #shorts",
+  "video_id": "fp9nC8KPNDA",
+  "duration": 30.9,
+  "publish_at": "2026-10-19T21:00:00Z",
+  "dir": "20261019-0810-short-the-prisoner-saved-from-a-volcano-by-his-solitary/en",
+  "thumb_template": "storybook",
+  "series": "survived",
+  "episode": 4,
+  "hook": "If you stood in Saint-Pierre on May 8, 1902, your only chance among thirty thousand deaths was behind locked iron bars.",
+  "pending_comment": "Would you have survived four days trapped in an underground stone cell in complete darkness?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
  }
 ]
