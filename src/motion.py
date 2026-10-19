@@ -160,7 +160,9 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
         g = np.random.default_rng(1).normal(128, 40, (1296, 2304)).clip(0, 255).astype(np.uint8)
         Image.fromarray(g).save(grain)
     lang = scenes[0].get("lang", "en") if scenes else "en"
-    logo = ROOT / "branding" / "logo.png"
+    logo = ROOT / "branding" / lang / "logo.png"   # each channel's own logo (English / Tamil tagline)
+    if not logo.exists():
+        logo = ROOT / "branding" / "logo.png"
     props = {
         "width": fc["width"], "height": fc["height"], "fps": vc["fps"], "total": round(sum(durs), 4),
         "lang": lang, "short": fmt == "short", "shots": shots,
