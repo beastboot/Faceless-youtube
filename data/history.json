@@ -260,7 +260,8 @@
   "series": "mandir",
   "episode": 1,
   "hook": "You might think you know the value of the Padmanabhaswamy Temple, but you have never heard of the thirty crore undeciphered records.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "hidden": true
  },
  {
   "created_utc": "2026-10-13T05:04:39+00:00",
@@ -332,7 +333,8 @@
   "series": "mandir",
   "episode": 2,
   "hook": "You are looking at the Kailasa temple in Maharashtra, an entire multi-story megalith carved downward from a single cliff.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "hidden": true
  },
  {
   "created_utc": "2026-10-14T07:01:00+00:00",
