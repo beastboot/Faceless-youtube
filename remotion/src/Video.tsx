@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Img, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Captions} from './Captions';
 import {GraphicLayer} from './graphics/Graphics';
-import {ClipVideo, FilmLook, FrameSeq, KenBurns, Particles, Vignette, entrance} from './Scene';
+import {ClipVideo, FilmLook, Flash, FrameSeq, KenBurns, Particles, VfxLayer, Vignette, entrance, shake} from './Scene';
 import type {Props, Shot} from './types';
 import {INK, RED, YELLOW, clamp, fontFor, pop} from './util';
 
@@ -23,12 +23,22 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
   const gStart = cardFrames ? Math.min(cardFrames, Math.max(0, narrationFrames - fps)) : (shot.graphic as any)?.instant ? 0 : Math.round(fps * 0.25);
   return (
     <AbsoluteFill style={index === 0 ? {} : entrance(shot.transition, frame, xf)}>
-      {shot.frames ? <FrameSeq dir={shot.frames.dir} count={shot.frames.count} />
-        : shot.video ? <ClipVideo src={shot.video} />
-        : shot.image ? <KenBurns src={shot.image} move={shot.move} len={len} />
-        : <AbsoluteFill style={{background: '#101418'}} />}
-      <Particles kind={shot.ambient} seed={`shot-${index}`} />
+      <AbsoluteFill style={shot.impact ? shake(frame, fps, `imp-${index}`) : {}}>
+        {shot.frames ? <FrameSeq dir={shot.frames.dir} count={shot.frames.count} />
+          : shot.video ? <ClipVideo src={shot.video} />
+          : shot.image ? <KenBurns src={shot.image} move={shot.move} len={len} />
+          : <AbsoluteFill style={{background: '#101418'}} />}
+        {shot.overlay ? <VfxLayer src={shot.overlay} opacity={shot.ambient === 'embers' ? 0.9 : 0.6} seed={`vfx-${index}`} /> : null}
+      </AbsoluteFill>
+      {shot.overlay ? null : <Particles kind={shot.ambient} seed={`shot-${index}`} />}
+      {shot.leak ? (
+        <Sequence durationInFrames={Math.round(fps * 0.7)} layout="none">
+          <VfxLayer src={shot.leak} opacity={0.45} seed={`leak-${index}`} fadeOut={Math.round(fps * 0.7)} />
+        </Sequence>
+      ) : null}
+      {shot.impact ? <Flash /> : null}
       <Vignette />
+      {shot.tag ? <PhotoStamp text={shot.tag} fonts={props.fonts} short={props.short} /> : null}
       {shot.graphic ? (
         <Sequence from={gStart} durationInFrames={Math.max(1, narrationFrames - gStart)} layout="none">
           <GraphicLayer g={shot.graphic} len={Math.max(1, narrationFrames - gStart)} fonts={props.fonts} short={props.short} />
@@ -44,6 +54,24 @@ const ShotView: React.FC<{shot: Shot; len: number; xf: number; index: number; pr
           <Captions captions={shot.captions} short={props.short} fonts={props.fonts} />
         </Sequence>
       ) : null}
+    </AbsoluteFill>
+  );
+};
+
+/** Honest stamp on real archive pictures ("REAL PHOTO"), under the framed photo. */
+const PhotoStamp: React.FC<{text: string; fonts: Props['fonts']; short: boolean}> = ({text, fonts, short}) => {
+  const frame = useCurrentFrame();
+  const {fps, width} = useVideoConfig();
+  const p = pop(frame, fps, 3, 12);
+  const size = width * (short ? 0.042 : 0.02);
+  return (
+    <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center', paddingTop: short ? '23%' : '4%', pointerEvents: 'none'}}>
+      <div style={{fontFamily: fonts.display, fontSize: size, letterSpacing: 3, color: '#fff', border: `3px solid ${RED}`,
+        background: 'rgba(0,0,0,0.55)', padding: `${size * 0.15}px ${size * 0.5}px`, transform: `rotate(-3deg) scale(${p})`,
+        display: 'flex', alignItems: 'center', gap: size * 0.35}}>
+        <span style={{width: size * 0.45, height: size * 0.45, borderRadius: '50%', background: RED, display: 'inline-block'}} />
+        {text}
+      </div>
     </AbsoluteFill>
   );
 };

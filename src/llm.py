@@ -67,6 +67,33 @@ def _groq(model, system, prompt, temperature):
     return r.json()["choices"][0]["message"]["content"]
 
 
+def ask_vision_json(cfg, prompt, images, models=None):
+    """Gemini with pictures: `images` are JPEG bytes, sent in order after the prompt. Returns parsed
+    JSON, or None when no model could answer (callers treat that as "no opinion")."""
+    import base64
+    key = os.environ.get("GEMINI_API_KEY")
+    if not key:
+        return None
+    parts = [{"text": prompt}] + [{"inline_data": {"mime_type": "image/jpeg",
+                                                   "data": base64.b64encode(b).decode()}} for b in images]
+    body = {"contents": [{"role": "user", "parts": parts}],
+            "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"}}
+    for model in models or ["gemini-flash-lite-latest", "gemini-flash-latest"]:
+        if model in _exhausted:
+            continue
+        try:
+            r = http().post(GEMINI_URL.format(model=model), params={"key": key}, json=body, timeout=(15, 150))
+            if r.status_code == 429 and "quota" in r.text.lower():
+                _exhausted.add(model)
+                continue
+            r.raise_for_status()
+            text = "".join(p.get("text", "") for p in r.json()["candidates"][0]["content"]["parts"])
+            return _parse_json(text)
+        except Exception as e:
+            log.warning("Vision check with %s failed: %s", model, str(e)[:150])
+    return None
+
+
 def ask_json(cfg, system, prompt, temperature=None):
     """Try every configured provider/model until one returns valid JSON."""
     lc = cfg["llm"]

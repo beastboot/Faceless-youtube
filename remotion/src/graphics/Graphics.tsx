@@ -19,8 +19,10 @@ const DateStamp: React.FC<GP<Extract<Graphic, {type: 'date'}>>> = ({g, len, font
   const hold = Math.min(Math.round(fps * 1.5), Math.max(1, len - fps));       // centre stage time
   const gather = interpolate(frame, [0, fps * 0.8], [0, 1], {...clamp, easing: (x) => 1 - Math.pow(1 - x, 3)});
   const dock = interpolate(frame, [hold, hold + fps * 0.45], [0, 1], {...clamp, easing: (x) => x * x * (3 - 2 * x)});
-  const big = width * (short ? 0.24 : 0.14);
-  const small = width * (short ? 0.11 : 0.055);
+  // fit long dates ("May 8, 1902") to the frame: Anton glyphs are about half an em wide
+  const em = Math.max(4, g.text.length) * 0.5;
+  const big = Math.min(width * (short ? 0.24 : 0.14), (width * 0.9) / em);
+  const small = Math.min(width * (short ? 0.11 : 0.055), (width * 0.6) / em);
   const size = big + (small - big) * dock;
   const cx = width / 2 + ((short ? width * 0.07 : width * 0.05) + 0 - width / 2) * dock;
   const cy = height / 2 + ((short ? height * 0.16 : height * 0.1) - height / 2) * dock;

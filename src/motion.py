@@ -6,7 +6,7 @@ import os
 import shutil
 from pathlib import Path
 
-from . import fonts
+from . import fonts, vfx
 from .common import ROOT, ffprobe_duration, log, run
 
 RDIR = ROOT / "remotion"
@@ -139,6 +139,12 @@ def render(scenes, starts, durs, work, out, cfg, fmt):
             "captions": [{"text": c["text"], "s": round(c["start"], 3), "e": round(c["end"], 3)}
                          for c in sc.get("captions") or []] if fc.get("burn_captions") else [],
             "graphic": sc.get("graphic") or None,
+            "tag": vis.get("tag"),   # "REAL PHOTO" stamp on archive pictures
+            # real filmed smoke / fog / sparks over the picture, and a light leak on some new pictures
+            "overlay": stage_file(vfx.clip(vis.get("ambient"))) if vc.get("vfx", True) else None,
+            "leak": stage_file(vfx.clip("leak")) if vc.get("vfx", True) and i > 0 and i % 3 == 0
+                    and sc.get("whoosh", True) else None,
+            "impact": bool(sc.get("impact")),
         })
     if fmt == "short" and shots and (scenes[0].get("hook_text") or scenes[0].get("line_text")):
         # The swipe-or-stay decision happens in the first second: a punchy title on screen (it replaces any

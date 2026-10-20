@@ -211,7 +211,9 @@ def assemble(scenes, work, out_path, cfg, fmt):
     events = []
     for sc, st in zip(scenes, starts):
         g = (sc.get("graphic") or {}).get("type")
-        if g in ("counter", "fact"):
+        if sc.get("impact"):   # the picture shakes and flashes on this line (Remotion)
+            events.append((st + 0.05, audio.impact(), vc.get("impact_volume", 0.45) * 1.3))
+        elif g in ("counter", "fact"):
             events.append((st + 0.25, audio.impact(), vc.get("impact_volume", 0.45)))
         elif g:
             events.append((st + 0.25, audio.pop(), vc.get("pop_volume", 0.35)))

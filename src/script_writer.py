@@ -210,6 +210,7 @@ def _clean_scenes(data):
                   "cast": [c for c in (sh.get("cast") or []) if isinstance(c, str)],
                   "location": (sh.get("location") or "").strip() if isinstance(sh.get("location"), str) else "",
                   "move": (sh.get("move") or "").strip(), "ambient": (sh.get("ambient") or "").strip(),
+                  "impact": bool(sh.get("impact")),
                   "graphic": sh.get("graphic") if isinstance(sh.get("graphic"), dict) else None,
                   "stock_query": (sh.get("stock_query") or "").strip()}
                  for sh in (sc.get("shots") or []) if (sh.get("line") or "").strip()]
@@ -304,8 +305,11 @@ Scene and shot rules:
 - Every shot also has "cast" (names of the recurring characters visible in it, [] if none),
   "move" (camera: zoom_in | zoom_out | pan_left | pan_right | rise | push_focus — vary them, push_focus
   for emotional beats) and "ambient" (a moving light/weather layer matching the mood: fireflies |
-  sparkles | dust | leaves | rain | snow | embers | none — magical/night: fireflies or sparkles,
-  sunlight indoors: dust, autumn/forest: leaves, storms/sorrow: rain, battles/fire: embers).
+  sparkles | dust | leaves | rain | snow | embers | smoke | fog | none — magical/night: fireflies or
+  sparkles, sunlight indoors: dust, autumn/forest: leaves, storms/sorrow: rain, battles/fire/explosions:
+  embers, burning/ruins/aftermath: smoke, mystery/dawn/sea/old places: fog).
+- "impact": true on the ONE or TWO biggest moments only (the explosion, the collapse, the reveal):
+  the picture shakes and flashes on that line. Leave it out everywhere else.
 - MOTION GRAPHICS: about one shot in three gets an on-screen "graphic" that makes a fact visual.
   Use the type that fits the line; never two in a row; facts only from the notes. A counter shows a
   number stated in the notes with a label that makes sense on its own ("84 villages emptied"), never a

@@ -111,6 +111,120 @@ def character_references(cfg, script, shots, art, landscape):
     return refs
 
 
+def check_pictures(cfg, script, shots, made):
+    """AI art director: one vision call looks at every AI picture next to its line. Clearly wrong ones
+    (wrong era or subject, cartoon look, garbled text, deformed people) get one redraw with the fix
+    spelled out. Returns {shot index: what the redraw must show}."""
+    from io import BytesIO
+    from PIL import Image
+    idx = [i for i, v in sorted(made.items()) if v and v.get("kind") == "image"]
+    if not idx:
+        return {}
+    imgs = []
+    for i in idx:
+        im = Image.open(made[i]["path"]).convert("RGB")
+        im.thumbnail((384, 384))
+        buf = BytesIO()
+        im.save(buf, "JPEG", quality=80)
+        imgs.append(buf.getvalue())
+    listing = "\n".join(f"Picture {k + 1}: line: {shots[i]['line']!r}" for k, i in enumerate(idx))
+    look = " ".join(str(cfg["images"].get("look", "consistent illustrations")).split())
+    prompt = f"""You are the art director of a true-history YouTube Short titled "{script.get('title', '')}".
+Style rule: {look}.
+The pictures follow in this order:
+{listing}
+Flag ONLY pictures with a clear problem a viewer would notice:
+- the wrong subject for its line, or a famous real object/place/person drawn clearly wrong
+- the wrong era (modern clothes, objects or people in an old story; wrong gender or age for a named person)
+- a cartoon / 3D-render look while the style rule says photorealistic
+- garbled text or letters, deformed faces or hands, extra limbs
+Never flag minor or artistic choices. Return {{"bad": [{{"picture": n, "problem": "...",
+"must_show": "one sentence: what the redrawn picture must show"}}]}} (an empty list if all are fine)."""
+    data = llm.ask_vision_json(cfg, prompt, imgs, cfg["images"].get("check_models"))
+    redo = {}
+    for b in (data or {}).get("bad") or []:
+        try:
+            i = idx[int(b["picture"]) - 1]
+        except (KeyError, ValueError, TypeError, IndexError):
+            continue
+        if b.get("must_show") and len(redo) < cfg["images"].get("check_max_redraws", 4):
+            redo[i] = b["must_show"]
+            log.info("Picture check: redrawing shot %d (%s)", i, str(b.get("problem", ""))[:100])
+    if data is not None and not redo:
+        log.info("Picture check: all %d pictures fit their lines", len(idx))
+    return redo
+
+
+def framed_photo(src, out, width, height):
+    """An archive photo (usually landscape) on a vertical frame: blurred, darkened copy behind, the
+    whole photo in front with a thin white border, so nothing important is cropped away."""
+    from PIL import Image, ImageEnhance, ImageFilter
+    im = Image.open(src).convert("RGB")
+    bg = im.copy()
+    k = max(width / bg.width, height / bg.height)
+    bg = bg.resize((round(bg.width * k) + 1, round(bg.height * k) + 1), Image.LANCZOS)
+    bg = bg.crop(((bg.width - width) // 2, (bg.height - height) // 2,
+                  (bg.width - width) // 2 + width, (bg.height - height) // 2 + height))
+    bg = ImageEnhance.Brightness(bg.filter(ImageFilter.GaussianBlur(40))).enhance(0.45)
+    k = min(width * 0.9 / im.width, height * 0.62 / im.height)
+    fg = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS)
+    b = max(4, width // 160)
+    framed = Image.new("RGB", (fg.width + 2 * b, fg.height + 2 * b), (245, 240, 230))
+    framed.paste(fg, (b, b))
+    bg.paste(framed, ((width - framed.width) // 2, int(height * 0.44 - framed.height / 2)))
+    bg.save(out, quality=94)
+    return out
+
+
+def real_photos(cfg, script, shots, picker, art, fmt):
+    """Real archive pictures (public domain / CC BY, from the article) for the moments that name a
+    real object, place or person: viewers see the actual thing, with an honest stamp. Returns
+    {shot index: visual}."""
+    n = (cfg["images"].get("real_photos") or {}).get(fmt, 0)
+    if not n or not picker.wiki:
+        return {}
+    cands = [{"photo": k, "title": im["title"].replace("File:", ""), "desc": im.get("desc", "")}
+             for k, im in enumerate(picker.wiki[:40])]
+    lines = [{"shot": i, "line": sh["line"]} for i, sh in enumerate(shots) if 0 < i < len(shots) - 1]
+    try:
+        data = llm.ask_json(cfg, "You are a documentary picture editor. JSON only.", f"""
+Story: {script.get('title', '')}
+Archive pictures from the story's encyclopedia article (file title + description):
+{json.dumps(cands, ensure_ascii=False)}
+Script lines (shot index + line):
+{json.dumps(lines, ensure_ascii=False)}
+Pick up to {n} pairs where the archive picture clearly shows exactly what that line talks about (the
+actual object, place, person or event). Only photographs, period paintings/engravings or historic
+documents; never maps, diagrams, logos, coats of arms, flags, modern signs or unrelated places. Each
+picture at most once. If nothing fits well, return an empty list.
+Return {{"pairs": [{{"shot": i, "photo": k, "kind": "photo" | "painting" | "document"}}]}}""", temperature=0.2)
+    except Exception as e:
+        log.warning("Real-photo pick failed: %s", e)
+        return {}
+    w, h = cfg[fmt]["width"], cfg[fmt]["height"]
+    tags = {"photo": "REAL PHOTO", "painting": "PERIOD PAINTING", "document": "ARCHIVE"}
+    out = {}
+    for p in (data.get("pairs") or [])[:n]:
+        try:
+            i, k = int(p["shot"]), int(p["photo"])
+            if not (0 < i < len(shots) - 1) or i in out or k in picker.used_wiki or not 0 <= k < len(picker.wiki):
+                continue
+            src = picker._wiki_image(k)["path"]
+            path = framed_photo(src, art / f"real-{i:03d}.jpg", w, h)
+            out[i] = {"kind": "image", "path": path, "fill": True, "tag": tags.get(p.get("kind"), "ARCHIVE")}
+        except Exception as e:
+            log.warning("Real photo for shot %s skipped: %s", p.get("shot"), e)
+    for i in out:
+        g = shots[i].get("graphic")
+        if g:
+            if i + 1 < len(shots) - 1 and not shots[i + 1].get("graphic") and i + 1 not in out:
+                shots[i + 1]["graphic"] = g
+            shots[i]["graphic"] = None
+    if out:
+        log.info("Real archive pictures on shots %s", sorted(out))
+    return out
+
+
 def illustrate(cfg, script, art, fmt, res):
     """One AI image per shot (+ thumbnail art). Falls back to stock footage per shot if needed."""
     art.mkdir(parents=True, exist_ok=True)
@@ -193,11 +307,22 @@ def illustrate(cfg, script, art, fmt, res):
         log.info("Retrying %d failed illustrations", len(failed))
         for i in failed:
             made[i] = one((i, shots[i]))[1]
+    if cfg["images"].get("check"):   # AI art director: redraw clearly wrong pictures once
+        try:
+            redo = check_pictures(cfg, script, shots, {i: made.get(i) for i in leaders})
+        except Exception as e:
+            log.warning("Picture check skipped: %s", e)
+            redo = {}
+        for i, fix in redo.items():
+            (art / f"shot-{i:03d}.jpg").unlink(missing_ok=True)
+            made[i] = one((i, {**shots[i], "image_prompt": f"{shots[i]['image_prompt'] or shots[i]['line']}. "
+                                                            f"It MUST show: {fix}"}))[1]
     results = dict(broll)
     for k, i in enumerate(need):
         results[i] = made.get(leaders[min(k // group, len(leaders) - 1)])
     if group > 1:
         log.info("Image budget: %d shots share %d images", len(need), len(leaders))
+    results.update(real_photos(cfg, script, shots, picker, art, fmt))
 
     # A failed shot reuses the NEAREST AI picture of this same story (a fresh camera move makes it
     # feel new). Random stock search is the last resort: it can return unrelated footage.
@@ -222,14 +347,22 @@ def illustrate(cfg, script, art, fmt, res):
         if vis is None or vis.get("kind") == "color":
             vis = last_ok or {"kind": "color", "path": None}
         sh["visual"] = {"kind": vis["kind"], "path": str(vis["path"]) if vis.get("path") else None,
-                        "fill": vis.get("fill", False), "move": sh.get("move"), "ambient": sh.get("ambient")}
+                        "fill": vis.get("fill", False), "move": sh.get("move"), "ambient": sh.get("ambient"),
+                        "tag": vis.get("tag")}
         if vis.get("kind") != "color":
             last_ok = sh["visual"]
+    if cfg["images"].get("upscale"):   # sharper pictures before depth maps and camera moves
+        from . import upscale
+        upscale.upscale_all(sorted({sh["visual"]["path"] for sh in shots
+                                    if sh["visual"]["kind"] == "image" and sh["visual"]["path"]
+                                    and not sh["visual"].get("tag")}),
+                            cfg["images"].get("upscale_px", 2048))
     if cfg["video"].get("parallax", True):   # depth maps -> 2.5D camera moves in the renderer
         try:
             from . import depth
-            maps = depth.depth_maps(sorted({sh["visual"]["path"] for sh in shots
-                                            if sh["visual"]["kind"] == "image" and sh["visual"]["path"]}))
+            maps = depth.depth_maps(sorted({sh["visual"]["path"] for sh in shots   # framed archive photos stay flat
+                                            if sh["visual"]["kind"] == "image" and sh["visual"]["path"]
+                                            and not sh["visual"].get("tag")}))
             for sh in shots:
                 d = maps.get(sh["visual"]["path"] or "")
                 if d and sh["visual"]["kind"] == "image":
@@ -453,7 +586,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             caps = tts.caption_chunks(words, max_words)
         return {"audio": mp3, "audio_dur": ffprobe_duration(mp3), "lang": lang, "scene": si,
                 "line_text": sh["line"], "graphic": sh.get("graphic"),
-                "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"),
+                "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"), "impact": sh.get("impact"),
                 "caption_lang": "en" if hinglish else lang, "captions": caps,
                 "visual": sh["visual"], "tail": vc["scene_tail_seconds"] if last else vc["shot_tail_seconds"]}
 
@@ -478,7 +611,7 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
                     else tts.caption_chunks(words, max_words))
             return {"audio": mp3, "audio_dur": ffprobe_duration(mp3), "lang": lang, "scene": si,
                     "line_text": sh["line"], "graphic": sh.get("graphic"),
-                    "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"),
+                    "whoosh": i > 0 and sh.get("visual") != flat[i - 1][1].get("visual"), "impact": sh.get("impact"),
                     "caption_lang": "en" if hinglish else lang, "captions": caps,
                     "visual": sh["visual"], "tail": vc["scene_tail_seconds"] if last else vc["shot_tail_seconds"]}
         try:

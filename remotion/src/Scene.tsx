@@ -45,6 +45,34 @@ export const FrameSeq: React.FC<{dir: string; count: number}> = ({dir, count}) =
   );
 };
 
+/** Real filmed VFX (smoke, fog, sparks, light leaks on black) blended over the picture. */
+export const VfxLayer: React.FC<{src: string; opacity: number; seed: string; fadeOut?: number}> = ({src, opacity, seed, fadeOut}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const start = Math.floor(random(seed) * 5 * fps);   // different part of the clip each time
+  const inO = interpolate(frame, [0, fps * 0.3], [0, 1], clamp);
+  const outO = fadeOut ? interpolate(frame, [fadeOut * 0.4, fadeOut], [1, 0], clamp) : 1;
+  return (
+    <AbsoluteFill style={{mixBlendMode: 'screen', opacity: opacity * inO * outO, pointerEvents: 'none'}}>
+      <OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+    </AbsoluteFill>
+  );
+};
+
+/** The story's biggest moment: a decaying camera shake plus a white flash. */
+export const shake = (frame: number, fps: number, seed: string) => {
+  const k = Math.max(0, 1 - frame / (fps * 0.6));
+  const a = 26 * k * k;
+  return {transform: `translate(${(random(`${seed}x${frame}`) - 0.5) * a}px, ${(random(`${seed}y${frame}`) - 0.5) * a}px) scale(${1 + 0.04 * k})`};
+};
+
+export const Flash: React.FC = () => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const o = interpolate(frame, [0, 2, fps * 0.35], [0, 0.85, 0], clamp);
+  return <AbsoluteFill style={{background: '#fff', opacity: o, pointerEvents: 'none'}} />;
+};
+
 export const ClipVideo: React.FC<{src: string}> = ({src}) => (
   <AbsoluteFill>
     <OffthreadVideo src={staticFile(src)} muted style={{width: '100%', height: '100%', objectFit: 'cover'}} />

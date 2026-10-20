@@ -24,6 +24,10 @@ export type Shot = {
   transition: string;
   captions: Caption[];
   graphic?: Graphic | null;
+  tag?: string | null;
+  overlay?: string | null; // real filmed smoke / fog / sparks, blended in screen mode
+  leak?: string | null; // light-leak flash as this picture arrives
+  impact?: boolean; // shake + flash on the story's biggest moment // "REAL PHOTO" / "PERIOD PAINTING" / "ARCHIVE" stamp on archive pictures
   chapter?: {n: number; title: string} | null; // full-screen chapter card at the start of this shot
 };
 

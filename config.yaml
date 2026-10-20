@@ -105,6 +105,12 @@ images:
   character_refs: 2                   # main characters per story that get a master picture
   reference_shots: {long: 16, short: 10}
   reference_size: [1024, 576]
+  check: true                         # AI art director (Gemini vision) redraws clearly wrong pictures once
+  check_max_redraws: 4
+  check_models: ["gemini-flash-lite-latest", "gemini-flash-latest"]
+  real_photos: {short: 2, long: 6}    # real archive pictures (public domain / CC BY) with a REAL PHOTO stamp
+  upscale: true                       # Real-ESRGAN x4v3 (open source, CPU) sharpens every picture...
+  upscale_px: 2048                    # ...to this long side (a Short crops a narrow strip of a square image)
   stock_broll_share: 0                # real stock clips mixed into long videos (0 = cartoon only)
   fallback_to_stock: true             # if every image provider fails, use stock footage for that shot
 
