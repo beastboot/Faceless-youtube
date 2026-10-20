@@ -210,13 +210,15 @@ def main():
             if fmt == "short" and done[fmt] == targets[fmt] - 1 and \
                     (langs_cfg.get("en", {}).get("tts") or {}).get("test_only"):
                 topic["voice_test"] = True   # last Short of the day (English only): expressive-voice trial
-            langs = topic.get("langs") or \
+            langs = topic.get("langs") or topic.get("_langs") or \
                 primary + [l for l, c in extra.items() if done[fmt] < c.get(f"{fmt}s_per_run", 0)]
             publish_at = {}
             for lang in langs:
                 n = slots.get((lang, fmt), 0)
                 publish_at[lang] = (youtube.next_publish_time(langs_cfg[lang].get(f"{fmt}_publish_utc"), n)
                                     if upload else None)
+            if topic.get("_same_slot"):   # Part 2 goes public together with its Part 1
+                publish_at = {l: topic["_same_slot"].get(l) for l in langs}
             try:
                 results = pipeline.produce(cfg, topic, fmt, langs, upload=upload, publish_at=publish_at)
                 report.extend((fmt, lang, vid, work) for lang, vid, work in results)
@@ -230,12 +232,22 @@ def main():
                                 + (f"https://youtu.be/{vid}" if vid else "(test render, not uploaded)")
                                 + (f"\n⏰ goes public {when} UTC" if when else ("\n🌐 public now" if vid else "")))
                 for lang, vid, work in results:
-                    slots[(lang, fmt)] = slots.get((lang, fmt), 0) + 1
+                    if not topic.get("_same_slot"):
+                        slots[(lang, fmt)] = slots.get((lang, fmt), 0) + 1
                     log.info("DONE %s/%s %s", fmt, lang, f"https://youtu.be/{vid}" if vid else work)
+                if topic.get("special") == "short_part2" and upload:
+                    pipeline.link_parts(topic, results)
+                p2 = topic.pop("_part2", None)
+                if p2:   # same-day two-parter: make Part 2 next, in the same languages
+                    p2["_same_slot"] = publish_at
+                    p2["_langs"] = [l for l, _, _ in results]
+                    queues[fmt].insert(queues[fmt].index(topic) + 1, p2)
                 if not topic.get("langs"):   # owner requests for specific languages are extra videos,
                     done[fmt] += 1           # they don't take the day's regular slot
             except Exception as e:
                 log.error("FAILED %s %r: %s — trying next candidate", fmt, topic.get("topic"), e)
+                if topic.get("special") == "short_part2" and upload:
+                    pipeline.queue_part2_later(topic)
                 failures.append(f"{fmt}: {topic.get('topic')} — {str(e)[:120]}")
                 notify.send(f"❌ {fmt} failed: {topic.get('topic')}\n{str(e)[:300]}\n(trying the next topic)")
                 log.debug(traceback.format_exc())

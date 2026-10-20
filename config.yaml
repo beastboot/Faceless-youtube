@@ -309,6 +309,7 @@ podcast:
 
 # Weekly formats: a "guess the place" quiz Short (answer revealed next day) and a two-part long story.
 formats:
+  short_two_part_daily: true          # one story a day as Part 1 + Part 2 Shorts, public together
   quiz_day: "fri"
   two_part_day: "wed"
 

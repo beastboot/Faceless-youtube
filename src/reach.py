@@ -218,12 +218,24 @@ def reply_to_comments(cfg, actions):
             break
     if not todo:
         return
-    prompt = f"""You run the YouTube channel {cfg['channel']['name']} (animated history and mysteries,
-mostly in Hindi). Write a reply IN ENGLISH to each viewer comment below.
-Rules: 1-2 short sentences, warm and human, no hashtags, no links, at most one emoji. Thank them,
-answer briefly if they ask something (say you're not sure rather than invent facts), and where natural
-invite them to suggest the next mystery. If a comment is spam, abusive, sexual, political flame-bait,
-or self-promotion, return "skip" for it.
+    titles = {r.get("video_id"): r.get("title", "") for r in state.load()}
+    for c in todo:   # what the video actually said, so replies can be specific instead of generic
+        c["video_title"] = titles.get(c["video"], "")
+        tl = ROOT / "data" / "timelines" / f"{c['video']}.json"
+        if tl.exists():
+            c["video_script"] = " ".join(x[1] for x in json.loads(tl.read_text()).get("timeline", []))[:900]
+    prompt = f"""You run the YouTube channel {cfg['channel']['name']} (true history and mystery Shorts).
+Write a reply to each viewer comment below, in the comment's own language.
+Rules: 1-2 short sentences, sound like a real person who made the video, no hashtags, no links, at most
+one emoji. Never generic ("Thanks for watching!", "I'm not sure which frame you mean").
+- Use the video's title and script: add one specific true detail from it, or answer their question
+  from it (if the script doesn't say, admit you don't know rather than invent facts).
+- Criticism (wrong picture, missing detail, a factual slip): agree with what is fair, give the correct
+  fact if it is in the script, and say we'll fix it in the next one. Never argue.
+- They suggest a topic: say it's going on the list (it really is queued).
+- At most every other reply ends with a light invitation (next mystery, or the series / Part 2 if the
+  video was part of one). If a comment is spam, abusive, sexual, political flame-bait, or
+  self-promotion, return "skip" for it.
 COMMENTS: {json.dumps(todo, ensure_ascii=False)}
 Return {{"replies": [{{"id": "...", "reply": "..." or "skip"}}]}}"""
     replies = llm.ask_json(cfg, "You are a friendly community manager. JSON only.", prompt, temperature=0.7)

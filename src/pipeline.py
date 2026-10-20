@@ -512,7 +512,10 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             name = series.get(f"name_{lang}") or series["name_en"]
             items[0]["badge"] = f"{name.upper() if lang == 'en' else name} #{episode}"
         # silent follow tag in the last second (the spoken loop stays intact)
-        if lang == "en":
+        if script.get("special") == "short_part1":
+            items[0]["follow_text"] = {"en": "Part 2 is on my channel ▶",
+                                       "ta": "பாகம் 2 சேனலில் உள்ளது ▶"}.get(lang, "Part 2 ▶")
+        elif lang == "en":
             items[0]["follow_text"] = (f"Follow for #{episode + 1} of {series['name_en']}"
                                        if episode and is_short_series(cfg, series) else "Follow for a true mystery every day")
         elif lang == "ta":
@@ -707,12 +710,43 @@ def produce(cfg, topic, fmt, langs, upload=True, publish_at=None):
     return results
 
 
+def link_parts(part2_topic, results):
+    """Part 1's first comment points to Part 2 and Part 2's to Part 1 (posted once each is public)."""
+    rows = state.load()
+    p1 = part2_topic.get("part1_videos") or {}
+    for lang, vid, _ in results:
+        if not vid:
+            continue
+        for r in rows:
+            if r.get("video_id") == p1.get(lang):
+                r["pending_comment"] = f"▶ Part 2: https://youtu.be/{vid}\n\n" + (r.get("pending_comment") or "")
+            elif r.get("video_id") == vid and p1.get(lang):
+                r["pending_comment"] = f"◀ Part 1: https://youtu.be/{p1[lang]}\n\n" + (r.get("pending_comment") or "")
+    state.HISTORY.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
+
+
+def queue_part2_later(part2_topic):
+    """Part 2 failed in this run: make it first thing next run (Part 1 already promised it)."""
+    path = ROOT / "data" / "followups.json"
+    q = json.loads(path.read_text()) if path.exists() else []
+    q.insert(0, {**{k: v for k, v in part2_topic.items() if not k.startswith("_")}, "kind": "part2"})
+    path.write_text(json.dumps(q, indent=1, ensure_ascii=False))
+
+
 def queue_followups(topic, fmt, script, results):
     """Part 1 -> queue Part 2 (2 days later); quiz -> queue tomorrow's answer reveal."""
     from datetime import datetime, timedelta, timezone
     path = ROOT / "data" / "followups.json"
     q = json.loads(path.read_text()) if path.exists() else []
     vid = next((v for _, v, _ in results if v), None)
+    if topic.get("special") == "short_part1":   # made right away in this run (main.py), same publish time
+        topic["_part2"] = {"special": "short_part2", "format": "short", "series": topic.get("series"),
+                           "short_series": topic.get("short_series"),
+                           "topic": topic["topic"].replace("— Part 1", "").strip() + " — Part 2",
+                           "wikipedia_title": topic.get("wikipedia_title"), "part1_title": script.get("title"),
+                           "part1_text": " ".join(sh["line"] for sc in script["scenes"] for sh in sc["shots"])[:900],
+                           "part1_videos": {l: v for l, v, _ in results if v},
+                           "angle": "Continue from Part 1's cliffhanger to the ending"}
     if topic.get("special") == "part1":
         q.append({"kind": "part2", "special": "part2", "format": fmt, "series": topic.get("series"),
                   "topic": topic["topic"].replace("Part 1", "").strip() + " — Part 2",

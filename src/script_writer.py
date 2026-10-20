@@ -124,7 +124,7 @@ def rehook(cfg, data, research, fmt):
     twist and promise exactly what the video pays off. Picks the best of several by hookscore, guided
     by which of our own past hooks kept viewers watching."""
     shots = [sh for sc in data["scenes"] for sh in sc["shots"]]
-    if not shots or data.get("special") in ("question", "quiz", "quiz_answer", "part2"):
+    if not shots or data.get("special") in ("question", "quiz", "quiz_answer", "part2", "short_part2"):
         return data   # these formats have a fixed first line
     n = max(6, cfg["quality"]["hook_candidates"])
     best, worst = past_hooks(fmt)
@@ -181,6 +181,13 @@ SPECIALS = {
     "part2": """This is PART 2 of "{part1_title}". Open with a 15-20 second recap of Part 1, then continue from
   the cliffhanger to the end of the story with a strong payoff. Mention Part 1 is linked in the description.
   Titles must include "Part 2".""",
+    "short_part1": """This is PART 1 of a two-part Short (both parts go up together). Set the story up fast
+  and stop at its biggest turning point, mid-tension, without revealing the outcome. The LAST line is
+  exactly: "Part 2 is already on my channel." Titles must end with "(Part 1)".""",
+    "short_part2": """This is PART 2 of the Short "{part1_title}". Part 1 said: "{part1_text}"
+  Line 1 recaps where Part 1 stopped in one sentence (max 12 words, e.g. "Last time, the ship was
+  burning and nobody ran."). Then the payoff: what happened next, the twist, and the ending. No cliffhanger.
+  Titles must end with "(Part 2)".""",
     "question": """This Short answers a viewer's question. The FIRST line is: "{asker} asked: {question}"
   (first name only). Then answer it clearly from the research notes with one surprising detail, and end by
   inviting viewers to ask their own questions in the comments.""",
@@ -269,7 +276,7 @@ Add him to "characters" with exactly that description.
     special = SPECIALS.get(topic.get("special") or "", "")
     if special:
         special = "\nSPECIAL FORMAT (follow exactly):\n" + special.format(**{k: topic.get(k, "") for k in
-                                                                            ("asker", "question", "part1_title")})
+                                                                            ("asker", "question", "part1_title", "part1_text")})
     prompt = f"""Write the full narration for a {fmt} YouTube video, split into shots for an
 animated documentary. Every shot gets its own AI-generated illustration.
 

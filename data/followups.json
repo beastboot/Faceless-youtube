@@ -12,12 +12,50 @@
   "not_before": "2026-10-16T06:45:59.477903+00:00"
  },
  {
+  "kind": "request",
+  "format": "short",
+  "series": "duniya",
+  "short_series": "impossible",
+  "topic": "The Disappearance of Malaysia Airlines Flight 370",
+  "wikipedia_title": "Malaysia Airlines Flight 370",
+  "angle": "A viewer asked for it: a Boeing 777 with 239 people vanished in 2014 and is still missing; the strangest proven clues"
+ },
+ {
   "kind": "winner",
   "format": "short",
   "series": "duniya",
+<<<<<<< Updated upstream
+=======
+  "topic": "The Accidental Discovery of the 2,200-Year-Old Terracotta Army — Part 2",
+  "angle": "Follow-up to our hit video 'Terracotta Army রহস্য 1974-ல் எப்படி கண்டுபிடிக்கப்பட்டது? #shorts' (377 views, 9.7x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "qN_awL5en_8"
+ },
+ {
+  "kind": "request",
+  "format": "short",
+  "series": "duniya",
+  "short_series": "survived",
+  "topic": "The Dyatlov Pass Incident",
+  "wikipedia_title": "Dyatlov Pass incident",
+  "angle": "A viewer asked for it: nine hikers in 1959 cut their tent open from inside and fled into -30°C; what the 2021 study found"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "duniya",
+>>>>>>> Stashed changes
   "topic": "The 1091 Tornado That Erased London Bridge — Part 2",
   "angle": "Follow-up to our hit video 'London Tornado 1091: 600 வீடுகள் அழிந்தும் பிழைத்தது எப்படி? #shorts' (340 views, 8.9x our typical): a deeper or unseen side of the same story, referencing Part 1",
   "source_video": "Y0xfXwwYK4k"
+ },
+ {
+  "kind": "request",
+  "format": "short",
+  "series": "duniya",
+  "short_series": "impossible",
+  "topic": "The Voynich Manuscript",
+  "wikipedia_title": "Voynich manuscript",
+  "angle": "A viewer asked for it: a 600-year-old book in an unknown script that no codebreaker has ever read"
  },
  {
   "kind": "winner",
