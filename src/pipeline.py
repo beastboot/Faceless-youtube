@@ -496,10 +496,20 @@ def render_language(cfg, script, res, fmt, lang, work, template="yellow", series
             with ThreadPoolExecutor(4) as ex:
                 items = list(ex.map(speak, enumerate(flat)))
         except RuntimeError as e:
-            if narrate[0] is tts.speak_kokoro or not tts.kokoro_supports(voice):
+            if not tts.kokoro_supports(voice) and narrate[0] is not tts.speak_kokoro:
+                # No local backup voice for this language (Tamil): Edge refusing is usually a short burst
+                # of rate limiting, so wait, then voice the lines one at a time.
+                log.warning("[%s] Edge voice refused (%s); retrying slowly in 60 s", lang, e)
+                time.sleep(60)
+                with ThreadPoolExecutor(1) as ex:
+                    items = list(ex.map(speak, enumerate(flat)))
+            elif narrate[0] is tts.speak_kokoro:
                 raise
+            else:
+                items, edge_err = None, e
+        if items is None:
             # Edge refused us: voice the whole video with Kokoro so it never switches voices half-way
-            log.warning("[%s] Edge voice unavailable (%s); narrating this video with Kokoro", lang, e)
+            log.warning("[%s] Edge voice unavailable (%s); narrating this video with Kokoro", lang, edge_err)
             narrate[0] = tts.speak_kokoro
             with ThreadPoolExecutor(2) as ex:
                 items = list(ex.map(speak, enumerate(flat)))
