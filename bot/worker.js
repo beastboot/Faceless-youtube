@@ -224,12 +224,33 @@ async function latest(env, ch, max = 8) {
 
 // ---------- commands ----------
 async function statsText(env) {
-  const out = ['📈 <b>Channels right now</b>'];
+  // YouTube's channel-level view total lags by a day or more; each video's own count is near-live,
+  // so add those up (and show which recent Shorts are moving right now).
+  const out = ['📈 <b>Channels right now</b> (live video counts)'];
   for (const ch of CHANNELS) {
     try {
       const c = await channel(env, ch);
-      const s = c.statistics;
-      out.push(`\n<b>${esc(c.snippet.title)}</b>\n👥 ${n(s.subscriberCount)} subscribers\n👁 ${n(s.viewCount)} views\n🎬 ${n(s.videoCount)} videos`);
+      const ids = [];
+      let page = '';
+      for (let k = 0; k < 4; k++) {
+        const pl = await yt(env, ch, 'playlistItems', {part: 'contentDetails', maxResults: '50',
+          playlistId: c.contentDetails.relatedPlaylists.uploads, ...(page ? {pageToken: page} : {})});
+        ids.push(...(pl.items || []).map((i) => i.contentDetails.videoId));
+        page = pl.nextPageToken;
+        if (!page) break;
+      }
+      const vids = [];
+      for (let k = 0; k < ids.length; k += 50) {
+        const v = await yt(env, ch, 'videos', {part: 'snippet,statistics,status', id: ids.slice(k, k + 50).join(',')});
+        vids.push(...(v.items || []));
+      }
+      const pub = vids.filter((v) => v.status.privacyStatus === 'public');
+      const sum = (f) => pub.reduce((a, v) => a + Number(v.statistics[f] || 0), 0);
+      const recent = pub.filter((v) => Date.now() - Date.parse(v.snippet.publishedAt) < 3 * 864e5)
+        .sort((a, b) => b.statistics.viewCount - a.statistics.viewCount).slice(0, 3);
+      out.push(`\n<b>${esc(c.snippet.title)}</b>\n👥 ${n(c.statistics.subscriberCount)} subscribers\n👁 ${n(sum('viewCount'))} views` +
+        ` · 👍 ${n(sum('likeCount'))} · 💬 ${n(sum('commentCount'))}\n🎬 ${n(pub.length)} public videos`);
+      if (recent.length) out.push('🔥 Last 3 days: ' + recent.map((v) => `<a href="https://youtu.be/${v.id}">${esc(v.snippet.title.replace(/#shorts/i, '').trim().slice(0, 32))}</a> ${n(v.statistics.viewCount)}`).join(' · '));
     } catch (e) {
       out.push(`\n<b>${ch.name}</b>: ${esc(e.message)}`);
     }
