@@ -202,9 +202,11 @@ anniversaries you know fall in the next 12 days from {date.today():%d %B %Y}:
 If one fits the niche, make at least one topic about the history or mystery behind it.
 
 SHORTS SERIES (our named shows; file every SHORT under exactly one, by id, and prefer topics that fit one
-clearly - a recognisable show is what turns viewers into subscribers). About HALF of the Shorts go to
-"impossible" (Things That Shouldn't Exist): impossible-seeming objects and places are our best performers
-(hanging pillar 343 views, floating-stone pillar 163, rust-free iron pillar 125):
+clearly - a recognisable show is what turns viewers into subscribers). About TWO-THIRDS of the Shorts go
+to "impossible" (Things That Shouldn't Exist): impossible-seeming objects and places are our best
+performers on BOTH channels (Krishna's Butterball, a 250-ton rock that won't roll: 669 English + 952 Tamil
+views, our best ever; hanging pillar 350; floating-stone pillar 163). Real, visitable, photogenic
+objects with one measurable impossible fact work best:
 {json.dumps([dict(id=x["id"], name=x["name_en"], about=x["about"]) for x in cfg.get("short_series", [])], ensure_ascii=False)}
 
 RECENT WINNERS (our Shorts that beat our usual views 2x+; make at least 2 of today's Short topics follow
