@@ -12,15 +12,6 @@
   "not_before": "2026-10-16T06:45:59.477903+00:00"
  },
  {
-  "kind": "request",
-  "format": "short",
-  "series": "duniya",
-  "short_series": "impossible",
-  "topic": "The Disappearance of Malaysia Airlines Flight 370",
-  "wikipedia_title": "Malaysia Airlines Flight 370",
-  "angle": "A viewer asked for it: a Boeing 777 with 239 people vanished in 2014 and is still missing; the strangest proven clues"
- },
- {
   "kind": "winner",
   "format": "short",
   "series": "duniya",
@@ -77,5 +68,13 @@
   "topic": "The 1932 War When Australia Was Defeated by 20,000 Emus — Part 2",
   "angle": "Follow-up to our hit video '20000 ஈமு பறவைகளுடன் மோதிய ராணுவம் தோற்றது ஏன்? #shorts' (395 views, 10.4x our typical): a deeper or unseen side of the same story, referencing Part 1",
   "source_video": "Q70sz0wEFX8"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "proven",
+  "topic": "The 1979 Dam Collapse That Wiped Out an Entire City — Part 2",
+  "angle": "Follow-up to our hit video 'Why Morbi Dam Collapsed in 1979 #shorts' (295 views, 5.4x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "aCJUm_5RJWM"
  }
 ]
