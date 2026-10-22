@@ -932,7 +932,8 @@
   "episode": 5,
   "voice": "gemini",
   "hook": "In 1572, 3,000 soldiers had one night to wade fifteen miles through the ocean. Could they reach land before high tide returned?",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-22T07:19:04+00:00"
  },
  {
   "created_utc": "2026-10-20T07:55:26+00:00",
@@ -1064,7 +1065,7 @@
   "episode": 7,
   "voice": "gemini",
   "hook": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?",
-  "pending_comment": "▶ Part 2: https://youtu.be/CGsDV-Rs3yk\n\nMH370 விமானம் விபத்துக்குள்ளானதா அல்லது திட்டமிட்டு கடத்தப்பட்டதா, உங்கள் கருத்து என்ன?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/VBsirTaxPOw"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T08:20:05+00:00",
@@ -1082,7 +1083,7 @@
   "episode": 7,
   "voice": "edge",
   "hook": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?",
-  "pending_comment": "▶ Part 2: https://youtu.be/0rVCS-teJ_w\n\nWhich theory do you think explains what happened to Flight 370?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T08:41:46+00:00",
@@ -1100,7 +1101,7 @@
   "episode": 9,
   "voice": "edge",
   "hook": "Where did Malaysia Airlines Flight 370 go after military radar lost it northwest of Penang Island?",
-  "pending_comment": "◀ Part 1: https://youtu.be/1zx2vgLVjek\n\nஉங்கள் கருத்துப்படி MH370 விமானத்திற்கு உண்மையில் என்ன நடந்திருக்கும்?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/VBsirTaxPOw"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T08:46:38+00:00",
@@ -1118,7 +1119,7 @@
   "episode": 9,
   "voice": "edge",
   "hook": "Where did Malaysia Airlines Flight 370 go after military radar lost it northwest of Penang Island?",
-  "pending_comment": "◀ Part 1: https://youtu.be/Cx2FTQCxqTA\n\nWhat do you think really happened to Flight 370?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T09:12:43+00:00",
@@ -1136,7 +1137,7 @@
   "episode": 11,
   "voice": "edge",
   "hook": "You assume modern engineering can move any heavy obstacle, but why couldn't seven British work elephants shift a giant granite boulder in 1908?",
-  "pending_comment": "இந்த பாறை எப்படி இவ்வளவு காலமாக அசையாமல் நிற்கிறது என்று நினைக்கிறீர்கள்?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/VBsirTaxPOw"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T09:17:37+00:00",
@@ -1154,7 +1155,7 @@
   "episode": 11,
   "voice": "edge",
   "hook": "You assume modern engineering can move any heavy obstacle, but why couldn't seven British work elephants shift a giant granite boulder in 1908?",
-  "pending_comment": "How do you think ancient builders balanced this massive rock without modern machinery?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T09:37:58+00:00",
@@ -1172,7 +1173,7 @@
   "episode": 13,
   "voice": "edge",
   "hook": "You might assume a 329-meter stone dam would instantly sink into loose riverbed sand, but how did King Karikala keep it standing since 150 CE?",
-  "pending_comment": "What other ancient structures do you want us to investigate next?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-21T09:55:20+00:00",
@@ -1190,6 +1191,162 @@
   "episode": 14,
   "voice": "edge",
   "hook": "What happens when you knock down a basement wall during a home renovation in 1963 and accidentally stumble into an 18-floor underground city?",
-  "pending_comment": "What would you do if you found a hidden city in your basement?\n\n▶ Watch next: https://youtube.com/shorts/U90uqgIJYSI"
+  "pending_comment": ""
+ },
+ {
+  "created_utc": "2026-10-22T07:41:21+00:00",
+  "format": "short-skipped",
+  "topic": "The 1091 Tornado That Erased London Bridge — Part 2",
+  "reason": "Quality gate rejected the script (avg 5.4): The script contains no sensitive religious or communal content and can be published after correcting historical claims not documented in the research notes."
+ },
+ {
+  "created_utc": "2026-10-22T07:58:51+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The 1928 Bardoli Iron Pillar That Defies Rust — Part 1",
+  "wiki_title": "Iron pillar of Delhi",
+  "title": "Delhi Iron Pillar உண்மை என்ன? நம்ப முடியாத 7 மீட்டர் தூண் #shorts",
+  "video_id": "Yymfe_Uc964",
+  "duration": 36.8,
+  "publish_at": "2026-10-22T10:30:00Z",
+  "dir": "20261022-0741-short-the-1928-bardoli-iron-pillar-that-defies-rust-part/ta",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 15,
+  "voice": "gemini",
+  "hook": "Look at 'The 1928 Bardoli Iron Pillar That Defies Rust — Part 1', a 7.21-meter iron structure untouched by rust since 415 CE. Why?",
+  "pending_comment": "▶ Part 2: https://youtu.be/9keljLDxBF8\n\nஇந்த இரும்புத் தூண் துருப்பிடிக்காமல் இருக்க என்ன காரணம் என்று நீங்கள் நினைக்கிறீர்கள்?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+ },
+ {
+  "created_utc": "2026-10-22T08:02:24+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1928 Bardoli Iron Pillar That Defies Rust — Part 1",
+  "wiki_title": "Iron pillar of Delhi",
+  "title": "The 415 CE Iron Pillar Anomaly (Part 1) #shorts",
+  "video_id": "zB8QSFf5Q-4",
+  "duration": 32.1,
+  "publish_at": "2026-10-22T12:00:00Z",
+  "dir": "20261022-0741-short-the-1928-bardoli-iron-pillar-that-defies-rust-part/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 15,
+  "voice": "edge",
+  "hook": "Look at 'The 1928 Bardoli Iron Pillar That Defies Rust — Part 1', a 7.21-meter iron structure untouched by rust since 415 CE. Why?",
+  "pending_comment": "▶ Part 2: https://youtu.be/RPcOtzF13wY\n\nDo you think modern metallurgical methods could match this ancient rust resistance?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-22T08:14:29+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The 1928 Bardoli Iron Pillar That Defies Rust — Part 2",
+  "wiki_title": "Iron pillar of Delhi",
+  "title": "Delhi Iron Pillar: ஆயிரம் ஆண்டுகளாக துருப்பிடிக்காத காரணம் என்ன? #shorts",
+  "video_id": "9keljLDxBF8",
+  "duration": 59.0,
+  "publish_at": "2026-10-22T10:30:00Z",
+  "dir": "20261022-0802-short-the-1928-bardoli-iron-pillar-that-defies-rust-part/ta",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 17,
+  "voice": "gemini",
+  "hook": "How did ancient smiths forge a six-tonne iron pillar in 415 CE that completely defies rust today?",
+  "pending_comment": "◀ Part 1: https://youtu.be/Yymfe_Uc964\n\nஇந்த இரும்புத் தூண் துருப்பிடிக்காததற்குக் காரணம் என்ன நினைக்கிறீர்கள்?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+ },
+ {
+  "created_utc": "2026-10-22T08:19:37+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1928 Bardoli Iron Pillar That Defies Rust — Part 2",
+  "wiki_title": "Iron pillar of Delhi",
+  "title": "Why Delhi's Ancient Iron Pillar Never Rusts (Part 2) #shorts",
+  "video_id": "RPcOtzF13wY",
+  "duration": 43.3,
+  "publish_at": "2026-10-22T12:00:00Z",
+  "dir": "20261022-0802-short-the-1928-bardoli-iron-pillar-that-defies-rust-part/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 17,
+  "voice": "edge",
+  "hook": "How did ancient smiths forge a six-tonne iron pillar in 415 CE that completely defies rust today?",
+  "pending_comment": "◀ Part 1: https://youtu.be/zB8QSFf5Q-4\n\nWhat other ancient architectural mysteries would you like us to investigate next?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-22T08:30:47+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The 1974 Derinkuyu Underground City That Hid 20,000 People",
+  "wiki_title": "Derinkuyu underground city",
+  "title": "Derinkuyu Underground City: 300 அடி ஆழத்தில் ஒரு ரகசிய நகரம்! #shorts",
+  "video_id": "ym9GWozXhS4",
+  "duration": 56.0,
+  "publish_at": "2026-10-22T13:30:00Z",
+  "dir": "20261022-0819-short-the-1974-derinkuyu-underground-city-that-hid-20-00/ta",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 19,
+  "voice": "edge",
+  "hook": "You are walking through your basement wall in 1963 when you accidentally discover an entire underground city carved two hundred feet deep.",
+  "pending_comment": "இந்த நிலத்தடி நகரத்தில் உங்களால் ஒரு வாரம் வாழ முடியுமா? உங்கள் பதிலை கமெண்ட் பண்ணுங்க!\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+ },
+ {
+  "created_utc": "2026-10-22T08:35:14+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1974 Derinkuyu Underground City That Hid 20,000 People",
+  "wiki_title": "Derinkuyu underground city",
+  "title": "The 20,000 People Under the Earth #shorts",
+  "video_id": "zVPtJo_76CE",
+  "duration": 39.1,
+  "publish_at": "2026-10-22T14:00:00Z",
+  "dir": "20261022-0819-short-the-1974-derinkuyu-underground-city-that-hid-20-00/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 19,
+  "voice": "edge",
+  "hook": "You are walking through your basement wall in 1963 when you accidentally discover an entire underground city carved two hundred feet deep.",
+  "pending_comment": "Could you survive a month living underground in Derinkuyu?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-22T08:44:48+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1931 Statue of Unity Precursor: Sardar Patel's Iron Gathering",
+  "wiki_title": "Vallabhbhai Patel",
+  "title": "Why 562 Kingdoms Joined India So Fast #shorts",
+  "video_id": "UscTve7iTYo",
+  "duration": 46.3,
+  "publish_at": "2026-10-22T16:00:00Z",
+  "dir": "20261022-0835-short-the-1931-statue-of-unity-precursor-sardar-patel-s/en",
+  "thumb_template": "storybook",
+  "series": "proven",
+  "episode": 5,
+  "voice": "edge",
+  "hook": "You know him as the Iron Man, but Sardar Patel's 1947 integration of 562 princely states changed the map forever.",
+  "pending_comment": "Which princely state integration surprised you the most?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-22T08:45:09+00:00",
+  "format": "short-skipped",
+  "topic": "The 1923 Bandit Post Stamps of Lincheng",
+  "reason": "Quality gate rejected the script (avg 6.8): The script required heavy factual corrections to align strictly with the provided research notes about philatelist Wolfgang Baldus."
+ },
+ {
+  "created_utc": "2026-10-22T08:54:45+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1857 Siege of Lucknow Residency That Still Bears Cannon Scars",
+  "wiki_title": "Siege of Lucknow",
+  "title": "The 1857 Siege of the Lucknow Residency #shorts",
+  "video_id": "4BzSPdClaP0",
+  "duration": 51.9,
+  "publish_at": "2026-10-22T18:00:00Z",
+  "dir": "20261022-0845-short-the-1857-siege-of-lucknow-residency-that-still-bea/en",
+  "thumb_template": "storybook",
+  "series": "survived",
+  "episode": 8,
+  "voice": "edge",
+  "hook": "Why did eight thousand armed rebel soldiers fail to crush nine hundred trapped Britons inside the Lucknow Residency in 1857?",
+  "pending_comment": "What is the most astonishing survival story from military history?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
  }
 ]

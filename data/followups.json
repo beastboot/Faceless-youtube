@@ -12,14 +12,6 @@
   "not_before": "2026-10-16T06:45:59.477903+00:00"
  },
  {
-  "kind": "winner",
-  "format": "short",
-  "series": "duniya",
-  "topic": "The 1091 Tornado That Erased London Bridge — Part 2",
-  "angle": "Follow-up to our hit video 'London Tornado 1091: 600 வீடுகள் அழிந்தும் பிழைத்தது எப்படி? #shorts' (340 views, 8.9x our typical): a deeper or unseen side of the same story, referencing Part 1",
-  "source_video": "Y0xfXwwYK4k"
- },
- {
   "kind": "request",
   "format": "short",
   "series": "duniya",
@@ -76,5 +68,13 @@
   "topic": "The 1979 Dam Collapse That Wiped Out an Entire City — Part 2",
   "angle": "Follow-up to our hit video 'Why Morbi Dam Collapsed in 1979 #shorts' (295 views, 5.4x our typical): a deeper or unseen side of the same story, referencing Part 1",
   "source_video": "aCJUm_5RJWM"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "survived",
+  "topic": "The 1572 Night 3,000 Soldiers Waded Through the Ocean — Part 2",
+  "angle": "Follow-up to our hit video '1572-ல் கடலுக்குள் 15 மைல் பயணம்: எப்படி தப்பினார்கள்? #shorts' (846 views, 8.7x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "ShwLuvGNP_c"
  }
 ]
