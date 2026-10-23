@@ -841,7 +841,7 @@
   "lang": "en",
   "topic": "The 1,300-Year-Old Temple That Disappears Twice a Day",
   "wiki_title": "Stambheshwar Mahadev",
-  "title": "Why This Sacred Shrine Sinks at 3 PM #shorts",
+  "title": "This 1,300-Year Temple VANISHES Every Day #shorts",
   "video_id": "XijJJ-jgEtI",
   "duration": 30.0,
   "publish_at": "2026-10-19T14:00:00Z",
@@ -850,7 +850,11 @@
   "series": "impossible",
   "episode": 3,
   "hook": "If you reach Kavi Kamboi after three in the afternoon, the temple you came to see is already submerged underwater.",
-  "pending_comment": ""
+  "pending_comment": "",
+  "repackaged": {
+   "old": "Why This Sacred Shrine Sinks at 3 PM #shorts",
+   "at": "2026-10-23T07:18:17+00:00"
+  }
  },
  {
   "created_utc": "2026-10-19T07:49:15+00:00",
@@ -1065,7 +1069,8 @@
   "episode": 7,
   "voice": "gemini",
   "hook": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-23T07:18:38+00:00"
  },
  {
   "created_utc": "2026-10-21T08:20:05+00:00",
@@ -1083,7 +1088,8 @@
   "episode": 7,
   "voice": "edge",
   "hook": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-23T07:18:38+00:00"
  },
  {
   "created_utc": "2026-10-21T08:41:46+00:00",
@@ -1101,7 +1107,8 @@
   "episode": 9,
   "voice": "edge",
   "hook": "Where did Malaysia Airlines Flight 370 go after military radar lost it northwest of Penang Island?",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-23T07:18:38+00:00"
  },
  {
   "created_utc": "2026-10-21T08:46:38+00:00",
@@ -1137,7 +1144,8 @@
   "episode": 11,
   "voice": "edge",
   "hook": "You assume modern engineering can move any heavy obstacle, but why couldn't seven British work elephants shift a giant granite boulder in 1908?",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-23T07:18:38+00:00"
  },
  {
   "created_utc": "2026-10-21T09:17:37+00:00",
@@ -1155,7 +1163,8 @@
   "episode": 11,
   "voice": "edge",
   "hook": "You assume modern engineering can move any heavy obstacle, but why couldn't seven British work elephants shift a giant granite boulder in 1908?",
-  "pending_comment": ""
+  "pending_comment": "",
+  "followed_up": "2026-10-23T07:18:38+00:00"
  },
  {
   "created_utc": "2026-10-21T09:37:58+00:00",
@@ -1215,7 +1224,7 @@
   "episode": 15,
   "voice": "gemini",
   "hook": "Look at 'The 1928 Bardoli Iron Pillar That Defies Rust — Part 1', a 7.21-meter iron structure untouched by rust since 415 CE. Why?",
-  "pending_comment": "▶ Part 2: https://youtu.be/9keljLDxBF8\n\nஇந்த இரும்புத் தூண் துருப்பிடிக்காமல் இருக்க என்ன காரணம் என்று நீங்கள் நினைக்கிறீர்கள்?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:02:24+00:00",
@@ -1233,7 +1242,7 @@
   "episode": 15,
   "voice": "edge",
   "hook": "Look at 'The 1928 Bardoli Iron Pillar That Defies Rust — Part 1', a 7.21-meter iron structure untouched by rust since 415 CE. Why?",
-  "pending_comment": "▶ Part 2: https://youtu.be/RPcOtzF13wY\n\nDo you think modern metallurgical methods could match this ancient rust resistance?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:14:29+00:00",
@@ -1251,7 +1260,7 @@
   "episode": 17,
   "voice": "gemini",
   "hook": "How did ancient smiths forge a six-tonne iron pillar in 415 CE that completely defies rust today?",
-  "pending_comment": "◀ Part 1: https://youtu.be/Yymfe_Uc964\n\nஇந்த இரும்புத் தூண் துருப்பிடிக்காததற்குக் காரணம் என்ன நினைக்கிறீர்கள்?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:19:37+00:00",
@@ -1269,7 +1278,7 @@
   "episode": 17,
   "voice": "edge",
   "hook": "How did ancient smiths forge a six-tonne iron pillar in 415 CE that completely defies rust today?",
-  "pending_comment": "◀ Part 1: https://youtu.be/zB8QSFf5Q-4\n\nWhat other ancient architectural mysteries would you like us to investigate next?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:30:47+00:00",
@@ -1287,7 +1296,7 @@
   "episode": 19,
   "voice": "edge",
   "hook": "You are walking through your basement wall in 1963 when you accidentally discover an entire underground city carved two hundred feet deep.",
-  "pending_comment": "இந்த நிலத்தடி நகரத்தில் உங்களால் ஒரு வாரம் வாழ முடியுமா? உங்கள் பதிலை கமெண்ட் பண்ணுங்க!\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:35:14+00:00",
@@ -1305,7 +1314,7 @@
   "episode": 19,
   "voice": "edge",
   "hook": "You are walking through your basement wall in 1963 when you accidentally discover an entire underground city carved two hundred feet deep.",
-  "pending_comment": "Could you survive a month living underground in Derinkuyu?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:44:48+00:00",
@@ -1323,7 +1332,7 @@
   "episode": 5,
   "voice": "edge",
   "hook": "You know him as the Iron Man, but Sardar Patel's 1947 integration of 562 princely states changed the map forever.",
-  "pending_comment": "Which princely state integration surprised you the most?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+  "pending_comment": ""
  },
  {
   "created_utc": "2026-10-22T08:45:09+00:00",
@@ -1347,6 +1356,156 @@
   "episode": 8,
   "voice": "edge",
   "hook": "Why did eight thousand armed rebel soldiers fail to crush nine hundred trapped Britons inside the Lucknow Residency in 1857?",
-  "pending_comment": "What is the most astonishing survival story from military history?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+  "pending_comment": ""
+ },
+ {
+  "created_utc": "2026-10-23T07:38:24+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The Dyatlov Pass Incident",
+  "wiki_title": "Dyatlov Pass incident",
+  "title": "Dyatlov Pass மர்மம்: அந்த 9 பேரின் விசித்திர மரணம்! #shorts",
+  "video_id": "a8b--s8PTr8",
+  "duration": 55.6,
+  "publish_at": "2026-10-23T10:30:00Z",
+  "dir": "20261023-0726-short-the-dyatlov-pass-incident/ta",
+  "thumb_template": "storybook",
+  "series": "survived",
+  "episode": 9,
+  "voice": "gemini",
+  "hook": "You asked for the Dyatlov Pass incident, where nine Soviet hikers cut open their tent from inside in 1959.",
+  "pending_comment": "இந்த டையாட்லோவ் பாஸ் சம்பவத்துக்கு இயற்கை பனிச்சரிவுதான் காரணமா இல்ல வேற ஏதாச்சும் மர்ம சக்தியா? உங்க கருத்து என்னன்னு கமெண்ட் பண்ணுங்க!\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+ },
+ {
+  "created_utc": "2026-10-23T07:41:39+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The Dyatlov Pass Incident",
+  "wiki_title": "Dyatlov Pass incident",
+  "title": "Why 9 Soviet Hikers Cut Their Tent Open #shorts",
+  "video_id": "brvDKd0l2lc",
+  "duration": 28.3,
+  "publish_at": "2026-10-23T12:00:00Z",
+  "dir": "20261023-0726-short-the-dyatlov-pass-incident/en",
+  "thumb_template": "storybook",
+  "series": "survived",
+  "episode": 9,
+  "voice": "edge",
+  "hook": "You asked for the Dyatlov Pass incident, where nine Soviet hikers cut open their tent from inside in 1959.",
+  "pending_comment": "Do you think the 2021 slab avalanche theory fully explains what happened at Dyatlov Pass?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-23T08:07:44+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The 13-Storey Geometric Abyss of Chand Baori — Part 1",
+  "wiki_title": "Chand Baori",
+  "title": "Chand Baori ரகசியம்: 13 அடுக்குகள் கொண்ட மர்மக் கிணறு! #shorts",
+  "video_id": "p6yAvTgtrDA",
+  "duration": 45.1,
+  "publish_at": "2026-10-23T13:30:00Z",
+  "dir": "20261023-0741-short-the-13-storey-geometric-abyss-of-chand-baori-part/ta",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 21,
+  "voice": "edge",
+  "hook": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by six degrees. How was it engineered?",
+  "pending_comment": "சந்த் பாவோரி கிணறு மனிதர்களால் கட்டப்பட்டதா அல்லது கதைகளில் சொல்வது போல் பேய்களால் கட்டப்பட்டதா? உங்கள் கருத்தைச் சொல்லுங்க!\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+ },
+ {
+  "created_utc": "2026-10-23T08:11:07+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 13-Storey Geometric Abyss of Chand Baori — Part 1",
+  "wiki_title": "Chand Baori",
+  "title": "The Geometry of Chand Baori (Part 1) #shorts",
+  "video_id": "UrIcGMGrXW4",
+  "duration": 32.5,
+  "publish_at": "2026-10-23T14:00:00Z",
+  "dir": "20261023-0741-short-the-13-storey-geometric-abyss-of-chand-baori-part/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 21,
+  "voice": "edge",
+  "hook": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by six degrees. How was it engineered?",
+  "pending_comment": "Would you dare walk down all 3,500 steps to the bottom of Chand Baori?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-23T08:16:19+00:00",
+  "format": "short-skipped",
+  "topic": "The 13-Storey Geometric Abyss of Chand Baori — Part 2",
+  "reason": "Quality gate rejected the script (avg 5.8): The script contains no sensitive or offensive material, but requires factual corrections to align unsupported thermodynamic claims with the research notes."
+ },
+ {
+  "created_utc": "2026-10-23T08:53:36+00:00",
+  "format": "short",
+  "lang": "ta",
+  "topic": "The 1966 Ignored Warnings Behind the Aberfan Slurry Avalanche",
+  "wiki_title": "Aberfan disaster",
+  "title": "Aberfan பேரழிவு: 1966-ல் நிகழ்ந்த அந்த கோர விபத்து ஏன்? #shorts",
+  "video_id": "rfovWJsa52g",
+  "duration": 59.7,
+  "publish_at": "2026-10-23T15:30:00Z",
+  "dir": "20261023-0816-short-the-1966-ignored-warnings-behind-the-aberfan-slurr/ta",
+  "thumb_template": "storybook",
+  "series": "proven",
+  "episode": 6,
+  "voice": "edge",
+  "hook": "Aberfan's deadly 1966 slurry avalanche began with ignored warnings in 1963, but why did the Coal Board keep piling waste onto known springs?",
+  "pending_comment": "இந்தக் கொடூரப் பேரழிவிற்கு அதிகாரிகளின் அலட்சியமே காரணம் என்பதை நீங்கள் ஏற்கிறீர்களா?\n\n▶ அடுத்து பாருங்கள்: https://youtube.com/shorts/i9dB58hf4OY"
+ },
+ {
+  "created_utc": "2026-10-23T08:57:07+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1966 Ignored Warnings Behind the Aberfan Slurry Avalanche",
+  "wiki_title": "Aberfan disaster",
+  "title": "Why Aberfan's 1966 Avalanche Was PREDICTED #shorts",
+  "video_id": "ai0JaPkvLMM",
+  "duration": 31.3,
+  "publish_at": "2026-10-23T16:00:00Z",
+  "dir": "20261023-0816-short-the-1966-ignored-warnings-behind-the-aberfan-slurr/en",
+  "thumb_template": "storybook",
+  "series": "proven",
+  "episode": 6,
+  "voice": "edge",
+  "hook": "Aberfan's deadly 1966 slurry avalanche began with ignored warnings in 1963, but why did the Coal Board keep piling waste onto known springs?",
+  "pending_comment": "Should public board executives face criminal charges when known safety warnings are ignored?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-23T09:34:24+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 1,000-Year-Old Giant Temple Left With Its Blueprints in Stone",
+  "wiki_title": "Bhojeshwar Temple",
+  "title": "Bhojpur Temple: Why Did Construction Stop in 1035 CE? #shorts",
+  "video_id": "7iYJz7G5GWE",
+  "duration": 41.8,
+  "publish_at": "2026-10-23T18:00:00Z",
+  "dir": "20261023-0857-short-the-1-000-year-old-giant-temple-left-with-its-blue/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 23,
+  "voice": "edge",
+  "hook": "If you step onto the sandstone bedrock at Bhojpur, you are standing inside an 11th-century architectural drawing that was never built.",
+  "pending_comment": "Why do you think the builders suddenly walked away from completing the Bhojeshwar Temple?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
+ },
+ {
+  "created_utc": "2026-10-23T09:54:49+00:00",
+  "format": "short",
+  "lang": "en",
+  "topic": "The 50-Year Burning Crater Soviet Engineers Thought Would Last a Week",
+  "wiki_title": "Darvaza gas crater",
+  "title": "The Accidental 50-Year Inferno #shorts",
+  "video_id": "yL6orVyreXI",
+  "duration": 43.5,
+  "publish_at": "2026-10-23T21:00:00Z",
+  "dir": "20261023-0934-short-the-50-year-burning-crater-soviet-engineers-though/en",
+  "thumb_template": "storybook",
+  "series": "impossible",
+  "episode": 24,
+  "voice": "edge",
+  "hook": "You probably assume the Darvaza gas crater died out decades ago, but this 230-foot pit has burned non-stop since 1971.",
+  "pending_comment": "Would you dare to descend into the Darvaza gas crater?\n\n▶ Watch next: https://youtube.com/shorts/0ivMAUIoYRA"
  }
 ]

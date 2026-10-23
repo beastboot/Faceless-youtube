@@ -1,5 +1,27 @@
 [
  {
+  "special": "short_part2",
+  "format": "short",
+  "series": "bharat",
+  "short_series": "impossible",
+  "topic": "The 13-Storey Geometric Abyss of Chand Baori — Part 2",
+  "wikipedia_title": "Chand Baori",
+  "part1_title": "The Geometry of Chand Baori (Part 1) #shorts",
+  "part1_text": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by five to six degrees Celsius. How was it engineered? Thirteen stone stories plunge deep underground. Did spirits build it overnight? Folklore claimed supernatural ghosts carved it. Was it a lavish royal bath? Neither assumption is correct. Raja Chanda built an upside-down pyramid. It funneled precious desert rainwater. The true marvel lies below. Part 2 is already on my channel.",
+  "part1_videos": {
+   "ta": "p6yAvTgtrDA",
+   "en": "UrIcGMGrXW4"
+  },
+  "angle": "Continue from Part 1's cliffhanger to the ending",
+  "short_series_info": {
+   "id": "impossible",
+   "name_en": "Things That Shouldn't Exist",
+   "name_ta": "இருக்கவே கூடாத அதிசயங்கள்",
+   "about": "real objects, buildings, places or phenomena that seem impossible (floating pillar, 1600-year rust-free iron pillar, a fire burning since 1962), and the real explanation or open question"
+  },
+  "kind": "part2"
+ },
+ {
   "kind": "part2",
   "special": "part2",
   "format": "long",
@@ -10,15 +32,6 @@
   "part1_video": "1MZ6uiS2TGE",
   "angle": "Continue from Part 1's cliffhanger",
   "not_before": "2026-10-16T06:45:59.477903+00:00"
- },
- {
-  "kind": "request",
-  "format": "short",
-  "series": "duniya",
-  "short_series": "survived",
-  "topic": "The Dyatlov Pass Incident",
-  "wikipedia_title": "Dyatlov Pass incident",
-  "angle": "A viewer asked for it: nine hikers in 1959 cut their tent open from inside and fled into -30°C; what the 2021 study found"
  },
  {
   "kind": "winner",
@@ -76,5 +89,56 @@
   "topic": "The 1572 Night 3,000 Soldiers Waded Through the Ocean — Part 2",
   "angle": "Follow-up to our hit video '1572-ல் கடலுக்குள் 15 மைல் பயணம்: எப்படி தப்பினார்கள்? #shorts' (846 views, 8.7x our typical): a deeper or unseen side of the same story, referencing Part 1",
   "source_video": "ShwLuvGNP_c"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The Disappearance of Malaysia Airlines Flight 370 — Part 1 — Part 2",
+  "angle": "Follow-up to our hit video 'MH370 உண்மை கதை: 6 மணி நேரம் எங்கே பறந்தது? 🌊 #shorts' (713 views, 8.2x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "1zx2vgLVjek"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The Disappearance of Malaysia Airlines Flight 370 — Part 1 — Part 2",
+  "angle": "Follow-up to our hit video 'Why MH370 Vanished Without a Trace (Part 1) #shorts' (300 views, 3.4x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "Cx2FTQCxqTA"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The Disappearance of Malaysia Airlines Flight 370 — Part 2 — Part 2",
+  "angle": "Follow-up to our hit video 'MH370 Flight 2014 உண்மை என்ன? 🔍 #shorts' (892 views, 10.3x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "CGsDV-Rs3yk"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The 250-Ton Boulder Seven Elephants Couldn't Move — Part 2",
+  "angle": "Follow-up to our hit video 'Krishna's Butterball அறிவியல்! 250 டன் பாறை நகராத ஏன்? #shorts' (956 views, 11.0x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "i9dB58hf4OY"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The 250-Ton Boulder Seven Elephants Couldn't Move — Part 2",
+  "angle": "Follow-up to our hit video '250 Tons Defying Gravity in Tamil Nadu #shorts' (892 views, 10.3x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "0ivMAUIoYRA"
+ },
+ {
+  "kind": "quiz_answer",
+  "special": "quiz_answer",
+  "format": "short",
+  "series": "duniya",
+  "topic": "The Dyatlov Pass Incident — quiz answer",
+  "wikipedia_title": "Dyatlov Pass incident",
+  "quiz_video": "a8b--s8PTr8",
+  "angle": "Reveal yesterday's quiz answer",
+  "not_before": "2026-10-24T03:41:39.450382+00:00"
  }
 ]
