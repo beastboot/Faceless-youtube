@@ -1,27 +1,5 @@
 [
  {
-  "special": "short_part2",
-  "format": "short",
-  "series": "bharat",
-  "short_series": "impossible",
-  "topic": "The 13-Storey Geometric Abyss of Chand Baori — Part 2",
-  "wikipedia_title": "Chand Baori",
-  "part1_title": "The Geometry of Chand Baori (Part 1) #shorts",
-  "part1_text": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by five to six degrees Celsius. How was it engineered? Thirteen stone stories plunge deep underground. Did spirits build it overnight? Folklore claimed supernatural ghosts carved it. Was it a lavish royal bath? Neither assumption is correct. Raja Chanda built an upside-down pyramid. It funneled precious desert rainwater. The true marvel lies below. Part 2 is already on my channel.",
-  "part1_videos": {
-   "ta": "p6yAvTgtrDA",
-   "en": "UrIcGMGrXW4"
-  },
-  "angle": "Continue from Part 1's cliffhanger to the ending",
-  "short_series_info": {
-   "id": "impossible",
-   "name_en": "Things That Shouldn't Exist",
-   "name_ta": "இருக்கவே கூடாத அதிசயங்கள்",
-   "about": "real objects, buildings, places or phenomena that seem impossible (floating pillar, 1600-year rust-free iron pillar, a fire burning since 1962), and the real explanation or open question"
-  },
-  "kind": "part2"
- },
- {
   "kind": "part2",
   "special": "part2",
   "format": "long",
@@ -140,5 +118,29 @@
   "quiz_video": "a8b--s8PTr8",
   "angle": "Reveal yesterday's quiz answer",
   "not_before": "2026-10-24T03:41:39.450382+00:00"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "survived",
+  "topic": "The 1572 Night 3,000 Soldiers Waded Through the Ocean — Part 2",
+  "angle": "Follow-up to our hit video 'How 3,000 Spanish Soldiers Beat the TIDE in 1572 #shorts' (201 views, 3.0x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "IPyWCqfYlIA"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The 1928 Bardoli Iron Pillar That Defies Rust — Part 1 — Part 2",
+  "angle": "Follow-up to our hit video 'Delhi Iron Pillar உண்மை என்ன? நம்ப முடியாத 7 மீட்டர் தூண் #shorts' (802 views, 11.8x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "Yymfe_Uc964"
+ },
+ {
+  "kind": "winner",
+  "format": "short",
+  "series": "impossible",
+  "topic": "The 1928 Bardoli Iron Pillar That Defies Rust — Part 2 — Part 2",
+  "angle": "Follow-up to our hit video 'Delhi Iron Pillar: ஆயிரம் ஆண்டுகளாக துருப்பிடிக்காத காரணம் என்ன? #shorts' (511 views, 7.5x our typical): a deeper or unseen side of the same story, referencing Part 1",
+  "source_video": "9keljLDxBF8"
  }
 ]
