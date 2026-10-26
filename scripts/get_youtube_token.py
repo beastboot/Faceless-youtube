@@ -9,6 +9,7 @@ It saves the login to .env and the GitHub secrets, records the sign-in date, and
 Telegram bot (gh CLI needed).
 """
 import json
+import os
 import re
 import subprocess
 import sys
@@ -33,7 +34,7 @@ creds = None
 for attempt in range(40):
     try:
         creds = flow.run_local_server(
-            port=8765, open_browser=False, access_type="offline", prompt="consent",
+            port=int(os.environ.get("SIGNIN_PORT", 8765)), open_browser=False, access_type="offline", prompt="consent",
             state="odd-annals-signin",
             authorization_prompt_message="Open this link in your browser:\n\n{url}\n")
         break
