@@ -1,5 +1,26 @@
 [
  {
+  "special": "short_part2",
+  "format": "short",
+  "series": "duniya",
+  "short_series": "impossible",
+  "topic": "The Voynich Manuscript — Part 2",
+  "wikipedia_title": "Voynich manuscript",
+  "part1_title": "World War Codebreakers FAILED This Book (Part 1) #shorts",
+  "part1_text": "If you love unsolved historical codes, the 600-year-old Voynich Manuscript has stumped every genius since 1912. Carbon testing dates its parchment between 1404 and 1438. A seventeenth century Prague alchemist owned it. Wilfrid Voynich bought the book in 1912. Inside are drawings of completely unknown plants. Astrological charts cover foldout vellum pages. Quill pens drew thirty-eight thousand secret words. Top World War codebreakers failed to read it. Yet statistical patterns show text structures consistent with natural language. Part 2 is already on my channel.",
+  "part1_videos": {
+   "ta": "SctuxFYOUqo"
+  },
+  "angle": "Continue from Part 1's cliffhanger to the ending",
+  "short_series_info": {
+   "id": "impossible",
+   "name_en": "Things That Shouldn't Exist",
+   "name_ta": "இருக்கவே கூடாத அதிசயங்கள்",
+   "about": "real objects, buildings, places or phenomena that seem impossible (floating pillar, 1600-year rust-free iron pillar, a fire burning since 1962), and the real explanation or open question"
+  },
+  "kind": "part2"
+ },
+ {
   "kind": "part2",
   "special": "part2",
   "format": "long",
@@ -10,15 +31,6 @@
   "part1_video": "1MZ6uiS2TGE",
   "angle": "Continue from Part 1's cliffhanger",
   "not_before": "2026-10-16T06:45:59.477903+00:00"
- },
- {
-  "kind": "request",
-  "format": "short",
-  "series": "duniya",
-  "short_series": "impossible",
-  "topic": "The Voynich Manuscript",
-  "wikipedia_title": "Voynich manuscript",
-  "angle": "A viewer asked for it: a 600-year-old book in an unknown script that no codebreaker has ever read"
  },
  {
   "kind": "winner",
