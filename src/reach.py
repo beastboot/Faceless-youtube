@@ -455,7 +455,8 @@ def run(cfg):
     from . import extras
     today = datetime.now(timezone.utc)
     dirty = []
-    steps = [lambda: dirty.append(double_down(table, actions)), lambda: record_winners(table, actions),
+    steps = [lambda: dirty.append(double_down(table, actions)) if (cfg.get("reach") or {}).get("winner_sequels") else None,
+             lambda: record_winners(table, actions),
              lambda: reply_to_comments(cfg, actions),
              lambda: weekly_strategy(cfg, table, actions)]
     if today.strftime("%a") == "Mon":

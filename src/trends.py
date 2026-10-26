@@ -119,8 +119,10 @@ def recent_winners(n=5):
 
 def recent_topics(days=7):
     since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
-    return {_base(r.get("topic")) for r in state.load()
-            if r.get("video_id") and (r.get("created_utc") or "") >= since} - {""}
+    rows = [r for r in state.load() if r.get("video_id") and (r.get("created_utc") or "") >= since]
+    # the same subject comes back under new names ("Delhi's pillar", "Iron Pillar Anomaly"): its
+    # Wikipedia article catches those
+    return {_base(r.get(k)) for r in rows for k in ("topic", "wiki_title")} - {""}
 
 
 def pick_topics(cfg, n_long, n_short, spares=2):
@@ -202,11 +204,9 @@ anniversaries you know fall in the next 12 days from {date.today():%d %B %Y}:
 If one fits the niche, make at least one topic about the history or mystery behind it.
 
 SHORTS SERIES (our named shows; file every SHORT under exactly one, by id, and prefer topics that fit one
-clearly - a recognisable show is what turns viewers into subscribers). About TWO-THIRDS of the Shorts go
-to "impossible" (Things That Shouldn't Exist): impossible-seeming objects and places are our best
-performers on BOTH channels (Krishna's Butterball, a 250-ton rock that won't roll: 669 English + 952 Tamil
-views, our best ever; hanging pillar 350; floating-stone pillar 163). Real, visitable, photogenic
-objects with one measurable impossible fact work best:
+clearly - a recognisable show is what turns viewers into subscribers). MIX the shows: no more than
+2 Shorts in one show per day, and Indian and world stories alternate. Real, famous, photogenic subjects
+with one measurable astonishing fact work best (Krishna's Butterball, Morbi dam, the 1572 tide march):
 {json.dumps([dict(id=x["id"], name=x["name_en"], about=x["about"]) for x in cfg.get("short_series", [])], ensure_ascii=False)}
 
 RECENT WINNERS (our Shorts that beat our usual views 2x+; make at least 2 of today's Short topics follow
@@ -227,11 +227,11 @@ Return:
     topics = [t for t in topics if isinstance(t, dict) and t.get("topic")]
     indian = {x["id"] for x in cfg.get("series", []) if x["id"] in ("mandir", "pauranik", "bharat")}
 
-    recent = recent_topics(days=7)
+    recent = recent_topics(days=30)
 
     def ranked(items, n):
         """Indian and world topics alternate (the English channel's audience is worldwide); anything
-        covered in the last 7 days is dropped (follow-ups of our own hits come from the queue below)."""
+        covered in the last 30 days is dropped (follow-ups of our own hits come from the queue below)."""
         items = [t for t in items if _base(t.get("topic")) not in recent
                  and _base(t.get("wikipedia_title")) not in recent]
         ind = [t for t in items if t.get("series") in indian]
@@ -249,7 +249,8 @@ Return:
     now = datetime.now(timezone.utc).isoformat()
     if queue:
         for fmt, lst, n in (("long", longs, n_long), ("short", shorts, n_short)):
-            ready = [x for x in queue if x.get("format") == fmt and (x.get("not_before") or "") <= now]
+            ready = [x for x in queue if x.get("format") == fmt and (x.get("not_before") or "") <= now
+                     and (x.get("kind") in ("part2", "quiz_answer") or _base(x["topic"]) not in recent)]
             picked = ready[:1] if n else []  # at most 1 per format per run
             for x in picked:
                 lst.insert(0, {**{k: v for k, v in x.items() if k not in ("kind", "not_before")},

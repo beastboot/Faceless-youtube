@@ -315,7 +315,7 @@ podcast:
 
 # Weekly formats: a "guess the place" quiz Short (answer revealed next day) and a two-part long story.
 formats:
-  short_two_part_daily: true          # one story a day as Part 1 + Part 2 Shorts, public together
+  short_two_part_daily: false         # off Oct 27: Part 1/Part 2 Shorts got a quarter of a single's views
   quiz_day: "fri"
   two_part_day: "wed"
 
@@ -361,6 +361,8 @@ reach:
   max_replies_per_day: 6              # English replies to new viewer comments (0 = off)
   repackage_after_hours: 72           # judge a video after 3 days...
   repackage_below_median: 0.5         # ...and retitle it once if under half its peers' median views
+  winner_sequels: false               # queue a 'Part 2' of each hit. Off Oct 27: sequels flopped and repeated
+                                      # topics (MH370 x3); hits now steer the picker to similar NEW stories
 
 youtube:
   privacy: "public"                   # public | unlisted | private
