@@ -4,12 +4,12 @@
   "likes": 5,
   "comments": 3,
   "privacy": "public",
-  "age_h": 342.88880757361113,
+  "age_h": 414.8860861638889,
   "watch_min": 55,
   "avg_pct": 84.53,
   "subs": 1,
   "shares": 1,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": null
  },
  "m3ByU0Psto4": {
@@ -17,7 +17,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 329.34714090694445,
+  "age_h": 401.3444194972222,
   "watch_min": 3,
   "avg_pct": 55.04,
   "subs": 0,
@@ -28,7 +28,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 329.1918631291667,
+  "age_h": 401.1891417194444,
   "watch_min": 0,
   "avg_pct": 27,
   "subs": 0,
@@ -39,7 +39,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 315.7138075736111,
+  "age_h": 387.71108616388887,
   "watch_min": 0,
   "avg_pct": 4.49,
   "subs": 0,
@@ -50,18 +50,18 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 304.80075201805556,
+  "age_h": 376.7980306083333,
   "watch_min": 1,
   "avg_pct": 20.44,
   "subs": 0,
   "shares": 0
  },
  "k_5cWstyZs4": {
-  "views": 6,
+  "views": 7,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 305.29741868472223,
+  "age_h": 377.294697275,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -72,7 +72,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 312.2946409069445,
+  "age_h": 384.29191949722224,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -83,12 +83,12 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 306.29602979583336,
+  "age_h": 378.2933083861111,
   "watch_min": 9,
   "avg_pct": 67.18,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.39,
    "biggest_drops": [
@@ -115,7 +115,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 307.2918631291667,
+  "age_h": 379.28914171944444,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -126,7 +126,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 302.3021409069445,
+  "age_h": 374.29941949722223,
   "watch_min": 1,
   "avg_pct": 46.24,
   "subs": 0,
@@ -137,7 +137,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 256.29991868472223,
+  "age_h": 328.297197275,
   "watch_min": 1,
   "avg_pct": 11.62,
   "subs": 0,
@@ -148,7 +148,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 258.29964090694443,
+  "age_h": 330.29691949722223,
   "watch_min": 1,
   "avg_pct": 55.05,
   "subs": 0,
@@ -159,12 +159,12 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 254.3013075736111,
+  "age_h": 326.2985861638889,
   "watch_min": 31,
   "avg_pct": 47.84,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.5,
    "biggest_drops": [
@@ -187,11 +187,11 @@
   }
  },
  "1MZ6uiS2TGE": {
-  "views": 151,
+  "views": 152,
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 233.2976964625,
+  "age_h": 305.2949750527778,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -203,7 +203,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 232.2974186847222,
+  "age_h": 304.294697275,
   "watch_min": 0,
   "avg_pct": 0,
   "subs": 0,
@@ -214,23 +214,23 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 237.80214090694443,
+  "age_h": 309.79941949722223,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "66RS-mtIA6U": {
-  "views": 52,
+  "views": 54,
   "likes": 1,
   "comments": 2,
   "privacy": "public",
-  "age_h": 234.29602979583333,
+  "age_h": 306.2933083861111,
   "watch_min": 20,
   "avg_pct": 64.7,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.68,
    "biggest_drops": [
@@ -257,23 +257,23 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 233.79825201805554,
+  "age_h": 305.7955306083333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "CXSFT766vjc": {
-  "views": 163,
+  "views": 164,
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 230.29186312916667,
+  "age_h": 302.28914171944444,
   "watch_min": 50,
   "avg_pct": 55.49000000000001,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.53,
    "biggest_drops": [
@@ -300,7 +300,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 209.2938075736111,
+  "age_h": 281.2910861638889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -312,12 +312,12 @@
   "likes": 4,
   "comments": 1,
   "privacy": "public",
-  "age_h": 191.7924186847222,
+  "age_h": 263.789697275,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "Lrnwr3Yg67A": {
@@ -325,7 +325,7 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 186.2974186847222,
+  "age_h": 258.294697275,
   "watch_min": 1,
   "avg_pct": 59.88,
   "subs": 0,
@@ -336,12 +336,12 @@
   "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 189.80047424027777,
+  "age_h": 261.79775283055557,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "p42kwBgsIxk": {
@@ -349,12 +349,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 183.2976964625,
+  "age_h": 255.29497505277777,
   "watch_min": 3,
   "avg_pct": 50.54,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.27,
    "biggest_drops": [
@@ -377,16 +377,16 @@
   }
  },
  "qN_awL5en_8": {
-  "views": 405,
+  "views": 407,
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 185.7926964625,
+  "age_h": 257.7899750527778,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "aKe9ddn-zsM": {
@@ -394,7 +394,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 179.29464090694444,
+  "age_h": 251.2919194972222,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -405,12 +405,12 @@
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 167.73547424027777,
+  "age_h": 239.73275283055554,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "GlJhZKM6Opk": {
@@ -418,7 +418,7 @@
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 165.7938075736111,
+  "age_h": 237.79108616388888,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -429,12 +429,12 @@
   "likes": 4,
   "comments": 0,
   "privacy": "public",
-  "age_h": 161.7926964625,
+  "age_h": 233.78997505277778,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "6WTHSxdhA1M": {
@@ -442,57 +442,57 @@
   "likes": 6,
   "comments": 0,
   "privacy": "public",
-  "age_h": 158.0063075736111,
+  "age_h": 230.00358616388888,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "Ge6pEKEENcQ": {
-  "views": 49,
+  "views": 52,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 157.9149186847222,
-  "watch_min": 16,
-  "avg_pct": 82.16,
+  "age_h": 229.91219727499998,
+  "watch_min": 17,
+  "avg_pct": 76.45,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
-   "held_at_30s": 0.79,
+   "held_at_30s": 0.71,
    "biggest_drops": [
     {
      "at": "0:22",
-     "drop": 0.105,
+     "drop": 0.095,
      "line": "Enormous landslides choked river valleys across the rugged Mishmi Hills."
     },
     {
      "at": "0:21",
-     "drop": 0.105,
+     "drop": 0.095,
      "line": "Enormous landslides choked river valleys across the rugged Mishmi Hills."
     },
     {
-     "at": "0:53",
-     "drop": 0.053,
-     "line": "Even soundwaves traveled across the globe, recorded as far away as Europe."
+     "at": "0:31",
+     "drop": 0.048,
+     "line": "Behind one mud barrier, a colossal lake swelled for eight silent days."
     }
    ]
   }
  },
  "U90uqgIJYSI": {
-  "views": 350,
+  "views": 356,
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 157.74908535138889,
+  "age_h": 229.74636394166666,
   "watch_min": 190,
   "avg_pct": 63.3,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.7,
    "biggest_drops": [
@@ -515,16 +515,16 @@
   }
  },
  "Q70sz0wEFX8": {
-  "views": 408,
+  "views": 420,
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 157.3715853513889,
+  "age_h": 229.36886394166666,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "_wcXrGojGmE": {
@@ -532,12 +532,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 155.29686312916667,
+  "age_h": 227.29414171944444,
   "watch_min": 65,
   "avg_pct": 63.81,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.63,
    "biggest_drops": [
@@ -560,16 +560,16 @@
   }
  },
  "wh23U5dee_4": {
-  "views": 128,
+  "views": 129,
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 139.29575201805554,
+  "age_h": 211.2930306083333,
   "watch_min": 23,
   "avg_pct": 74.49,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.44,
    "biggest_drops": [
@@ -596,12 +596,11 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 137.29852979583333,
+  "age_h": 209.2958083861111,
   "watch_min": 4,
   "avg_pct": 63.14999999999999,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
   "retention": {
    "held_at_30s": 0.45,
    "biggest_drops": [
@@ -624,16 +623,16 @@
   }
  },
  "Yi_Yan3pNTE": {
-  "views": 43,
+  "views": 44,
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 135.2924186847222,
+  "age_h": 207.28969727499998,
   "watch_min": 10,
   "avg_pct": 160.21,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 1.55,
    "biggest_drops": [
@@ -656,16 +655,16 @@
   }
  },
  "DeD31l0HPuY": {
-  "views": 68,
+  "views": 69,
   "likes": 2,
   "comments": 3,
   "privacy": "public",
-  "age_h": 133.30047424027777,
+  "age_h": 205.29775283055554,
   "watch_min": 74,
   "avg_pct": 207.20000000000002,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 2.0,
    "biggest_drops": [
@@ -688,16 +687,16 @@
   }
  },
  "u0vtjmqtKE4": {
-  "views": 46,
+  "views": 47,
   "likes": 3,
   "comments": 1,
   "privacy": "public",
-  "age_h": 130.30047424027777,
+  "age_h": 202.29775283055554,
   "watch_min": 13,
   "avg_pct": 72.14,
   "subs": 1,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.58,
    "biggest_drops": [
@@ -720,16 +719,16 @@
   }
  },
  "f90cu_vTobk": {
-  "views": 60,
+  "views": 61,
   "likes": 3,
   "comments": 1,
   "privacy": "public",
-  "age_h": 115.29686312916667,
+  "age_h": 187.29414171944444,
   "watch_min": 9,
   "avg_pct": 66.56,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.39,
    "biggest_drops": [
@@ -756,23 +755,23 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 113.29852979583333,
+  "age_h": 185.2958083861111,
   "watch_min": 0,
   "avg_pct": 88.71,
   "subs": 0,
   "shares": 0
  },
  "0PwOoNAqMSw": {
-  "views": 110,
+  "views": 111,
   "likes": 3,
   "comments": 3,
   "privacy": "public",
-  "age_h": 111.29964090694443,
+  "age_h": 183.2969194972222,
   "watch_min": 23,
   "avg_pct": 104.03999999999999,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.71,
    "biggest_drops": [
@@ -795,48 +794,48 @@
   }
  },
  "aCJUm_5RJWM": {
-  "views": 301,
+  "views": 303,
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 109.30047424027777,
+  "age_h": 181.29775283055554,
   "watch_min": 39,
-  "avg_pct": 39.32,
+  "avg_pct": 38.98,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.11,
    "biggest_drops": [
     {
      "at": "0:08",
-     "drop": 0.063,
-     "line": "Unprecedented rainfall sent a massive flood surging downstream."
-    },
-    {
-     "at": "0:09",
-     "drop": 0.05,
+     "drop": 0.062,
      "line": "Unprecedented rainfall sent a massive flood surging downstream."
     },
     {
      "at": "0:08",
      "drop": 0.05,
+     "line": "Unprecedented rainfall sent a massive flood surging downstream."
+    },
+    {
+     "at": "0:09",
+     "drop": 0.044,
      "line": "Unprecedented rainfall sent a massive flood surging downstream."
     }
    ]
   }
  },
  "fp9nC8KPNDA": {
-  "views": 106,
+  "views": 105,
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 106.29741868472222,
+  "age_h": 178.294697275,
   "watch_min": 11,
   "avg_pct": 69.47,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.42,
    "biggest_drops": [
@@ -863,41 +862,41 @@
   "likes": 4,
   "comments": 0,
   "privacy": "public",
-  "age_h": 92.79797424027777,
+  "age_h": 164.79525283055554,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
+  "peer_median": 420,
   "retention": null
  },
  "IPyWCqfYlIA": {
-  "views": 201,
+  "views": 200,
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 91.29686312916667,
-  "watch_min": 21,
-  "avg_pct": 50.13000000000001,
+  "age_h": 163.29414171944444,
+  "watch_min": 22,
+  "avg_pct": 51.54,
   "subs": 0,
   "shares": 2,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
-   "held_at_30s": 0.24,
+   "held_at_30s": 0.26,
    "biggest_drops": [
     {
      "at": "0:11",
-     "drop": 0.086,
+     "drop": 0.083,
      "line": "Enemy warships blocked all sea routes."
     },
     {
      "at": "0:04",
-     "drop": 0.071,
+     "drop": 0.07,
      "line": "In 1572, 3,000 soldiers had one night to wade fifteen miles through tidal waters. Could they reach land before high tide returned?"
     },
     {
-     "at": "0:08",
-     "drop": 0.043,
+     "at": "0:07",
+     "drop": 0.042,
      "line": "In 1572, 3,000 soldiers had one night to wade fifteen miles through tidal waters. Could they reach land before high tide returned?"
     }
    ]
@@ -908,12 +907,11 @@
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 89.79991868472221,
+  "age_h": 161.797197275,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 373.0,
   "retention": null
  },
  "A7q6iw2nmew": {
@@ -921,24 +919,23 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 89.29352979583332,
+  "age_h": 161.2908083861111,
   "watch_min": 2,
   "avg_pct": 48.58,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 77.5
+  "shares": 0
  },
  "pBAwAaaRiOE": {
   "views": 87,
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 87.29991868472221,
+  "age_h": 159.297197275,
   "watch_min": 16,
   "avg_pct": 51.739999999999995,
   "subs": 0,
   "shares": 2,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
    "held_at_30s": 0.35,
    "biggest_drops": [
@@ -961,32 +958,32 @@
   }
  },
  "3cAM2XjUdiM": {
-  "views": 112,
+  "views": 116,
   "likes": 4,
   "comments": 1,
   "privacy": "public",
-  "age_h": 85.29991868472221,
-  "watch_min": 22,
-  "avg_pct": 45.57,
+  "age_h": 157.297197275,
+  "watch_min": 23,
+  "avg_pct": 46.55,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
-   "held_at_30s": 0.34,
+   "held_at_30s": 0.35,
    "biggest_drops": [
     {
-     "at": "0:08",
-     "drop": 0.072,
-     "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
-    },
-    {
      "at": "0:05",
-     "drop": 0.071,
+     "drop": 0.07,
      "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
     },
     {
-     "at": "0:04",
-     "drop": 0.054,
+     "at": "0:08",
+     "drop": 0.07,
+     "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
+    },
+    {
+     "at": "0:02",
+     "drop": 0.053,
      "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
     }
    ]
@@ -997,292 +994,638 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 82.29686312916667,
+  "age_h": 154.29414171944444,
   "watch_min": 22,
-  "avg_pct": 55.47,
+  "avg_pct": 55.06999999999999,
   "subs": 0,
   "shares": 0,
-  "peer_median": 77.5,
+  "peer_median": 54,
   "retention": {
-   "held_at_30s": 0.27,
+   "held_at_30s": 0.26,
    "biggest_drops": [
     {
      "at": "0:05",
-     "drop": 0.093,
+     "drop": 0.092,
      "line": "You could walk right into any house in Shani Shingnapur today and find zero locks, zero doors, and open entrances everywhere."
     },
     {
      "at": "0:06",
-     "drop": 0.08,
+     "drop": 0.079,
      "line": "You could walk right into any house in Shani Shingnapur today and find zero locks, zero doors, and open entrances everywhere."
     },
     {
      "at": "0:07",
-     "drop": 0.067,
+     "drop": 0.079,
      "line": "in the Indian village of Shani Shingnapur"
     }
    ]
   }
  },
  "1zx2vgLVjek": {
-  "views": 742,
+  "views": 743,
   "likes": 10,
   "comments": 0,
   "privacy": "public",
-  "age_h": 68.79325201805555,
+  "age_h": 140.79053060833334,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
  },
  "Cx2FTQCxqTA": {
-  "views": 301,
+  "views": 302,
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 67.29741868472222,
-  "watch_min": 57,
-  "avg_pct": 72.11,
+  "age_h": 139.294697275,
+  "watch_min": 59,
+  "avg_pct": 70.54,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.51,
+   "biggest_drops": [
+    {
+     "at": "0:05",
+     "drop": 0.053,
+     "line": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?"
+    },
+    {
+     "at": "0:01",
+     "drop": 0.053,
+     "line": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?"
+    },
+    {
+     "at": "0:05",
+     "drop": 0.046,
+     "line": "If you asked about Flight 370, this Boeing 777 vanished with 239 people in 2014 without sending a single distress call. How?"
+    }
+   ]
+  }
  },
  "CGsDV-Rs3yk": {
   "views": 902,
   "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 68.80047424027778,
+  "age_h": 140.79775283055557,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
  },
  "0rVCS-teJ_w": {
   "views": 108,
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 67.2926964625,
-  "watch_min": 17,
-  "avg_pct": 88.18,
+  "age_h": 139.28997505277778,
+  "watch_min": 18,
+  "avg_pct": 88.76,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.76,
+   "biggest_drops": [
+    {
+     "at": "0:03",
+     "drop": 0.104,
+     "line": "Where did Malaysia Airlines Flight 370 go after military radar lost it northwest of Penang Island?"
+    },
+    {
+     "at": "0:09",
+     "drop": 0.069,
+     "line": "Satellite data revealed a flight deep into the southern Indian Ocean."
+    },
+    {
+     "at": "0:18",
+     "drop": 0.069,
+     "line": "Debris finally washed ashore on the African coast and Indian Ocean islands beginning in July 2015."
+    }
+   ]
+  }
  },
  "i9dB58hf4OY": {
   "views": 989,
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 65.79241868472222,
+  "age_h": 137.789697275,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
  },
  "0ivMAUIoYRA": {
-  "views": 900,
+  "views": 914,
   "likes": 13,
   "comments": 1,
   "privacy": "public",
-  "age_h": 65.29797424027778,
-  "watch_min": 248,
-  "avg_pct": 79.83,
+  "age_h": 137.29525283055557,
+  "watch_min": 253,
+  "avg_pct": 78.93,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.61,
+   "biggest_drops": [
+    {
+     "at": "0:09",
+     "drop": 0.054,
+     "line": "Arthur Havelock ordered the test for public safety."
+    },
+    {
+     "at": "0:07",
+     "drop": 0.052,
+     "line": "You assume modern engineering can move any heavy obstacle, but why couldn't seven British work elephants shift a giant granite boulder in 19"
+    },
+    {
+     "at": "0:10",
+     "drop": 0.048,
+     "line": "Arthur Havelock ordered the test for public safety."
+    }
+   ]
+  }
  },
  "MruPqS0O-uo": {
-  "views": 28,
+  "views": 32,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 63.294640906944444,
-  "watch_min": 6,
-  "avg_pct": 97.54,
+  "age_h": 135.29191949722224,
+  "watch_min": 7,
+  "avg_pct": 66.52,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.47,
+   "biggest_drops": [
+    {
+     "at": "0:10",
+     "drop": 0.133,
+     "line": "King Karikala built the unhewn stone dam right across running water."
+    },
+    {
+     "at": "0:04",
+     "drop": 0.133,
+     "line": "You might assume a 329-meter stone dam would instantly sink into loose riverbed sand, but how did King Karikala keep it standing since 150 C"
+    },
+    {
+     "at": "0:14",
+     "drop": 0.067,
+     "line": "But the king dropped rough boulders straight into running water."
+    }
+   ]
+  }
  },
  "55ZFkX3DZIk": {
-  "views": 139,
-  "likes": 5,
+  "views": 140,
+  "likes": 4,
   "comments": 3,
   "privacy": "public",
-  "age_h": 61.29547424027778,
-  "watch_min": 13,
-  "avg_pct": 56.10000000000001,
+  "age_h": 133.29275283055557,
+  "watch_min": 14,
+  "avg_pct": 56.69,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.23,
+   "biggest_drops": [
+    {
+     "at": "0:01",
+     "drop": 0.068,
+     "line": "What happens when you knock down a basement wall during a home renovation in 1963 and accidentally stumble into an 18-floor underground city"
+    },
+    {
+     "at": "0:15",
+     "drop": 0.068,
+     "line": "Christians carved it for safety."
+    },
+    {
+     "at": "0:16",
+     "drop": 0.045,
+     "line": "Christians carved it for safety."
+    }
+   ]
+  }
  },
  "Yymfe_Uc964": {
-  "views": 802,
-  "likes": 4,
+  "views": 839,
+  "likes": 5,
   "comments": 0,
   "privacy": "public",
-  "age_h": 44.79630757361111,
+  "age_h": 116.79358616388889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
  },
  "zB8QSFf5Q-4": {
   "views": 22,
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 43.29686312916667,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 115.29414171944445,
+  "watch_min": 1,
+  "avg_pct": 58.79,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54
  },
  "9keljLDxBF8": {
-  "views": 511,
+  "views": 582,
   "likes": 4,
   "comments": 0,
   "privacy": "public",
-  "age_h": 44.80047424027778,
+  "age_h": 116.79775283055557,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
  },
  "RPcOtzF13wY": {
   "views": 15,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 43.29436312916667,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 115.29164171944446,
+  "watch_min": 2,
+  "avg_pct": 60.07,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54
  },
  "ym9GWozXhS4": {
-  "views": 98,
+  "views": 118,
   "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 41.792696462500004,
+  "age_h": 113.78997505277779,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
  },
  "zVPtJo_76CE": {
   "views": 34,
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 41.29297424027778,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 113.29025283055556,
+  "watch_min": 6,
+  "avg_pct": 57.60000000000001,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.35,
+   "biggest_drops": [
+    {
+     "at": "0:07",
+     "drop": 0.118,
+     "line": "You are walking through your basement wall in 1963 when you accidentally discover an entire underground city carved nearly three hundred fee"
+    },
+    {
+     "at": "0:10",
+     "drop": 0.118,
+     "line": "Deep beneath Turkey, twenty thousand people vanished underground."
+    },
+    {
+     "at": "0:10",
+     "drop": 0.059,
+     "line": "Deep beneath Turkey, twenty thousand people vanished underground."
+    }
+   ]
+  }
  },
  "UscTve7iTYo": {
-  "views": 21,
+  "views": 22,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 39.29825201805556,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 111.29553060833334,
+  "watch_min": 5,
+  "avg_pct": 67.09,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54
  },
  "4BzSPdClaP0": {
   "views": 19,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 37.29408535138889,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 109.29136394166667,
+  "watch_min": 2,
+  "avg_pct": 32.57,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54
  },
  "a8b--s8PTr8": {
-  "views": 20,
+  "views": 27,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 20.796307573611113,
+  "age_h": 92.79358616388889,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null,
+  "peer_median": 420
+ },
+ "brvDKd0l2lc": {
+  "views": 4,
+  "likes": 0,
+  "comments": 1,
+  "privacy": "public",
+  "age_h": 91.2985861638889,
+  "watch_min": 0,
+  "avg_pct": 0,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54
+ },
+ "p6yAvTgtrDA": {
+  "views": 766,
+  "likes": 3,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 89.79053060833334,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
+ },
+ "UrIcGMGrXW4": {
+  "views": 36,
+  "likes": 1,
+  "comments": 1,
+  "privacy": "public",
+  "age_h": 89.28969727500001,
+  "watch_min": 2,
+  "avg_pct": 35.14,
+  "subs": 1,
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.18,
+   "biggest_drops": [
+    {
+     "at": "0:10",
+     "drop": 0.182,
+     "line": "Thirteen stone stories plunge deep underground."
+    },
+    {
+     "at": "0:06",
+     "drop": 0.091,
+     "line": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by five to six degrees Celsius. How was it"
+    },
+    {
+     "at": "0:06",
+     "drop": 0.091,
+     "line": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by five to six degrees Celsius. How was it"
+    }
+   ]
+  }
+ },
+ "rfovWJsa52g": {
+  "views": 68,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 87.7985861638889,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null,
+  "peer_median": 420,
+  "retention": null
+ },
+ "ai0JaPkvLMM": {
+  "views": 118,
+  "likes": 0,
+  "comments": 1,
+  "privacy": "public",
+  "age_h": 87.29136394166667,
+  "watch_min": 15,
+  "avg_pct": 80.6,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54,
+  "retention": {
+   "held_at_30s": 0.55,
+   "biggest_drops": [
+    {
+     "at": "0:01",
+     "drop": 0.091,
+     "line": "Aberfan's deadly 1966 slurry avalanche began with ignored warnings in 1963, but why did the Coal Board keep piling waste onto known springs?"
+    },
+    {
+     "at": "0:01",
+     "drop": 0.061,
+     "line": "Aberfan's deadly 1966 slurry avalanche began with ignored warnings in 1963, but why did the Coal Board keep piling waste onto known springs?"
+    },
+    {
+     "at": "0:11",
+     "drop": 0.061,
+     "line": "Officials claimed that nobody knew."
+    }
+   ]
+  }
+ },
+ "7iYJz7G5GWE": {
+  "views": 3,
+  "likes": 0,
+  "comments": 1,
+  "privacy": "public",
+  "age_h": 85.28997505277779,
+  "watch_min": 0,
+  "avg_pct": 2.62,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54
+ },
+ "yL6orVyreXI": {
+  "views": 1,
+  "likes": 0,
+  "comments": 1,
+  "privacy": "public",
+  "age_h": 82.29941949722223,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null,
+  "peer_median": 54
+ },
+ "UAVIxrnbv44": {
+  "views": 261,
+  "likes": 5,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 68.79636394166667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "brvDKd0l2lc": {
+ "EEOXGb5TuLE": {
+  "views": 75,
+  "likes": 3,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 67.29608616388889,
+  "watch_min": 11,
+  "avg_pct": 82.91,
+  "subs": 0,
+  "shares": 0
+ },
+ "xfXQmkqZMnE": {
+  "views": 21,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 65.794697275,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "P-17ghxlvs0": {
   "views": 2,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 19.301307573611112,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 65.29025283055556,
+  "watch_min": 1,
+  "avg_pct": 197.03,
+  "subs": 0,
+  "shares": 0
  },
- "p6yAvTgtrDA": {
-  "views": 440,
-  "likes": 2,
+ "JxkiBUNKh94": {
+  "views": 98,
+  "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 17.793252018055554,
+  "age_h": 65.79386394166667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "UrIcGMGrXW4": {
-  "views": 19,
+ "uMqZGx0bc3E": {
+  "views": 49,
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 17.29241868472222,
+  "age_h": 65.28941949722223,
+  "watch_min": 2,
+  "avg_pct": 45.49,
+  "subs": 0,
+  "shares": 0
+ },
+ "Q0_1zg7rKWM": {
+  "views": 1,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 63.291919497222224,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "rfovWJsa52g": {
-  "views": 29,
+ "nWxBl8wVFU8": {
+  "views": 72,
+  "likes": 2,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 61.29441949722222,
+  "watch_min": 5,
+  "avg_pct": 41.52,
+  "subs": 0,
+  "shares": 0
+ },
+ "eiQpE6FBS4o": {
+  "views": 18,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 15.80130757361111,
+  "age_h": 44.79441949722222,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "ai0JaPkvLMM": {
-  "views": 71,
-  "likes": 0,
+ "sw5XClNPLyU": {
+  "views": 111,
+  "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 15.294085351388889,
+  "age_h": 44.79608616388889,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "7iYJz7G5GWE": {
-  "views": 0,
+ "rpH-Grg7Vm0": {
+  "views": 14,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 13.292696462499999,
+  "age_h": 41.79775283055555,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
- "yL6orVyreXI": {
-  "views": 0,
-  "likes": 0,
+ "SctuxFYOUqo": {
+  "views": 34,
+  "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 10.302140906944445,
+  "age_h": 20.798863941666664,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "TjB9vbE0eMQ": {
+  "views": 54,
+  "likes": 1,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 17.790530608333334,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "xLEweRB99co": {
+  "views": 20,
+  "likes": 1,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 15.789697275,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,

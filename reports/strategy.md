@@ -1,23 +1,29 @@
-# Weekly strategy — 2026-10-19
+# Weekly strategy — 2026-10-27
 
-### Weekly Growth Strategy & Performance Review
+# Weekly Growth Review: Shorts Performance & Strategy
 
-#### 1. What Worked (Top Performers & Hooks)
-- **Regional/Indian Mystery Topics Dominate Tamil Views:** Tamil Shorts focusing on local geological or architectural mysteries pulled the highest reach. *Lonar Lake* led with **825 views**, followed by *1950 Assam Earthquake* (**537 views**) and *Golconda Fort Secrets* (**526 views**).
-- **High Average Retention on Clear Visual Anomalies:** English Shorts with explicit physical paradoxes performed best in engagement. *Windscale 1957* hit **219 views with 84.53% APW** and 1 subscriber. *Why This 16th-Century Stone Pillar Floats* reached **163 views (55.62% APW)** and *The 500-Year-Old Pillar That Hangs* achieved **329 views**.
-- **Strong Retention Retention at 30s:** Shorts focusing on mystery payoff sustained high mid-video retention (*Windscale’s Lingering Chimneys* held **71% at 30s**; *Lepakshi Pillar* held **53% at 30s**).
+### Top Performing Topics & Title Styles
+- **Indian Architectural & Engineering Mysteries**: 
+  - *250 Tons Defying Gravity in Tamil Nadu* (914 views, 78.93% APW, 61% held at 30s) and Tamil version (989 views).
+  - *The 500-Year-Old Pillar That Hangs* (356 views, 63.30% APW, 70% held at 30s).
+  - Tamil audience heavily responded to local heritage topics (*Chand Baori*: 766 views, *Delhi Iron Pillar*: 839 views).
+- **High-Stakes Modern Disasters & Aviation Mysteries**:
+  - *MH370 Flight 370* (Tamil: 902 views, English Part 1: 302 views, 70.54% APW, 51% held at 30s).
+  - *1950 Assam Earthquake* (Tamil: 562 views, English: 52 views, 76.45% APW, 71% held at 30s).
+- **High APW Short Loops**:
+  - Ultra-short scripts like *The 1943 Torpedo Attack on FDR* (207.20% APW) and *The 80-Ton Temple Mystery* (160.21% APW) achieved loop retention well over 100%.
 
-#### 2. What Flopped & Script Retention Breakdown
-- **Niche European History & Vague Titles:** Obscure historical topics without clear visual hooks failed (*Jadwiga* - **4 views**, *Vienna Hospital* - **32 views**). Vague titling (*The 1957 'folly' that SAVED Britain*) crashed engagement (**3 views, 11.07% APW**).
-- **Retention Drops - Early Hook Killers:**
-  - *Complex Names/Citations in First 5s:* *The 7000 Year Old Geological Bridge* suffered an immediate **13% drop at 0:05** due to introducing dense academic citations ("Long before Ibn Khordadbeh mapped Set Bandhai...").
-  - *Cliché Conversational Intros:* *Lepakshi Floating Pillar* lost **6.7% at 0:05** due to wordy setup lines ("You probably think every stone pillar in a 16th-century...").
-  - *Material/Ingredient Rosters:* *Ramappa Temple* dropped **9.4% at 0:07** when listing dense construction materials ("clay, resinous gum, jute fiber, and rice husks").
-  - *End-Video Repetition:* *Windscale's Lingering Chimneys* dropped **4.2% at 0:41 and 0:47** due to repeating the phrase "severe/extensive contamination".
+### What Didn't Work
+- **Niche Western History & Industrial Incidents**: Topics like *1971 Soviet Mistake* (1 view), *1937 Texas Gas* (1 view), and *Dyatlov Pass* (4 views) failed to enter YouTube Shorts recommendation feeds.
+- **Complex Academic Hooks**: In *The 7000 Year Old Geological Bridge*, dropping academic names early ("Long before Ibn Khordadbeh mapped...") caused a 13% audience drop within 5 seconds.
+- **Delayed Curiosity Payoffs**: In *Why Morbi Dam Collapsed*, slow exposition dropped retention at 30s to 11%.
 
-#### 3. Concrete Script & Growth Changes For Next Week
-1. **Ban Hard Names in the First 10 Seconds:** Never drop obscure historical figures or foreign places early; replace them with high-stakes visual descriptions.
-2. **Eliminate Wordy Preamble Hooks:** Cut hooks like "You probably think..." and start immediately with the paradox (e.g., "A 10-ton stone pillar in India hangs completely off the ground.").
-3. **Double Down on Localized Tamil Shorts:** Shift Tamil strategy to 100% Indian engineering mysteries, geological anomalies, and ancient fort acoustics.
-4. **Trim Mid-Video Exposition Lists:** Replace ingredient or material listings with visual metaphors to keep mid-video retention above 60%.
-5. **Standardize Actionable Titles:** Use high-curiosity, clear visual titles ("Why X Cannot Y") rather than poetic or abstract phrases.
+### Retention Analysis & Script Adjustments
+- **Drop Point Pattern**: Data shows massive drops between 0:01–0:07 whenever scripts use dense backstory, historical names, or administrative preamble (e.g., *Semmelweis* lost 18.2% at 0:04 due to clinic statistics).
+- **Hook Fix**: Remove all historical dates, proper nouns, and preamble from the first 5 seconds. Open immediately with a visual question or absurd contrast (e.g., replace "Vienna's maternity clinic lost..." with "Washing hands got this doctor beaten to death.").
+
+### 4 Concrete Actionable Changes for Next Week
+1. **Hyper-Focus Content Mix**: Shift content to 70% Indian ancient mega-structures/temple mysteries and 30% catastrophic global mysteries.
+2. **Front-Load Visual Hooks**: First line must state the visual anomaly within 3 seconds; zero background dates allowed in intro.
+3. **Tighten Script Length for Looping**: Aim for 30–40 seconds to maximize APW above 100%.
+4. **Optimize Tamil Titles**: Use numbers, simple Tamil terms, and high-curiosity phrasing, which consistently cross 500–900 views naturally.
