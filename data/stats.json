@@ -4,12 +4,12 @@
   "likes": 5,
   "comments": 3,
   "privacy": "public",
-  "age_h": 414.8860861638889,
+  "age_h": 438.88604424666664,
   "watch_min": 55,
   "avg_pct": 84.53,
   "subs": 1,
   "shares": 1,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": null
  },
  "m3ByU0Psto4": {
@@ -17,7 +17,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 401.3444194972222,
+  "age_h": 425.34437757999996,
   "watch_min": 3,
   "avg_pct": 55.04,
   "subs": 0,
@@ -28,7 +28,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 401.1891417194444,
+  "age_h": 425.1890998022222,
   "watch_min": 0,
   "avg_pct": 27,
   "subs": 0,
@@ -39,7 +39,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 387.71108616388887,
+  "age_h": 411.71104424666663,
   "watch_min": 0,
   "avg_pct": 4.49,
   "subs": 0,
@@ -50,7 +50,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 376.7980306083333,
+  "age_h": 400.7979886911111,
   "watch_min": 1,
   "avg_pct": 20.44,
   "subs": 0,
@@ -61,7 +61,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 377.294697275,
+  "age_h": 401.29465535777774,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -72,7 +72,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 384.29191949722224,
+  "age_h": 408.29187758,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -83,12 +83,12 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 378.2933083861111,
+  "age_h": 402.2932664688889,
   "watch_min": 9,
   "avg_pct": 67.18,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.39,
    "biggest_drops": [
@@ -111,11 +111,11 @@
   }
  },
  "FNURFpDxlaM": {
-  "views": 0,
+  "views": 1,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 379.28914171944444,
+  "age_h": 403.2890998022222,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -126,7 +126,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 374.29941949722223,
+  "age_h": 398.29937758,
   "watch_min": 1,
   "avg_pct": 46.24,
   "subs": 0,
@@ -137,7 +137,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 328.297197275,
+  "age_h": 352.29715535777774,
   "watch_min": 1,
   "avg_pct": 11.62,
   "subs": 0,
@@ -148,7 +148,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 330.29691949722223,
+  "age_h": 354.29687758,
   "watch_min": 1,
   "avg_pct": 55.05,
   "subs": 0,
@@ -159,12 +159,12 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 326.2985861638889,
+  "age_h": 350.29854424666667,
   "watch_min": 31,
   "avg_pct": 47.84,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.5,
    "biggest_drops": [
@@ -191,7 +191,7 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 305.2949750527778,
+  "age_h": 329.29493313555554,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -203,7 +203,7 @@
   "likes": 0,
   "comments": 0,
   "privacy": "private",
-  "age_h": 304.294697275,
+  "age_h": 328.29465535777774,
   "watch_min": 0,
   "avg_pct": 0,
   "subs": 0,
@@ -214,23 +214,23 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 309.79941949722223,
+  "age_h": 333.79937758,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "66RS-mtIA6U": {
-  "views": 54,
+  "views": 56,
   "likes": 1,
   "comments": 2,
   "privacy": "public",
-  "age_h": 306.2933083861111,
+  "age_h": 330.2932664688889,
   "watch_min": 20,
   "avg_pct": 64.7,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.68,
    "biggest_drops": [
@@ -257,7 +257,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 305.7955306083333,
+  "age_h": 329.7954886911111,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -268,12 +268,12 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 302.28914171944444,
+  "age_h": 326.2890998022222,
   "watch_min": 50,
   "avg_pct": 55.49000000000001,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.53,
    "biggest_drops": [
@@ -300,7 +300,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 281.2910861638889,
+  "age_h": 305.2910442466667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -312,12 +312,12 @@
   "likes": 4,
   "comments": 1,
   "privacy": "public",
-  "age_h": 263.789697275,
+  "age_h": 287.78965535777775,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "Lrnwr3Yg67A": {
@@ -325,7 +325,7 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 258.294697275,
+  "age_h": 282.29465535777774,
   "watch_min": 1,
   "avg_pct": 59.88,
   "subs": 0,
@@ -336,12 +336,12 @@
   "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 261.79775283055557,
+  "age_h": 285.79771091333333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "p42kwBgsIxk": {
@@ -349,12 +349,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 255.29497505277777,
+  "age_h": 279.29493313555554,
   "watch_min": 3,
   "avg_pct": 50.54,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.27,
    "biggest_drops": [
@@ -381,12 +381,12 @@
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 257.7899750527778,
+  "age_h": 281.78993313555554,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "aKe9ddn-zsM": {
@@ -394,7 +394,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 251.2919194972222,
+  "age_h": 275.29187758,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -405,12 +405,12 @@
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 239.73275283055554,
+  "age_h": 263.73271091333334,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "GlJhZKM6Opk": {
@@ -418,7 +418,7 @@
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 237.79108616388888,
+  "age_h": 261.7910442466667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -429,12 +429,12 @@
   "likes": 4,
   "comments": 0,
   "privacy": "public",
-  "age_h": 233.78997505277778,
+  "age_h": 257.78993313555554,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "6WTHSxdhA1M": {
@@ -442,12 +442,12 @@
   "likes": 6,
   "comments": 0,
   "privacy": "public",
-  "age_h": 230.00358616388888,
+  "age_h": 254.00354424666665,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "Ge6pEKEENcQ": {
@@ -455,29 +455,29 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 229.91219727499998,
+  "age_h": 253.91215535777775,
   "watch_min": 17,
-  "avg_pct": 76.45,
+  "avg_pct": 67.99,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
-   "held_at_30s": 0.71,
+   "held_at_30s": 0.62,
    "biggest_drops": [
     {
+     "at": "0:08",
+     "drop": 0.125,
+     "line": "You might think earthquakes only shake the ground, but the 1950 Assam shock triggered massive landslides and surface ruptures that drastical"
+    },
+    {
      "at": "0:22",
-     "drop": 0.095,
+     "drop": 0.083,
      "line": "Enormous landslides choked river valleys across the rugged Mishmi Hills."
     },
     {
-     "at": "0:21",
-     "drop": 0.095,
-     "line": "Enormous landslides choked river valleys across the rugged Mishmi Hills."
-    },
-    {
-     "at": "0:31",
-     "drop": 0.048,
-     "line": "Behind one mud barrier, a colossal lake swelled for eight silent days."
+     "at": "0:03",
+     "drop": 0.083,
+     "line": "You might think earthquakes only shake the ground, but the 1950 Assam shock triggered massive landslides and surface ruptures that drastical"
     }
    ]
   }
@@ -487,18 +487,18 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 229.74636394166666,
-  "watch_min": 190,
-  "avg_pct": 63.3,
+  "age_h": 253.74632202444442,
+  "watch_min": 198,
+  "avg_pct": 65.85,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
-   "held_at_30s": 0.7,
+   "held_at_30s": 0.73,
    "biggest_drops": [
     {
      "at": "0:07",
-     "drop": 0.067,
+     "drop": 0.066,
      "line": "You probably assume every stone pillar in the 1530 AD Veerabhadra temple carries weight, but one hangs entirely in the air."
     },
     {
@@ -519,12 +519,12 @@
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 229.36886394166666,
+  "age_h": 253.36882202444443,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "_wcXrGojGmE": {
@@ -532,12 +532,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 227.29414171944444,
+  "age_h": 251.2940998022222,
   "watch_min": 65,
   "avg_pct": 63.81,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.63,
    "biggest_drops": [
@@ -564,12 +564,12 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 211.2930306083333,
+  "age_h": 235.2929886911111,
   "watch_min": 23,
   "avg_pct": 74.49,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.44,
    "biggest_drops": [
@@ -596,7 +596,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 209.2958083861111,
+  "age_h": 233.29576646888887,
   "watch_min": 4,
   "avg_pct": 63.14999999999999,
   "subs": 0,
@@ -627,12 +627,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 207.28969727499998,
+  "age_h": 231.28965535777778,
   "watch_min": 10,
   "avg_pct": 160.21,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 1.55,
    "biggest_drops": [
@@ -659,12 +659,12 @@
   "likes": 2,
   "comments": 3,
   "privacy": "public",
-  "age_h": 205.29775283055554,
+  "age_h": 229.2977109133333,
   "watch_min": 74,
   "avg_pct": 207.20000000000002,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 2.0,
    "biggest_drops": [
@@ -691,12 +691,12 @@
   "likes": 3,
   "comments": 1,
   "privacy": "public",
-  "age_h": 202.29775283055554,
+  "age_h": 226.2977109133333,
   "watch_min": 13,
   "avg_pct": 72.14,
   "subs": 1,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.58,
    "biggest_drops": [
@@ -723,12 +723,12 @@
   "likes": 3,
   "comments": 1,
   "privacy": "public",
-  "age_h": 187.29414171944444,
+  "age_h": 211.2940998022222,
   "watch_min": 9,
   "avg_pct": 66.56,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.39,
    "biggest_drops": [
@@ -755,7 +755,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 185.2958083861111,
+  "age_h": 209.29576646888887,
   "watch_min": 0,
   "avg_pct": 88.71,
   "subs": 0,
@@ -763,15 +763,15 @@
  },
  "0PwOoNAqMSw": {
   "views": 111,
-  "likes": 3,
+  "likes": 4,
   "comments": 3,
   "privacy": "public",
-  "age_h": 183.2969194972222,
+  "age_h": 207.29687757999997,
   "watch_min": 23,
   "avg_pct": 104.03999999999999,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.71,
    "biggest_drops": [
@@ -798,14 +798,14 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 181.29775283055554,
-  "watch_min": 39,
-  "avg_pct": 38.98,
+  "age_h": 205.2977109133333,
+  "watch_min": 40,
+  "avg_pct": 39.41,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
-   "held_at_30s": 0.11,
+   "held_at_30s": 0.12,
    "biggest_drops": [
     {
      "at": "0:08",
@@ -818,9 +818,9 @@
      "line": "Unprecedented rainfall sent a massive flood surging downstream."
     },
     {
-     "at": "0:09",
+     "at": "0:06",
      "drop": 0.044,
-     "line": "Unprecedented rainfall sent a massive flood surging downstream."
+     "line": "If you stood on a Morbi rooftop on August 11, 1979, thirty feet of dam water was already rushing in."
     }
    ]
   }
@@ -830,12 +830,12 @@
   "likes": 2,
   "comments": 1,
   "privacy": "public",
-  "age_h": 178.294697275,
+  "age_h": 202.29465535777777,
   "watch_min": 11,
   "avg_pct": 69.47,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.42,
    "biggest_drops": [
@@ -862,12 +862,12 @@
   "likes": 4,
   "comments": 0,
   "privacy": "public",
-  "age_h": 164.79525283055554,
+  "age_h": 188.7952109133333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "IPyWCqfYlIA": {
@@ -875,12 +875,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 163.29414171944444,
+  "age_h": 187.2940998022222,
   "watch_min": 22,
   "avg_pct": 51.54,
   "subs": 0,
   "shares": 2,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.26,
    "biggest_drops": [
@@ -907,7 +907,7 @@
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 161.797197275,
+  "age_h": 185.79715535777777,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -919,7 +919,7 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 161.2908083861111,
+  "age_h": 185.29076646888888,
   "watch_min": 2,
   "avg_pct": 48.58,
   "subs": 0,
@@ -930,12 +930,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 159.297197275,
+  "age_h": 183.29715535777777,
   "watch_min": 16,
   "avg_pct": 51.739999999999995,
   "subs": 0,
   "shares": 2,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.35,
    "biggest_drops": [
@@ -962,28 +962,28 @@
   "likes": 4,
   "comments": 1,
   "privacy": "public",
-  "age_h": 157.297197275,
+  "age_h": 181.29715535777777,
   "watch_min": 23,
-  "avg_pct": 46.55,
+  "avg_pct": 45.81,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
-   "held_at_30s": 0.35,
+   "held_at_30s": 0.34,
    "biggest_drops": [
     {
-     "at": "0:05",
-     "drop": 0.07,
+     "at": "0:08",
+     "drop": 0.069,
      "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
     },
     {
-     "at": "0:08",
-     "drop": 0.07,
+     "at": "0:05",
+     "drop": 0.069,
      "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
     },
     {
      "at": "0:02",
-     "drop": 0.053,
+     "drop": 0.069,
      "line": "How did RMS Olympic survive 24 years of service from 1911 to 1935 while her sister ship Titanic sank on her maiden voyage?"
     }
    ]
@@ -994,12 +994,12 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 154.29414171944444,
+  "age_h": 178.2940998022222,
   "watch_min": 22,
   "avg_pct": 55.06999999999999,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.26,
    "biggest_drops": [
@@ -1022,16 +1022,16 @@
   }
  },
  "1zx2vgLVjek": {
-  "views": 743,
+  "views": 744,
   "likes": 10,
   "comments": 0,
   "privacy": "public",
-  "age_h": 140.79053060833334,
+  "age_h": 164.7904886911111,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "Cx2FTQCxqTA": {
@@ -1039,12 +1039,12 @@
   "likes": 5,
   "comments": 1,
   "privacy": "public",
-  "age_h": 139.294697275,
+  "age_h": 163.29465535777777,
   "watch_min": 59,
   "avg_pct": 70.54,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.51,
    "biggest_drops": [
@@ -1071,12 +1071,12 @@
   "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 140.79775283055557,
+  "age_h": 164.7977109133333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "0rVCS-teJ_w": {
@@ -1084,12 +1084,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 139.28997505277778,
+  "age_h": 163.28993313555554,
   "watch_min": 18,
   "avg_pct": 88.76,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.76,
    "biggest_drops": [
@@ -1116,12 +1116,12 @@
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 137.789697275,
+  "age_h": 161.78965535777778,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "0ivMAUIoYRA": {
@@ -1129,12 +1129,12 @@
   "likes": 13,
   "comments": 1,
   "privacy": "public",
-  "age_h": 137.29525283055557,
+  "age_h": 161.2952109133333,
   "watch_min": 253,
   "avg_pct": 78.93,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.61,
    "biggest_drops": [
@@ -1157,16 +1157,16 @@
   }
  },
  "MruPqS0O-uo": {
-  "views": 32,
+  "views": 35,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 135.29191949722224,
+  "age_h": 159.29187757999998,
   "watch_min": 7,
   "avg_pct": 66.52,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.47,
    "biggest_drops": [
@@ -1193,12 +1193,12 @@
   "likes": 4,
   "comments": 3,
   "privacy": "public",
-  "age_h": 133.29275283055557,
+  "age_h": 157.2927109133333,
   "watch_min": 14,
   "avg_pct": 56.69,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.23,
    "biggest_drops": [
@@ -1225,12 +1225,12 @@
   "likes": 5,
   "comments": 0,
   "privacy": "public",
-  "age_h": 116.79358616388889,
+  "age_h": 140.79354424666667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "zB8QSFf5Q-4": {
@@ -1238,24 +1238,23 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 115.29414171944445,
+  "age_h": 139.29409980222223,
   "watch_min": 1,
   "avg_pct": 58.79,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 54
+  "shares": 0
  },
  "9keljLDxBF8": {
   "views": 582,
   "likes": 4,
   "comments": 0,
   "privacy": "public",
-  "age_h": 116.79775283055557,
+  "age_h": 140.79771091333333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "RPcOtzF13wY": {
@@ -1263,24 +1262,22 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 115.29164171944446,
+  "age_h": 139.2915998022222,
   "watch_min": 2,
   "avg_pct": 60.07,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 54
+  "shares": 0
  },
  "ym9GWozXhS4": {
   "views": 118,
   "likes": 2,
   "comments": 0,
   "privacy": "public",
-  "age_h": 113.78997505277779,
+  "age_h": 137.78993313555554,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
   "retention": null
  },
  "zVPtJo_76CE": {
@@ -1288,12 +1285,12 @@
   "likes": 1,
   "comments": 1,
   "privacy": "public",
-  "age_h": 113.29025283055556,
+  "age_h": 137.29021091333334,
   "watch_min": 6,
   "avg_pct": 57.60000000000001,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
    "held_at_30s": 0.35,
    "biggest_drops": [
@@ -1320,89 +1317,85 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 111.29553060833334,
+  "age_h": 135.2954886911111,
   "watch_min": 5,
   "avg_pct": 67.09,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 54
+  "shares": 0
  },
  "4BzSPdClaP0": {
-  "views": 19,
+  "views": 20,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 109.29136394166667,
+  "age_h": 133.29132202444444,
   "watch_min": 2,
   "avg_pct": 32.57,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 54
+  "shares": 0
  },
  "a8b--s8PTr8": {
   "views": 27,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 92.79358616388889,
+  "age_h": 116.79354424666667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null,
-  "peer_median": 420
+  "shares": null
  },
  "brvDKd0l2lc": {
   "views": 4,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 91.2985861638889,
+  "age_h": 115.29854424666667,
   "watch_min": 0,
   "avg_pct": 0,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 54
+  "shares": 0
  },
  "p6yAvTgtrDA": {
   "views": 766,
   "likes": 3,
   "comments": 0,
   "privacy": "public",
-  "age_h": 89.79053060833334,
+  "age_h": 113.79048869111111,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
+  "peer_median": 374.0,
   "retention": null
  },
  "UrIcGMGrXW4": {
   "views": 36,
   "likes": 1,
-  "comments": 1,
+  "comments": 2,
   "privacy": "public",
-  "age_h": 89.28969727500001,
-  "watch_min": 2,
-  "avg_pct": 35.14,
+  "age_h": 113.28965535777778,
+  "watch_min": 3,
+  "avg_pct": 30.579999999999995,
   "subs": 1,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
-   "held_at_30s": 0.18,
+   "held_at_30s": 0.12,
    "biggest_drops": [
     {
+     "at": "0:11",
+     "drop": 0.125,
+     "line": "Thirteen stone stories plunge deep underground."
+    },
+    {
      "at": "0:10",
-     "drop": 0.182,
+     "drop": 0.125,
      "line": "Thirteen stone stories plunge deep underground."
     },
     {
      "at": "0:06",
-     "drop": 0.091,
-     "line": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by five to six degrees Celsius. How was it"
-    },
-    {
-     "at": "0:06",
-     "drop": 0.091,
+     "drop": 0.125,
      "line": "You might assume Chand Baori's 3,500 steps are purely decorative, but they cool the 100-foot well by five to six degrees Celsius. How was it"
     }
    ]
@@ -1413,12 +1406,11 @@
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 87.7985861638889,
+  "age_h": 111.79854424666667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null,
-  "peer_median": 420,
   "retention": null
  },
  "ai0JaPkvLMM": {
@@ -1426,28 +1418,28 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 87.29136394166667,
-  "watch_min": 15,
-  "avg_pct": 80.6,
+  "age_h": 111.29132202444444,
+  "watch_min": 16,
+  "avg_pct": 78.91,
   "subs": 0,
   "shares": 0,
-  "peer_median": 54,
+  "peer_median": 54.0,
   "retention": {
-   "held_at_30s": 0.55,
+   "held_at_30s": 0.53,
    "biggest_drops": [
     {
      "at": "0:01",
-     "drop": 0.091,
+     "drop": 0.088,
      "line": "Aberfan's deadly 1966 slurry avalanche began with ignored warnings in 1963, but why did the Coal Board keep piling waste onto known springs?"
     },
     {
      "at": "0:01",
-     "drop": 0.061,
+     "drop": 0.059,
      "line": "Aberfan's deadly 1966 slurry avalanche began with ignored warnings in 1963, but why did the Coal Board keep piling waste onto known springs?"
     },
     {
      "at": "0:11",
-     "drop": 0.061,
+     "drop": 0.059,
      "line": "Officials claimed that nobody knew."
     }
    ]
@@ -1458,130 +1450,179 @@
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 85.28997505277779,
+  "age_h": 109.28993313555556,
   "watch_min": 0,
   "avg_pct": 2.62,
   "subs": 0,
-  "shares": 0,
-  "peer_median": 54
+  "shares": 0
  },
  "yL6orVyreXI": {
   "views": 1,
   "likes": 0,
   "comments": 1,
   "privacy": "public",
-  "age_h": 82.29941949722223,
+  "age_h": 106.29937758,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null,
-  "peer_median": 54
+  "shares": null
  },
  "UAVIxrnbv44": {
   "views": 261,
   "likes": 5,
   "comments": 0,
   "privacy": "public",
-  "age_h": 68.79636394166667,
+  "age_h": 92.79632202444445,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 374.0,
+  "retention": null
  },
  "EEOXGb5TuLE": {
   "views": 75,
   "likes": 3,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 67.29608616388889,
+  "age_h": 91.29604424666667,
   "watch_min": 11,
-  "avg_pct": 82.91,
+  "avg_pct": 81,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54.0,
+  "retention": {
+   "held_at_30s": 0.5,
+   "biggest_drops": [
+    {
+     "at": "0:23",
+     "drop": 0.077,
+     "line": "Geometric stairways funnel precious desert water."
+    },
+    {
+     "at": "0:13",
+     "drop": 0.077,
+     "line": "In reality ancient builders trapped rainwater."
+    },
+    {
+     "at": "0:09",
+     "drop": 0.077,
+     "line": "Folklore claimed ghosts built it overnight."
+    }
+   ]
+  }
  },
  "xfXQmkqZMnE": {
   "views": 21,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 65.794697275,
+  "age_h": 89.79465535777778,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 374.0
  },
  "P-17ghxlvs0": {
   "views": 2,
   "likes": 0,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 65.29025283055556,
+  "age_h": 89.29021091333334,
   "watch_min": 1,
   "avg_pct": 197.03,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54.0
  },
  "JxkiBUNKh94": {
   "views": 98,
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 65.79386394166667,
+  "age_h": 89.79382202444444,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
-  "shares": null
+  "shares": null,
+  "peer_median": 374.0,
+  "retention": null
  },
  "uMqZGx0bc3E": {
   "views": 49,
   "likes": 1,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 65.28941949722223,
+  "age_h": 89.28937758000001,
   "watch_min": 2,
   "avg_pct": 45.49,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54.0,
+  "retention": null
  },
  "Q0_1zg7rKWM": {
   "views": 1,
   "likes": 0,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 63.291919497222224,
-  "watch_min": null,
-  "avg_pct": null,
-  "subs": null,
-  "shares": null
+  "age_h": 87.29187758,
+  "watch_min": 0,
+  "avg_pct": 42.39,
+  "subs": 0,
+  "shares": 0,
+  "peer_median": 54.0
  },
  "nWxBl8wVFU8": {
-  "views": 72,
+  "views": 76,
   "likes": 2,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 61.29441949722222,
-  "watch_min": 5,
-  "avg_pct": 41.52,
+  "age_h": 85.29437758,
+  "watch_min": 8,
+  "avg_pct": 45.66,
   "subs": 0,
-  "shares": 0
+  "shares": 0,
+  "peer_median": 54.0,
+  "retention": {
+   "held_at_30s": 0.26,
+   "biggest_drops": [
+    {
+     "at": "0:04",
+     "drop": 0.148,
+     "line": "If your boat rides a seventeen-hundred-foot wave over the forest canopy on July 9, 1958, how do you manage to walk away alive?"
+    },
+    {
+     "at": "0:02",
+     "drop": 0.148,
+     "line": "If your boat rides a seventeen-hundred-foot wave over the forest canopy on July 9, 1958, how do you manage to walk away alive?"
+    },
+    {
+     "at": "0:34",
+     "drop": 0.074,
+     "line": "You probably think coastal tsunamis max out at fifty feet, until you look at the tree line in Lituya Bay."
+    }
+   ]
+  }
  },
  "eiQpE6FBS4o": {
-  "views": 18,
+  "views": 19,
   "likes": 0,
-  "comments": 0,
+  "comments": 1,
   "privacy": "public",
-  "age_h": 44.79441949722222,
+  "age_h": 68.79437758,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "sw5XClNPLyU": {
-  "views": 111,
+  "views": 113,
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 44.79608616388889,
+  "age_h": 68.79604424666667,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
@@ -1592,40 +1633,128 @@
   "likes": 0,
   "comments": 0,
   "privacy": "public",
-  "age_h": 41.79775283055555,
+  "age_h": 65.79771091333333,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "SctuxFYOUqo": {
-  "views": 34,
+  "views": 35,
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 20.798863941666664,
+  "age_h": 44.79882202444445,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "TjB9vbE0eMQ": {
-  "views": 54,
+  "views": 56,
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 17.790530608333334,
+  "age_h": 41.790488691111115,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
   "shares": null
  },
  "xLEweRB99co": {
-  "views": 20,
+  "views": 51,
+  "likes": 2,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 39.789655357777775,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "lY6LbVuOqA8": {
+  "views": 4,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 20.78965535777778,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "yCx4JldnHys": {
+  "views": 35,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 19.292155357777776,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "8OJrBbYBPjM": {
+  "views": 69,
   "likes": 1,
   "comments": 0,
   "privacy": "public",
-  "age_h": 15.789697275,
+  "age_h": 17.78965535777778,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "F1_D087a7lg": {
+  "views": 80,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 17.289933135555557,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "8aWNesLSz5o": {
+  "views": 80,
+  "likes": 1,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 15.795210913333333,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "3gpKOgpM1eM": {
+  "views": 2,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 15.29437758,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "k_SXZXLlkko": {
+  "views": 2,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 13.299099802222223,
+  "watch_min": null,
+  "avg_pct": null,
+  "subs": null,
+  "shares": null
+ },
+ "yez3tNDUj6g": {
+  "views": 2,
+  "likes": 0,
+  "comments": 0,
+  "privacy": "public",
+  "age_h": 10.299099802222223,
   "watch_min": null,
   "avg_pct": null,
   "subs": null,
