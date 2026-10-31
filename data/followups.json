@@ -1,13 +1,19 @@
 [
  {
-  "kind": "quiz_answer",
-  "special": "quiz_answer",
+  "kind": "question",
+  "special": "question",
   "format": "short",
-  "series": "bharat",
-  "topic": "Operation Cactus: The 12-Hour Midnight Rescue of Maldives — quiz answer",
-  "wikipedia_title": "Operation Cactus",
-  "quiz_video": "ETyEK5ByaUs",
-  "angle": "Reveal yesterday's quiz answer",
-  "not_before": "2026-10-31T03:47:26.700638+00:00"
+  "series": null,
+  "topic": "Authenticity of the mystery",
+  "asker": "Amy",
+  "question": "Is this really exist",
+  "angle": "Answer a viewer's question"
+ },
+ {
+  "kind": "request",
+  "format": "short",
+  "topic": "The War of the Worlds",
+  "angle": "Requested by 1 viewer(s) in comments",
+  "series": null
  }
 ]
