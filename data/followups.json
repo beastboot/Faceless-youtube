@@ -1,15 +1,5 @@
 [
  {
-  "kind": "question",
-  "special": "question",
-  "format": "short",
-  "series": null,
-  "topic": "Authenticity of the mystery",
-  "asker": "Amy",
-  "question": "Is this really exist",
-  "angle": "Answer a viewer's question"
- },
- {
   "kind": "request",
   "format": "short",
   "topic": "The War of the Worlds",
